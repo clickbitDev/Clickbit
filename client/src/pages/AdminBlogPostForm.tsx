@@ -3,8 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { teamMembers } from '../services/TEAM_MEMBERS_DATA';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Save, Eye } from 'lucide-react';
 import ImageUpload from '../components/ImageUpload';
+import RichTextEditor from '../components/RichTextEditor';
 
 // Helper function to generate slug from title
 const generateSlug = (title: string): string => {
@@ -40,6 +41,8 @@ const AdminBlogPostForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+  const [isDraftSaved, setIsDraftSaved] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const isEditing = Boolean(id);
 
@@ -100,6 +103,46 @@ const AdminBlogPostForm: React.FC = () => {
   const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSlug(e.target.value);
     setSlugManuallyEdited(true);
+  };
+
+  const handleSaveDraft = async () => {
+    if (!title.trim() || !content.trim()) {
+      setError('Title and content are required to save a draft.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const draftData = {
+      title,
+      slug: slug || generateSlug(title),
+      content,
+      excerpt,
+      category: category || 'General',
+      status: 'draft',
+      featured_image: featuredImage,
+      tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
+    };
+
+    try {
+      if (isEditing) {
+        await api.put(`/admin/posts/${id}`, draftData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } else {
+        await api.post('/admin/posts', draftData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+      setIsDraftSaved(true);
+      setTimeout(() => setIsDraftSaved(false), 3000);
+    } catch (err: any) {
+      console.error('Draft save error:', err);
+      setError('Failed to save draft');
+    } finally {
+      setLoading(false);
+    }
   };
 
 
@@ -277,18 +320,17 @@ const AdminBlogPostForm: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Content (HTML & Markdown supported) *</label>
-            <textarea 
-              id="content" 
-              value={content} 
-              onChange={e => setContent(e.target.value)} 
-              rows={15} 
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono text-sm" 
-              placeholder="You can write HTML tags like <h2>Title</h2>, <p>Paragraph</p>, <img src='/path/to/image.jpg' alt='Image'>, etc."
+            <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Content *</label>
+            <RichTextEditor
+              value={content}
+              onChange={setContent}
+              placeholder="Write your blog content here..."
+              height={500}
+              onSaveDraft={handleSaveDraft}
+              isDraft={isDraftSaved}
             />
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Supports both HTML tags and Markdown syntax. Use HTML for more control over formatting.
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              Use the rich text editor to format your content, or switch to HTML source for advanced editing.
             </p>
           </div>
 

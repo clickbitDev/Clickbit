@@ -27,17 +27,18 @@ const BlogPage: React.FC = () => {
     const fetchBlogPosts = async () => {
       try {
         setLoading(true);
-        const response = await api.get('/blog');
+        // Add timestamp to prevent caching issues
+        const response = await api.get(`/blog?t=${Date.now()}`);
         const blogPosts: BlogPost[] = response.data.posts || response.data;
         setPosts(blogPosts);
 
         // Extract categories from both old format (metadata.category) and new format (categories array)
-        const allCategories = blogPosts.map(post => {
-          if (post.metadata?.category) return post.metadata.category;
+        const allCategories = blogPosts.flatMap(post => {
+          if (post.metadata?.category) return [post.metadata.category];
           if ((post as any).categories && Array.isArray((post as any).categories)) {
-            return (post as any).categories[0]; // Take first category
+            return (post as any).categories;
           }
-          return 'General';
+          return ['General'];
         }).filter(Boolean);
         
         const uniqueCategories = ['All', ...Array.from(new Set(allCategories))];
@@ -57,9 +58,13 @@ const BlogPage: React.FC = () => {
   const filteredPosts = activeCategory === 'All'
     ? posts
     : posts.filter(p => {
-        const postCategory = p.metadata?.category || 
-                           ((p as any).categories && Array.isArray((p as any).categories) ? (p as any).categories[0] : 'General');
-        return postCategory === activeCategory;
+        const postCategories = [];
+        if (p.metadata?.category) postCategories.push(p.metadata.category);
+        if ((p as any).categories && Array.isArray((p as any).categories)) {
+          postCategories.push(...(p as any).categories);
+        }
+        if (postCategories.length === 0) postCategories.push('General');
+        return postCategories.includes(activeCategory);
       });
 
   const containerVariants = {

@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/globals.css';
+import './styles/blog.css';
 
 const rootElement = document.getElementById('root');
 const adminRootElement = document.getElementById('admin-root');

@@ -5,6 +5,7 @@ import { pageVariants, pageTransition } from '../animations';
 import api from '../services/api';
 import PageHeader from '../components/PageHeader';
 import LazyImage from '../components/LazyImage';
+import SecureHtmlRenderer from '../components/SecureHtmlRenderer';
 import { Calendar, Clock, User, ArrowLeft, Tag, Share2, Send, MessageCircle } from 'lucide-react';
 
 interface Comment {
@@ -126,41 +127,68 @@ const BlogPostPage: React.FC = () => {
               {post.category || post.metadata?.category || ((post as any).categories && Array.isArray((post as any).categories) ? (post as any).categories[0] : 'General')}
             </span>
           </div>
-          <div 
-            className="prose dark:prose-invert lg:prose-xl mx-auto"
-            dangerouslySetInnerHTML={{ __html: post.content }} 
+          <SecureHtmlRenderer 
+            content={post.content}
+            className="lg:prose-xl mx-auto"
           />
-          <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold mb-4">Tags</h3>
-            <div className="flex flex-wrap gap-2">
-              {(() => {
-                try {
-                  const tags = post.tags || post.metadata?.tags || (post as any).tags || [];
-                  let tagsArray: string[] = [];
-                  
-                  if (Array.isArray(tags)) {
-                    tagsArray = tags;
-                  } else if (typeof tags === 'string') {
-                    try {
-                      tagsArray = JSON.parse(tags);
-                      if (!Array.isArray(tagsArray)) tagsArray = [];
-                    } catch (e) {
-                      tagsArray = [];
-                    }
+
+          {/* JSON-LD Schema Markup for Blog Post */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "BlogPosting",
+                headline: post.title,
+                description: post.excerpt || post.title,
+                author: {
+                  "@type": "Person",
+                  name: typeof post.author === 'object' && post.author
+                    ? `${post.author.first_name} ${post.author.last_name}`
+                    : post.author || post.metadata?.author?.name || 'ClickBit Team'
+                },
+                publisher: {
+                  "@type": "Organization",
+                  name: "ClickBit",
+                  logo: {
+                    "@type": "ImageObject",
+                    url: `${window.location.origin}/images/logos/logo-full.png`
                   }
-                  
-                  return tagsArray.map((tag: string, index: number) => (
-                    <span key={index} className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full text-xs font-semibold">
-                      {tag}
-                    </span>
-                  ));
-                } catch (error) {
-                  console.error('Tags rendering error:', error);
-                  return null;
-                }
-              })()}
-            </div>
-          </div>
+                },
+                datePublished: post.published_at,
+                                 dateModified: (post as any).updated_at || post.published_at,
+                image: post.featured_image || post.metadata?.featuredImage || `${window.location.origin}/images/placeholders/pattern.svg`,
+                url: `${window.location.origin}/blog/${post.slug}`,
+                mainEntityOfPage: {
+                  "@type": "WebPage",
+                  "@id": `${window.location.origin}/blog/${post.slug}`
+                },
+                articleSection: post.category || post.metadata?.category || ((post as any).categories && Array.isArray((post as any).categories) ? (post as any).categories[0] : 'General'),
+                keywords: (() => {
+                  try {
+                    const tags = post.tags || post.metadata?.tags || (post as any).tags || [];
+                    let tagsArray: string[] = [];
+                    
+                    if (Array.isArray(tags)) {
+                      tagsArray = tags;
+                    } else if (typeof tags === 'string') {
+                      try {
+                        tagsArray = JSON.parse(tags);
+                        if (!Array.isArray(tagsArray)) tagsArray = [];
+                      } catch (e) {
+                        tagsArray = [];
+                      }
+                    }
+                    
+                    return tagsArray.join(', ');
+                  } catch (error) {
+                    return '';
+                  }
+                })(),
+                wordCount: post.content ? post.content.replace(/<[^>]*>/g, '').split(/\s+/).length : 0
+              })
+            }}
+          />
         </article>
       </div>
     </motion.div>

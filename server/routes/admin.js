@@ -4,6 +4,7 @@ const { protect, authorize } = require('../middleware/auth');
 const { User, Content, BlogPost, PortfolioItem, SiteSetting, Contact, Analytics, Service, Team, Comment, Order, OrderItem } = require('../models');
 const { Op } = require('sequelize');
 const { sequelize } = require('../config/database');
+const blogScheduler = require('../services/blogScheduler');
 
 // @desc    Get admin-only data (test route)
 // @route   GET /api/admin/data
@@ -238,7 +239,8 @@ router.get(
         featured_image: post.featured_image,
         created_at: post.created_at,
         updated_at: post.updated_at,
-        published_at: post.published_at
+        published_at: post.published_at,
+        scheduled_at: post.scheduled_at
       };
 
       res.status(200).json(transformedPost);
@@ -257,11 +259,23 @@ router.post(
   authorize('admin', 'manager'),
   async (req, res) => {
     try {
-      const { title, content, slug, status, author_id, category, excerpt, tags, featured_image } = req.body;
+      const { title, content, slug, status, author_id, category, excerpt, tags, featured_image, scheduled_at } = req.body;
       console.log('Blog post CREATE - featured_image received:', featured_image);
+      console.log('Blog post CREATE - scheduled_at received:', scheduled_at);
       
       if (!title || !content || !category) {
         return res.status(400).json({ message: 'Title, content, and category are required.' });
+      }
+
+      // Validate scheduled_at if status is 'scheduled'
+      if (status === 'scheduled') {
+        if (!scheduled_at) {
+          return res.status(400).json({ message: 'Scheduled date is required for scheduled posts.' });
+        }
+        const scheduledDate = new Date(scheduled_at);
+        if (scheduledDate <= new Date()) {
+          return res.status(400).json({ message: 'Scheduled date must be in the future.' });
+        }
       }
 
       const postSlug = slug || title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
@@ -276,7 +290,8 @@ router.post(
         featured_image,
         tags: tags || [],
         categories: category ? [category] : [],
-        published_at: status === 'published' ? new Date() : null
+        published_at: status === 'published' ? new Date() : null,
+        scheduled_at: status === 'scheduled' ? new Date(scheduled_at) : null
       });
       
       console.log('Created blog post with featured_image:', newPost.featured_image);
@@ -302,11 +317,23 @@ router.put(
         return res.status(404).json({ message: 'Post not found' });
       }
 
-      const { title, content, slug, status, category, excerpt, tags, featured_image } = req.body;
+      const { title, content, slug, status, category, excerpt, tags, featured_image, scheduled_at } = req.body;
       console.log('Blog post UPDATE - featured_image received:', featured_image);
+      console.log('Blog post UPDATE - scheduled_at received:', scheduled_at);
       
       if (!title || !content || !category) {
         return res.status(400).json({ message: 'Title, content, and category are required.' });
+      }
+
+      // Validate scheduled_at if status is 'scheduled'
+      if (status === 'scheduled') {
+        if (!scheduled_at) {
+          return res.status(400).json({ message: 'Scheduled date is required for scheduled posts.' });
+        }
+        const scheduledDate = new Date(scheduled_at);
+        if (scheduledDate <= new Date()) {
+          return res.status(400).json({ message: 'Scheduled date must be in the future.' });
+        }
       }
       
       const postSlug = slug || title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
@@ -320,7 +347,8 @@ router.put(
         featured_image,
         tags: tags || [],
         categories: category ? [category] : [],
-        published_at: status === 'published' && post.status !== 'published' ? new Date() : post.published_at
+        published_at: status === 'published' && post.status !== 'published' ? new Date() : post.published_at,
+        scheduled_at: status === 'scheduled' ? new Date(scheduled_at) : null
       };
 
       await post.update(updatedData);
@@ -2474,6 +2502,71 @@ router.get(
       console.error('Error fetching order details:', error);
       res.status(500).json({ 
         message: 'Error fetching order details', 
+        error: error.message 
+      });
+    }
+  }
+);
+
+// ========================== BLOG SCHEDULING ROUTES ==========================
+
+// @desc    Get all scheduled posts
+// @route   GET /api/admin/scheduled-posts
+// @access  Private/Admin
+router.get(
+  '/scheduled-posts',
+  protect,
+  authorize('content:view'),
+  async (req, res) => {
+    try {
+      const scheduledPosts = await blogScheduler.getScheduledPosts();
+      res.status(200).json(scheduledPosts);
+    } catch (error) {
+      res.status(500).json({ 
+        message: 'Error fetching scheduled posts', 
+        error: error.message 
+      });
+    }
+  }
+);
+
+// @desc    Manually publish a scheduled post
+// @route   POST /api/admin/scheduled-posts/:id/publish
+// @access  Private/Admin
+router.post(
+  '/scheduled-posts/:id/publish',
+  protect,
+  authorize('content:update'),
+  async (req, res) => {
+    try {
+      const post = await blogScheduler.publishScheduledPost(req.params.id);
+      res.status(200).json({ 
+        message: 'Post published successfully', 
+        post 
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: 'Error publishing scheduled post', 
+        error: error.message 
+      });
+    }
+  }
+);
+
+// @desc    Get blog scheduler status
+// @route   GET /api/admin/scheduler/status
+// @access  Private/Admin
+router.get(
+  '/scheduler/status',
+  protect,
+  authorize('content:view'),
+  (req, res) => {
+    try {
+      const status = blogScheduler.getStatus();
+      res.status(200).json(status);
+    } catch (error) {
+      res.status(500).json({ 
+        message: 'Error getting scheduler status', 
         error: error.message 
       });
     }

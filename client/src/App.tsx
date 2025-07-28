@@ -21,6 +21,7 @@ import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminOrdersPage from './pages/AdminOrdersPage';
 import AdminBlogPage from './pages/AdminBlogPage';
 import AdminBlogPostForm from './pages/AdminBlogPostForm';
+import AdminScheduledPostsPage from './pages/AdminScheduledPostsPage';
 import AdminPortfolioPage from './pages/AdminPortfolioPage';
 import AdminPortfolioItemForm from './pages/AdminPortfolioItemForm';
 import AdminUsersPage from './pages/AdminUsersPage';
@@ -56,6 +57,7 @@ const AppContent: React.FC = () => {
             <Route path="blog" element={<AdminBlogPage />} />
             <Route path="blog/new" element={<AdminBlogPostForm />} />
             <Route path="blog/edit/:id" element={<AdminBlogPostForm />} />
+            <Route path="blog/scheduled" element={<AdminScheduledPostsPage />} />
             <Route path="portfolio" element={<AdminPortfolioPage />} />
             <Route path="portfolio/new" element={<AdminPortfolioItemForm />} />
             <Route path="portfolio/edit/:id" element={<AdminPortfolioItemForm />} />

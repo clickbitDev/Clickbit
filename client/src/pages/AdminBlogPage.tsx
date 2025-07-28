@@ -151,17 +151,26 @@ const AdminBlogPage: React.FC = () => {
               Manage all blog posts, categories, and content
             </p>
           </div>
-          <Link
-            to="/admin/blog/new"
-            className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-          >
-            <PlusCircle className="mr-2 h-5 w-5" />
-            Create New Post
-          </Link>
+          <div className="flex space-x-3">
+            <Link
+              to="/admin/blog/scheduled"
+              className="inline-flex items-center px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition-colors"
+            >
+              <Calendar className="mr-2 h-5 w-5" />
+              Scheduled Posts
+            </Link>
+            <Link
+              to="/admin/blog/new"
+              className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+            >
+              <PlusCircle className="mr-2 h-5 w-5" />
+              Create New Post
+            </Link>
+          </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-6 mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 md:p-6">
             <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-white">Total Posts</h3>
             <p className="text-xl md:text-3xl font-bold text-blue-600">{Array.isArray(posts) ? posts.length : 0}</p>
@@ -169,6 +178,10 @@ const AdminBlogPage: React.FC = () => {
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 md:p-6">
             <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-white">Published</h3>
             <p className="text-xl md:text-3xl font-bold text-green-600">{Array.isArray(posts) ? posts.filter(p => p.status === 'published').length : 0}</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 md:p-6">
+            <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-white">Scheduled</h3>
+            <p className="text-xl md:text-3xl font-bold text-indigo-600">{Array.isArray(posts) ? posts.filter(p => p.status === 'scheduled').length : 0}</p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 md:p-6">
             <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-white">Drafts</h3>

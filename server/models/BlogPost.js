@@ -51,6 +51,10 @@ const BlogPost = sequelize.define('BlogPost', {
     type: DataTypes.DATE,
     allowNull: true
   },
+  // scheduled_at: {
+  //   type: DataTypes.DATE,
+  //   allowNull: true
+  // },
   meta_title: {
     type: DataTypes.STRING(255),
     allowNull: true

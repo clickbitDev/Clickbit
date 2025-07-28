@@ -36,6 +36,9 @@ const publicContentRoutes = require('./routes/publicContent');
 const uploadRoutes = require('./routes/upload');
 const SocketService = require('./services/socketService');
 
+// Import blog scheduler
+const blogScheduler = require('./services/blogScheduler');
+
 const app = express();
 const PORT = process.env.PORT || 5001;
 
@@ -313,6 +316,10 @@ const startServer = async () => {
     // Start connection monitoring
     connectionMonitor.startMonitoring(30000); // Check every 30 seconds
     
+    // Start blog scheduler
+    // blogScheduler.start(); // Temporarily disabled until scheduled_at column is added
+    // logger.info('Blog scheduler started');
+    
     // Generate sitemap
     try {
       const { generateSitemap } = require('./scripts/generateSitemap');
@@ -346,6 +353,10 @@ const gracefulShutdown = async (signal) => {
   try {
     // Stop connection monitoring
     connectionMonitor.stopMonitoring();
+    
+    // Stop blog scheduler
+    // blogScheduler.stop(); // Temporarily disabled
+    // logger.info('Blog scheduler stopped');
     
     // Close database connection
     const { sequelize } = require('./config/database');

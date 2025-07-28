@@ -37,6 +37,7 @@ const AdminBlogPostForm: React.FC = () => {
   const [category, setCategory] = useState('');
   const [featuredImage, setFeaturedImage] = useState('');
   const [tags, setTags] = useState('');
+  const [scheduledAt, setScheduledAt] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -86,6 +87,7 @@ const AdminBlogPostForm: React.FC = () => {
           setStatus(post.status || 'draft');
           setFeaturedImage(post.featured_image || '');
           setTags(post.tags ? post.tags.join(', ') : '');
+          setScheduledAt(post.scheduled_at ? new Date(post.scheduled_at).toISOString().slice(0, 16) : '');
         } catch (err) {
           setError('Failed to load post data.');
         } finally {
@@ -166,6 +168,14 @@ const AdminBlogPostForm: React.FC = () => {
       setError('Category is required.');
       return;
     }
+    if (status === 'scheduled' && !scheduledAt) {
+      setError('Scheduled date is required for scheduled posts.');
+      return;
+    }
+    if (status === 'scheduled' && new Date(scheduledAt) <= new Date()) {
+      setError('Scheduled date must be in the future.');
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -179,6 +189,7 @@ const AdminBlogPostForm: React.FC = () => {
       status,
       featured_image: featuredImage,
       tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
+      ...(status === 'scheduled' && scheduledAt && { scheduled_at: scheduledAt })
     };
     
     console.log('Blog submission data:', submissionData);
@@ -347,6 +358,24 @@ const AdminBlogPostForm: React.FC = () => {
               <option value="scheduled">Scheduled</option>
             </select>
           </div>
+
+          {status === 'scheduled' && (
+            <div>
+              <label htmlFor="scheduledAt" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Schedule Publication Date *</label>
+              <input
+                type="datetime-local"
+                id="scheduledAt"
+                value={scheduledAt}
+                onChange={(e) => setScheduledAt(e.target.value)}
+                min={new Date().toISOString().slice(0, 16)}
+                required
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              />
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Select when this post should be automatically published
+              </p>
+            </div>
+          )}
 
           <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
             <button 

@@ -1,0 +1,27 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://clickbit.com.au/sitemap.xml
+
+# Disallow admin and private areas
+Disallow: /admin
+Disallow: /login
+Disallow: /register
+Disallow: /_next/
+Disallow: /api/
+Disallow: /.env
+
+# Allow important pages
+Allow: /
+Allow: /about
+Allow: /services
+Allow: /portfolio
+Allow: /contact
+Allow: /blog
+Allow: /privacy-policy
+Allow: /terms-of-service
+Allow: /faq
+
+# Crawl delay for bots
+Crawl-delay: 1

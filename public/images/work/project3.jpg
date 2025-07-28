@@ -1,0 +1,9 @@
+<svg width="600" height="400" viewBox="0 0 600 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="600" height="400" fill="#F0F9FF"/>
+<g opacity="0.6">
+<path d="M0 200 H 600" stroke="#1FBBD2" stroke-width="50"/>
+<path d="M0 300 H 600" stroke="#F39C12" stroke-width="30"/>
+<path d="M0 100 H 600" stroke="#4F46E5" stroke-width="20"/>
+<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="40" fill="black" font-weight="bold">Project 3</text>
+</g>
+</svg> 

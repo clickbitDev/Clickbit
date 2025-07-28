@@ -1,0 +1,23 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1FBBD2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1c9aa8;stop-opacity:1" />
+    </linearGradient>
+    <filter id="noise" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/>
+      <feComposite operator="in" in2="SourceGraphic" result="map"/>
+      <feBlend in="SourceGraphic" in2="map" mode="multiply" />
+    </filter>
+  </defs>
+  <rect width="800" height="600" fill="#0A192F"/>
+  <g filter="url(#noise)" opacity="0.7">
+    <path d="M-100 200 C 150 100, 250 300, 500 250 L 850 300 V 600 H -100 Z" fill="#0F2A4D"/>
+    <path d="M 600 -50 C 700 150, 850 50, 850 250 L 850 0 Z" fill="url(#grad1)"/>
+    <path d="M 300 650 C 400 500, 550 550, 850 450 V 600 H 300 Z" fill="#F39C12"/>
+    <rect x="50" y="50" width="200" height="150" fill="url(#grad1)" transform="rotate(15, 150, 125)"/>
+    <path d="M 100 400 L 250 550 L -50 550 Z" fill="#F39C12" opacity="0.8"/>
+    <circle cx="700" cy="150" r="100" fill="#0F2A4D" />
+    <path d="M 750 100 A 100 100 0 0 1 650 200" fill="#F39C12"/>
+  </g>
+</svg> 

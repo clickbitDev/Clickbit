@@ -317,8 +317,8 @@ const startServer = async () => {
     connectionMonitor.startMonitoring(30000); // Check every 30 seconds
     
     // Start blog scheduler
-    // blogScheduler.start(); // Temporarily disabled until scheduled_at column is added
-    // logger.info('Blog scheduler started');
+    blogScheduler.start();
+    logger.info('Blog scheduler started');
     
     // Generate sitemap
     try {
@@ -355,8 +355,8 @@ const gracefulShutdown = async (signal) => {
     connectionMonitor.stopMonitoring();
     
     // Stop blog scheduler
-    // blogScheduler.stop(); // Temporarily disabled
-    // logger.info('Blog scheduler stopped');
+    blogScheduler.stop();
+    logger.info('Blog scheduler stopped');
     
     // Close database connection
     const { sequelize } = require('./config/database');

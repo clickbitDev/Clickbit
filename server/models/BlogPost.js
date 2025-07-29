@@ -43,7 +43,7 @@ const BlogPost = sequelize.define('BlogPost', {
     }
   },
   status: {
-    type: DataTypes.ENUM('draft', 'published', 'archived', 'private'),
+    type: DataTypes.ENUM('draft', 'published', 'scheduled', 'archived', 'private'),
     defaultValue: 'draft',
     allowNull: false
   },
@@ -51,10 +51,10 @@ const BlogPost = sequelize.define('BlogPost', {
     type: DataTypes.DATE,
     allowNull: true
   },
-  // scheduled_at: {
-  //   type: DataTypes.DATE,
-  //   allowNull: true
-  // },
+  scheduled_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
   meta_title: {
     type: DataTypes.STRING(255),
     allowNull: true

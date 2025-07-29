@@ -179,6 +179,17 @@ router.get(
 
       // Transform the data to match frontend expectations
       const transformedPosts = posts.map(post => {
+        // Parse categories if it's a string
+        let categories = post.categories;
+        if (typeof categories === 'string') {
+          try {
+            categories = JSON.parse(categories);
+          } catch (err) {
+            console.warn('Failed to parse categories for post:', post.id);
+            categories = [];
+          }
+        }
+        
         return {
           id: post.id,
           title: post.title,
@@ -187,7 +198,7 @@ router.get(
           excerpt: post.excerpt,
           status: post.status,
           author: post.author ? `${post.author.first_name} ${post.author.last_name}` : 'Unknown',
-          category: post.categories && post.categories.length > 0 ? post.categories[0] : 'General',
+          category: categories && categories.length > 0 ? categories[0] : 'General',
           cover_image: post.featured_image,
           featured_image: post.featured_image,
           created_at: post.created_at,
@@ -226,6 +237,17 @@ router.get(
         return res.status(404).json({ message: 'Blog post not found' });
       }
       
+      // Parse categories if it's a string
+      let categories = post.categories;
+      if (typeof categories === 'string') {
+        try {
+          categories = JSON.parse(categories);
+        } catch (err) {
+          console.warn('Failed to parse categories for post:', post.id);
+          categories = [];
+        }
+      }
+      
       const transformedPost = {
         id: post.id,
         title: post.title,
@@ -234,7 +256,7 @@ router.get(
         excerpt: post.excerpt,
         status: post.status,
         author: post.author ? `${post.author.first_name} ${post.author.last_name}` : 'Unknown',
-        category: post.categories && post.categories.length > 0 ? post.categories[0] : 'General',
+        category: categories && categories.length > 0 ? categories[0] : 'General',
         cover_image: post.featured_image,
         featured_image: post.featured_image,
         created_at: post.created_at,
@@ -414,95 +436,28 @@ router.get(
   authorize('content:list'),
   async (req, res) => {
     try {
-      // Get categories from actual content
-      const [portfolioItems, blogPosts] = await Promise.all([
-        PortfolioItem.findAll({
-          attributes: ['category'],
-          raw: true
-        }),
-        BlogPost.findAll({
-          attributes: ['categories'],
-          raw: true
-        })
-      ]);
-
-      // Extract categories
-      const allCategories = new Set();
-      
-      portfolioItems.forEach(item => {
-        if (item.category) allCategories.add(item.category);
+      // Get categories from the database table
+      const Category = require('../models/Category');
+      const categories = await Category.findAll({
+        where: { status: 'active' },
+        order: [['sort_order', 'ASC'], ['name', 'ASC']],
+        attributes: ['id', 'name', 'slug', 'description']
       });
-      
-      blogPosts.forEach(post => {
-        if (post.categories && Array.isArray(post.categories)) {
-          post.categories.forEach(category => {
-            if (category) allCategories.add(category);
-          });
-        }
-      });
-
-      // Add comprehensive default categories
-      const defaultCategories = [
-        'Web Development',
-        'Mobile App Development', 
-        'E-commerce Development',
-        'Custom Software Development',
-        'API Development & Integration',
-        'Database Design & Management',
-        'Cloud Solutions & Infrastructure',
-        'DevOps & Automation',
-        'UI/UX Design',
-        'Design & Branding',
-        'Digital Marketing',
-        'SEO & Content Strategy',
-        'Business Systems',
-        'Infrastructure',
-        'Specialized Tech',
-        'Marketing & Growth',
-        'Business Packages',
-        'Consulting & Strategy',
-        'Maintenance & Support',
-        'General'
-      ];
-
-      // Merge found categories with defaults
-      defaultCategories.forEach(cat => allCategories.add(cat));
-
-      // Convert to array format
-      const categories = Array.from(allCategories).sort().map((name, index) => ({
-        id: index + 1,
-        name,
-        slug: name.toLowerCase().replace(/\s+&\s+/g, '-and-').replace(/\s+/g, '-'),
-        description: `${name} projects and content`
-      }));
 
       res.status(200).json(categories);
     } catch (error) {
       console.error('Categories fetch error:', error);
-      // Return comprehensive fallback categories on error
+      // Return fallback categories on error
       const fallbackCategories = [
-        { id: 1, name: 'Web Development', slug: 'web-development', description: 'Web development projects' },
-        { id: 2, name: 'Mobile App Development', slug: 'mobile-app-development', description: 'Mobile app projects' },
-        { id: 3, name: 'E-commerce Development', slug: 'ecommerce-development', description: 'E-commerce projects' },
-        { id: 4, name: 'Custom Software Development', slug: 'custom-software-development', description: 'Custom software projects' },
-        { id: 5, name: 'API Development & Integration', slug: 'api-development-and-integration', description: 'API projects' },
-        { id: 6, name: 'Database Design & Management', slug: 'database-design-and-management', description: 'Database projects' },
-        { id: 7, name: 'Cloud Solutions & Infrastructure', slug: 'cloud-solutions-and-infrastructure', description: 'Cloud projects' },
-        { id: 8, name: 'DevOps & Automation', slug: 'devops-and-automation', description: 'DevOps projects' },
-        { id: 9, name: 'UI/UX Design', slug: 'ui-ux-design', description: 'Design projects' },
-        { id: 10, name: 'Design & Branding', slug: 'design-and-branding', description: 'Branding projects' },
-        { id: 11, name: 'Digital Marketing', slug: 'digital-marketing', description: 'Marketing projects' },
-        { id: 12, name: 'SEO & Content Strategy', slug: 'seo-and-content-strategy', description: 'SEO projects' },
-        { id: 13, name: 'Business Systems', slug: 'business-systems', description: 'Business systems projects' },
-        { id: 14, name: 'Infrastructure', slug: 'infrastructure', description: 'Infrastructure projects' },
-        { id: 15, name: 'Specialized Tech', slug: 'specialized-tech', description: 'Specialized technology projects' },
-        { id: 16, name: 'Marketing & Growth', slug: 'marketing-and-growth', description: 'Growth projects' },
-        { id: 17, name: 'Business Packages', slug: 'business-packages', description: 'Business package projects' },
-        { id: 18, name: 'Consulting & Strategy', slug: 'consulting-and-strategy', description: 'Consulting projects' },
-        { id: 19, name: 'Maintenance & Support', slug: 'maintenance-and-support', description: 'Support projects' },
-        { id: 20, name: 'General', slug: 'general', description: 'General projects' }
+        { id: 1, name: 'Design & Branding', slug: 'design-branding', description: 'Design and branding services' },
+        { id: 2, name: 'Digital Marketing', slug: 'digital-marketing', description: 'Digital marketing strategies and services' },
+        { id: 3, name: 'E-commerce Development', slug: 'ecommerce-development', description: 'E-commerce website development' },
+        { id: 4, name: 'UI/UX Design', slug: 'ui-ux-design', description: 'User interface and user experience design' },
+        { id: 5, name: 'Specialized Tech', slug: 'specialized-tech', description: 'Specialized technology solutions' },
+        { id: 6, name: 'Business Packages', slug: 'business-packages', description: 'Complete business solution packages' },
+        { id: 7, name: 'API Development & Integration', slug: 'api-development-integration', description: 'API development and system integration' },
+        { id: 8, name: 'General', slug: 'general', description: 'General blog posts and articles' }
       ];
-      
       res.status(200).json(fallbackCategories);
     }
   }

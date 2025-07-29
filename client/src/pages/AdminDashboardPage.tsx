@@ -11,7 +11,12 @@ import {
   Trash2,
   TrendingUp,
   Clock,
-  CheckCircle
+  CheckCircle,
+  Cloud,
+  Database,
+  Activity,
+  Settings,
+  Zap
 } from 'lucide-react';
 
 interface Comment {
@@ -191,6 +196,102 @@ const AdminDashboardPage: React.FC = () => {
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.pendingComments}</p>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Service Cards */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">External Services</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <a 
+              href="https://crm.clickbit.com.au/app-admin" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <div className="flex items-center mb-3">
+                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                  <Database className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="ml-3">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">CRM Admin</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Customer Management</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Manage customer relationships and sales pipeline</p>
+            </a>
+
+            <a 
+              href="https://team.crm.clickbit.com.au" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <div className="flex items-center mb-3">
+                <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                  <Users className="h-6 w-6 text-green-600 dark:text-green-400" />
+                </div>
+                <div className="ml-3">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Team CRM</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Team Collaboration</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Team access to CRM system and shared data</p>
+            </a>
+
+            <a 
+              href="https://status.clickbit.com.au" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <div className="flex items-center mb-3">
+                <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                  <Activity className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                </div>
+                <div className="ml-3">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Uptime Kuma</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">System Monitoring</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Monitor system status and uptime</p>
+            </a>
+
+            <a 
+              href="https://cloud.clickbit.com.au" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <div className="flex items-center mb-3">
+                <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                  <Cloud className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div className="ml-3">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">ClickCloud</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Cloud Services</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Cloud infrastructure and hosting management</p>
+            </a>
+
+            <a 
+              href="https://automation.clickbit.com.au" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <div className="flex items-center mb-3">
+                <div className="p-3 bg-teal-100 dark:bg-teal-900/30 rounded-lg">
+                  <Zap className="h-6 w-6 text-teal-600 dark:text-teal-400" />
+                </div>
+                <div className="ml-3">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">N8N</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Workflow Automation</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Automate workflows and business processes</p>
+            </a>
           </div>
         </div>
 

@@ -35,8 +35,20 @@ const BlogPage: React.FC = () => {
         // Extract categories from both old format (metadata.category) and new format (categories array)
         const allCategories = blogPosts.flatMap(post => {
           if (post.metadata?.category) return [post.metadata.category];
-          if ((post as any).categories && Array.isArray((post as any).categories)) {
-            return (post as any).categories;
+          
+          const categories = (post as any).categories;
+          if (categories) {
+            // Handle both string and array formats
+            if (typeof categories === 'string') {
+              try {
+                const parsed = JSON.parse(categories);
+                return Array.isArray(parsed) && parsed.length > 0 ? parsed : ['General'];
+              } catch {
+                return ['General'];
+              }
+            } else if (Array.isArray(categories) && categories.length > 0) {
+              return categories;
+            }
           }
           return ['General'];
         }).filter(Boolean);
@@ -60,9 +72,24 @@ const BlogPage: React.FC = () => {
     : posts.filter(p => {
         const postCategories = [];
         if (p.metadata?.category) postCategories.push(p.metadata.category);
-        if ((p as any).categories && Array.isArray((p as any).categories)) {
-          postCategories.push(...(p as any).categories);
+        
+        const categories = (p as any).categories;
+        if (categories) {
+          // Handle both string and array formats
+          if (typeof categories === 'string') {
+            try {
+              const parsed = JSON.parse(categories);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                postCategories.push(...parsed);
+              }
+            } catch {
+              // If parsing fails, continue
+            }
+          } else if (Array.isArray(categories) && categories.length > 0) {
+            postCategories.push(...categories);
+          }
         }
+        
         if (postCategories.length === 0) postCategories.push('General');
         return postCategories.includes(activeCategory);
       });
@@ -146,7 +173,23 @@ const BlogPage: React.FC = () => {
                   </div>
                   <div className="p-6">
                     <p className="text-sm text-cyan-600 dark:text-cyan-400 font-semibold">
-                      {post.metadata?.category || ((post as any).categories && Array.isArray((post as any).categories) ? (post as any).categories[0] : 'General')}
+                      {post.metadata?.category || (() => {
+                        const categories = (post as any).categories;
+                        if (categories) {
+                          // Handle both string and array formats
+                          if (typeof categories === 'string') {
+                            try {
+                              const parsed = JSON.parse(categories);
+                              return Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : 'General';
+                            } catch {
+                              return 'General';
+                            }
+                          } else if (Array.isArray(categories) && categories.length > 0) {
+                            return categories[0];
+                          }
+                        }
+                        return 'General';
+                      })()}
                     </p>
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-2 mb-3 group-hover:text-[#1FBBD2] transition-colors">
                       {post.title}

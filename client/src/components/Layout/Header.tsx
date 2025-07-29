@@ -209,6 +209,16 @@ const Header: React.FC = () => {
     <>
       <div className="sticky top-0 z-50 p-4">
         <div className="flex items-center justify-center space-x-4 max-w-screen-2xl mx-auto">
+          {/* CLICKCRM BUTTON - DESKTOP */}
+          <a
+            href="https://crm.clickbit.com.au"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden xl:inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-semibold rounded-full text-white bg-[#1FBBD2] hover:bg-[#1c9aa8] transition-colors duration-300 flex-shrink-0 shadow-lg"
+          >
+            ClickCRM
+          </a>
+
           {/* LOGIN BUTTON - DESKTOP */}
           {!isLoading && (
             isAuthenticated ? (
@@ -569,6 +579,17 @@ const Header: React.FC = () => {
                     <p className="font-semibold text-gray-600 dark:text-gray-400">Theme</p>
                     <ThemeToggle />
                   </div>
+                  {/* CLICKCRM BUTTON - MOBILE */}
+                  <a
+                    href="https://crm.clickbit.com.au"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={closeMobileMenu}
+                    className="mt-6 block w-full text-center px-4 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-[#1FBBD2] hover:bg-[#1c9aa8]"
+                  >
+                    ClickCRM
+                  </a>
+
                   {!isLoading && (
                     isAuthenticated ? (
                       <button
@@ -576,7 +597,7 @@ const Header: React.FC = () => {
                           logout();
                           closeMobileMenu();
                         }}
-                        className="mt-6 block w-full text-center px-4 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-red-500 hover:bg-red-600"
+                        className="mt-4 block w-full text-center px-4 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-red-500 hover:bg-red-600"
                       >
                         Logout
                       </button>
@@ -584,7 +605,7 @@ const Header: React.FC = () => {
                       <Link
                         to="/login"
                         onClick={closeMobileMenu}
-                        className="mt-6 block w-full text-center px-4 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-[#F39C12] hover:bg-[#E67E22]"
+                        className="mt-4 block w-full text-center px-4 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-[#F39C12] hover:bg-[#E67E22]"
                       >
                         Login
                       </Link>

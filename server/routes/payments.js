@@ -26,12 +26,8 @@ async function initializePaymentProviders() {
       }
       
       if (settings.paypalClientId && settings.paypalClientSecret) {
-        const environment = process.env.NODE_ENV === 'production' 
-          ? paypal.Environment.Production 
-          : paypal.Environment.Sandbox;
-          
-        paypalClient = paypal.client(settings.paypalClientId, settings.paypalClientSecret, environment);
-        console.log('✅ PayPal initialized');
+        // PayPal initialization temporarily disabled due to SDK compatibility issues
+        console.log('⚠️  PayPal initialization temporarily disabled');
       } else {
         console.log('⚠️  PayPal credentials not found');
       }

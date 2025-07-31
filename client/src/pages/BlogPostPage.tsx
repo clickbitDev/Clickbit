@@ -24,6 +24,7 @@ interface BlogPost {
   slug: string;
   excerpt: string;
   published_at: string;
+  contentType?: 'html' | 'markdown';
   author?: string | {
     id: number;
     first_name: string;
@@ -130,6 +131,7 @@ const BlogPostPage: React.FC = () => {
           <SecureHtmlRenderer 
             content={post.content}
             className="mx-auto"
+            contentType={post.contentType || (post.content?.startsWith('#') || post.content?.includes('|') ? 'markdown' : 'html')}
           />
 
           {/* JSON-LD Schema Markup for Blog Post */}

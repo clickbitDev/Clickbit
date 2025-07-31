@@ -152,7 +152,7 @@
   font-size: 0.875rem;
 }
 
-/* Table Styles */
+/* Enhanced Table Styles */
 .blog-content table {
   width: 100%;
   border-collapse: collapse;
@@ -160,6 +160,7 @@
   border: 1px solid rgb(229 231 235); /* gray-200 */
   border-radius: 8px;
   overflow: hidden;
+  font-family: 'Sora', sans-serif;
 }
 
 .dark .blog-content table {
@@ -188,6 +189,15 @@
 .dark .blog-content th {
   background: rgb(31 41 55); /* gray-800 */
   color: rgb(255 255 255); /* white */
+}
+
+/* Table wrapper for responsive design */
+.blog-content .overflow-x-auto {
+  margin: 1.5rem 0;
+}
+
+.blog-content .min-w-full {
+  min-width: 100%;
 }
 
 /* Horizontal Rule */

@@ -38,6 +38,7 @@ const AdminBlogPostForm: React.FC = () => {
   const [featuredImage, setFeaturedImage] = useState('');
   const [tags, setTags] = useState('');
   const [scheduledAt, setScheduledAt] = useState('');
+  const [contentType, setContentType] = useState<'html' | 'markdown'>('html');
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -85,6 +86,7 @@ const AdminBlogPostForm: React.FC = () => {
           setExcerpt(post.excerpt || '');
           setCategory(post.category || '');
           setStatus(post.status || 'draft');
+          setContentType(post.contentType || 'html');
           setFeaturedImage(post.featured_image || '');
           setTags(post.tags ? post.tags.join(', ') : '');
           setScheduledAt(post.scheduled_at ? new Date(post.scheduled_at).toISOString().slice(0, 16) : '');
@@ -187,6 +189,7 @@ const AdminBlogPostForm: React.FC = () => {
       excerpt,
       category,
       status,
+      contentType,
       featured_image: featuredImage,
       tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
       ...(status === 'scheduled' && scheduledAt && { scheduled_at: scheduledAt })
@@ -331,17 +334,55 @@ const AdminBlogPostForm: React.FC = () => {
           </div>
 
           <div>
+            <label htmlFor="contentType" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Content Type</label>
+            <select
+              id="contentType"
+              value={contentType}
+              onChange={(e) => setContentType(e.target.value as 'html' | 'markdown')}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            >
+              <option value="html">HTML (Rich Text Editor)</option>
+              <option value="markdown">Markdown (Plain Text)</option>
+            </select>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Choose HTML for rich formatting or Markdown for simple text formatting
+            </p>
+          </div>
+
+          <div>
             <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Content *</label>
-            <RichTextEditor
-              value={content}
-              onChange={setContent}
-              placeholder="Write your blog content here..."
-              height={500}
-              onSaveDraft={handleSaveDraft}
-              isDraft={isDraftSaved}
-            />
+            {contentType === 'markdown' ? (
+              <textarea
+                id="content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                rows={20}
+                placeholder="Write your blog content in Markdown format...
+# Your Title
+## Subtitle
+- List item 1
+- List item 2
+
+| Column 1 | Column 2 |
+|----------|----------|
+| Data 1   | Data 2   |"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono text-sm"
+              />
+            ) : (
+              <RichTextEditor
+                value={content}
+                onChange={setContent}
+                placeholder="Write your blog content here..."
+                height={500}
+                onSaveDraft={handleSaveDraft}
+                isDraft={isDraftSaved}
+              />
+            )}
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              Use the rich text editor to format your content, or switch to HTML source for advanced editing.
+              {contentType === 'markdown' 
+                ? 'Use Markdown syntax for formatting. Supports headings (# ##), lists (- *), bold (**text**), italic (*text*), and tables (| column |).'
+                : 'Use the rich text editor to format your content, or switch to HTML source for advanced editing.'
+              }
             </p>
           </div>
 

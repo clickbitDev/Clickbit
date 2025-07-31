@@ -131,7 +131,29 @@ const BlogPostPage: React.FC = () => {
           <SecureHtmlRenderer 
             content={post.content}
             className="mx-auto"
-            contentType={post.contentType || (post.content?.startsWith('#') || post.content?.includes('|') ? 'markdown' : 'html')}
+            contentType={post.contentType || (() => {
+              // More robust Markdown detection
+              const content = post.content || '';
+              const hasMarkdownHeaders = /^#+\s/.test(content);
+              const hasMarkdownTable = /\|.*\|.*\|/.test(content);
+              const hasMarkdownList = /^[\s]*[-*+]\s/.test(content);
+              const hasMarkdownBold = /\*\*.*\*\*/.test(content);
+              const hasMarkdownItalic = /\*[^*].*\*/.test(content);
+              const hasHtmlTags = /<[^>]+>/.test(content);
+              
+              // If it has Markdown features and no HTML tags, treat as Markdown
+              if ((hasMarkdownHeaders || hasMarkdownTable || hasMarkdownList || hasMarkdownBold || hasMarkdownItalic) && !hasHtmlTags) {
+                return 'markdown';
+              }
+              
+              // If it has HTML tags, treat as HTML
+              if (hasHtmlTags) {
+                return 'html';
+              }
+              
+              // Default to Markdown for plain text
+              return 'markdown';
+            })()}
           />
 
           {/* JSON-LD Schema Markup for Blog Post */}

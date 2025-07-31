@@ -129,7 +129,7 @@ const BlogPostPage: React.FC = () => {
           </div>
           <SecureHtmlRenderer 
             content={post.content}
-            className="lg:prose-xl mx-auto"
+            className="mx-auto"
           />
 
           {/* JSON-LD Schema Markup for Blog Post */}

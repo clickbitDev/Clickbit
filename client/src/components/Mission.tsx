@@ -31,6 +31,8 @@ const Mission = () => {
   const missionTitle = getContent('home', 'mission', 'title') || 'Our Mission:';
   const missionHighlight = getContent('home', 'mission', 'highlight') || 'Your Growth';
 
+
+
   // Use dynamic mission points if available, otherwise fall back to default
   const defaultMissionPoints = [
     {
@@ -100,7 +102,19 @@ const Mission = () => {
                   <IconComponent size={20} className="sm:w-7 sm:h-7 text-gray-900 group-hover:text-white transition-colors duration-300" />
                 </div>
                 <h3 className="text-sm sm:text-xl font-bold mb-2 sm:mb-3 text-[#F39C12]">{point.title}</h3>
-                <p className="text-xs sm:text-base text-gray-600 dark:text-gray-400">{point.description}</p>
+                <p className="text-xs sm:text-base text-gray-600 dark:text-gray-400">
+                  {point.description.includes('From web development to digital marketing and hardware support') ? (
+                    <>
+                      From web development to digital marketing and hardware support, our experienced team brings a wealth of knowledge to every project.
+                    </>
+                  ) : point.description.includes('From initial planning and installation to ongoing maintenance') ? (
+                    <>
+                      From initial planning and installation to ongoing maintenance and emergency repairs, we offer true end-to-end support.
+                    </>
+                  ) : (
+                    point.description
+                  )}
+                </p>
               </div>
             );
           })}

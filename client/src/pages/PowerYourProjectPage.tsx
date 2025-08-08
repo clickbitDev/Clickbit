@@ -686,7 +686,7 @@ const PowerYourProjectPage = () => {
                 title="Power Your Project"
                 breadcrumbs={[
                     { name: 'Home', href: '/' },
-                    { name: 'Power Your Project', href: '/power-your-project' },
+                    { name: 'Get Started', href: '/get-started' },
                 ]}
             />
             <div className="container mx-auto px-4 py-8 lg:py-16">

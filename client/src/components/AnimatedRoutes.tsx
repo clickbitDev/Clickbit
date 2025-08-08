@@ -57,17 +57,23 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/services/:slug" element={<ServiceDetailPage />} />
+        <Route path="/web-development" element={<ServicesPage />} />
+        <Route path="/digital-marketing" element={<ServicesPage />} />
+        <Route path="/it-support" element={<ServicesPage />} />
+        <Route path="/cloud-solutions" element={<ServicesPage />} />
         <Route path="/portfolio" element={<PortfolioPage />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
         <Route path="/contact" element={<ContactPage />} />
-        <Route path="/power-your-project" element={<ProtectedRoute><PowerYourProjectPage /></ProtectedRoute>} />
+        <Route path="/contact-us" element={<ContactPage />} />
+        <Route path="/get-started" element={<ProtectedRoute><PowerYourProjectPage /></ProtectedRoute>} />
+        <Route path="/start-project" element={<ProtectedRoute><PowerYourProjectPage /></ProtectedRoute>} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
         <Route path="/faq" element={<FAQPage />} />
-        <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+        <Route path="/terms" element={<TermsOfServicePage />} />
         <Route path="/test-errors" element={<ErrorTestPage />} />
         
         {/* Admin Routes */}

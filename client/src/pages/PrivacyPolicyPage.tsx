@@ -16,7 +16,7 @@ const PrivacyPolicyPage = () => {
         title="Privacy Policy"
         breadcrumbs={[
           { name: 'Home', href: '/' },
-          { name: 'Privacy Policy', href: '/privacy-policy' }
+          { name: 'Privacy Policy', href: '/privacy' }
         ]}
       />
       

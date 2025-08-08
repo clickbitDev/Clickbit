@@ -16,7 +16,7 @@ const TermsOfServicePage = () => {
         title="Terms of Service"
         breadcrumbs={[
           { name: 'Home', href: '/' },
-          { name: 'Terms of Service', href: '/terms-of-service' }
+          { name: 'Terms of Service', href: '/terms' }
         ]}
       />
       

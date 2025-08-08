@@ -517,7 +517,7 @@ const Header: React.FC = () => {
           
           {/* POWER YOUR PROJECT - DESKTOP */}
           <Link 
-            to="/power-your-project" 
+                            to="/get-started" 
             className="hidden xl:inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-semibold rounded-full text-white bg-[#1FBBD2] hover:bg-[#1A9DAA] transition-colors duration-300 flex-shrink-0 shadow-lg"
           >
             Power Your Project
@@ -612,7 +612,7 @@ const Header: React.FC = () => {
                     )
                   )}
                   <Link
-                    to="/power-your-project"
+                    to="/get-started"
                     onClick={closeMobileMenu}
                     className="mt-4 block w-full text-center px-4 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-[#1FBBD2] hover:bg-[#1A9DAA]"
                   >

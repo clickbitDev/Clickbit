@@ -53,8 +53,8 @@ const getPricingAction = (tier: PricingTier) => {
   // If custom or price > $1,500 AUD, go to Power Your Project
   if (isCustom || !(price && price <= 1500)) {
     return {
-      type: 'power-your-project' as const,
-      href: '/power-your-project',
+              type: 'get-started' as const,
+        href: '/get-started',
       text: isCustom ? 'Get Custom Quote' : 'Get Started'
     };
   }

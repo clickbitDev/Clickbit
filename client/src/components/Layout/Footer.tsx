@@ -42,8 +42,8 @@ const Footer: React.FC = () => {
   const companyLinks = [
     { name: 'Blog', href: '/blog' },
     { name: 'Frequently Asked Questions', href: '/faq' },
-    { name: 'Privacy Policy', href: '/privacy-policy' },
-    { name: 'Terms of Service', href: '/terms-of-service' },
+    { name: 'Privacy Policy', href: '/privacy' },
+    { name: 'Terms of Service', href: '/terms' },
   ];
 
   // Map social platform names to icons

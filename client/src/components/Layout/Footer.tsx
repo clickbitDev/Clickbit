@@ -178,9 +178,20 @@ const Footer: React.FC = () => {
         {/* Bottom section */}
         <div className="mt-12 pt-4 border-t border-gray-200 dark:border-gray-700/50 bg-gray-100 dark:bg-gray-800 -mx-4 px-4 py-4">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-gray-500 dark:text-gray-400 text-center sm:text-left text-sm">
-              © {currentYear} ClickBit.com.au. All rights reserved.
-            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
+              <p className="text-gray-500 dark:text-gray-400 text-center sm:text-left text-sm">
+                © {currentYear} ClickBit.com.au. All rights reserved.
+              </p>
+              <span className="text-gray-400 dark:text-gray-500 text-sm">•</span>
+              <a 
+                href="https://clickbit.com.au" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-500 dark:text-gray-400 hover:text-[#1FBBD2] transition-colors duration-300 text-sm"
+              >
+                Designed by ClickBIT
+              </a>
+            </div>
             <button 
               onClick={scrollToTop}
               className="group inline-flex items-center justify-center w-10 h-10 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-full text-gray-500 dark:text-gray-400 hover:text-[#1FBBD2] hover:border-[#1FBBD2] dark:hover:text-[#1FBBD2] dark:hover:border-[#1FBBD2] transition-all duration-300 hover:shadow-lg"

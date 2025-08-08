@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { pageVariants, pageTransition } from '../animations';
 import PageHeader from '../components/PageHeader';
 import Mission from '../components/Mission';
@@ -100,7 +101,7 @@ const AboutPage: React.FC = () => {
                   <div className="relative">
                       <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Customised Solution</h3>
                       <p className="text-lg">
-                          No two businesses are the same, and your IT solutions shouldn't be either. We take the time to get to know your company, its goals, and its challenges, so we can create custom strategies that fit you perfectly.
+                          No two businesses are the same, and your IT solutions shouldn't be either. We take the time to get to know your company, its goals, and its challenges, so we can create custom strategies that fit you perfectly. <Link to="/services" className="text-[#1FBBD2] hover:text-[#1A9DAA] font-semibold underline">Learn more about our services</Link> and how we support startups and small business growth.
                       </p>
                   </div>
               </div>

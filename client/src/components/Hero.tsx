@@ -9,7 +9,7 @@ const Hero = () => {
   // Get dynamic content with fallbacks
   const heroTitle = getContent('home', 'hero', 'title') || 'Inspired by Creativity, Driven by Conversions';
   const heroSubtitle = getContent('home', 'hero', 'subtitle') || 'At ClickBit, we craft amazing websites, data-backed marketing campaigns, and cutting-edge design assets that turn clicks into customers.';
-  const heroCtaText = getContent('home', 'hero', 'cta_text') || 'Start Your Project';
+  const heroCtaText = getContent('home', 'hero', 'cta_text') || 'Explore our services';
 
   return (
     <div 

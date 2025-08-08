@@ -145,7 +145,7 @@ const PortfolioPage: React.FC = () => {
         <div className="py-16">
           <div className="container mx-auto px-4">
             <p className="text-center text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-12">
-              We take pride in our work. Check out our complete portfolio showcasing our expertise and commitment to delivering exceptional results.
+              We take pride in projects powered by our services. Check out our excellent team and the complete portfolio they've crafted, showcasing our expertise and commitment to delivering exceptional results.
             </p>
 
             {/* Category Filter */}

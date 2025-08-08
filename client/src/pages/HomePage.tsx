@@ -11,6 +11,7 @@ import Testimonials from '../components/Testimonials';
 import StatsGrid from '../components/StatsGrid';
 import DynamicRibbon from '../components/DynamicRibbon';
 import ShowcaseGrid from '../components/ShowcaseGrid';
+import CTA from '../components/CTA';
 
 const HomePage = () => {
   return (
@@ -30,6 +31,7 @@ const HomePage = () => {
       <OurProcess />
       <FeaturedWork />
       <Testimonials />
+      <CTA />
     </motion.div>
   );
 };

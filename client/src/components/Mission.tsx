@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useContent } from '../contexts/ContentContext';
 import {
   Users,
@@ -86,6 +87,9 @@ const Mission = () => {
               {missionHighlight}
             </span>
           </h2>
+          <p className="mt-6 text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            Our mission is simple — your growth is our success. We're not just here to deliver projects; we're here to build lasting partnerships. Curious about the people and passion behind ClickBIT? <Link to="/about" className="text-[#1FBBD2] hover:text-[#1A9DAA] font-semibold underline">Learn more about us</Link>.
+          </p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
           {displayMissionPoints.map((point, index) => {

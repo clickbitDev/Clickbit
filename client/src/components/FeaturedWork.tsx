@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { X, ExternalLink } from 'lucide-react';
 import LogoCloud from './LogoCloud';
 import api from '../services/api';
@@ -137,7 +138,7 @@ const FeaturedWork = () => {
               Our <span className="bg-gradient-to-r from-[#1FBBD2] to-[#F39C12] text-transparent bg-clip-text">Featured Work</span>
             </h2>
             <p className="mt-4 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Explore our portfolio of innovative digital solutions. Click on any image to view details or visit the live project.
+              We take pride in projects powered by our services. Check out our excellent team and the <Link to="/portfolio" className="text-[#1FBBD2] hover:text-[#1A9DAA] font-semibold underline">complete portfolio they've crafted</Link>, showcasing our expertise and commitment to delivering exceptional results.
             </p>
           </div>
 

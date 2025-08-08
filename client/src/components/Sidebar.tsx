@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSidebar } from '../contexts/SidebarContext';
-import { X, MapPin, Mail, Phone, Facebook, Instagram, Linkedin, PhoneCall } from 'lucide-react';
+import { X, MapPin, Mail, Phone, Facebook, Instagram, Linkedin, PhoneCall, Twitter } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { useTheme } from '../contexts/ThemeContext';
 import { Link } from 'react-router-dom';
@@ -40,6 +40,7 @@ const Sidebar: React.FC = () => {
     { icon: Facebook, href: "https://www.facebook.com/clickbitau/", name: "Facebook" },
     { icon: Instagram, href: "https://www.instagram.com/clickbitau/", name: "Instagram" },
     { icon: Linkedin, href: "https://www.linkedin.com/company/clickbitau/", name: "LinkedIn" },
+    { icon: Twitter, href: "https://x.com/ClickBITau", name: "Twitter" },
   ];
 
   return (

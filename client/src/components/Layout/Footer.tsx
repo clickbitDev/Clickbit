@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useContent } from '../../contexts/ContentContext';
-import { Facebook, Instagram, Linkedin, Twitter, Youtube, Mail, Phone, MapPin, ArrowUp } from 'lucide-react';
+import { Facebook, Instagram, Linkedin, Twitter, Youtube, Mail, Phone, MapPin, ArrowUp, Github } from 'lucide-react';
 import { animateScroll as scroll } from 'react-scroll';
 
 const Footer: React.FC = () => {
@@ -53,6 +53,7 @@ const Footer: React.FC = () => {
     linkedin: Linkedin,
     twitter: Twitter,
     youtube: Youtube,
+    github: Github,
   };
 
   const getSocialIcon = (platform: string) => {

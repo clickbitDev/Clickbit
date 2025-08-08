@@ -119,7 +119,13 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) =>
     address: '44 Shoreline Road\nMoorebank NSW 2170\nAustralia',
     businessHours: 'Monday - Friday: 9:00 AM - 6:00 PM\nWeekend: By appointment',
     googleMapsUrl: '',
-    socialLinks: []
+    socialLinks: [
+      { platform: 'facebook', url: 'https://www.facebook.com/clickbitau/' },
+      { platform: 'instagram', url: 'https://www.instagram.com/clickbitau/' },
+      { platform: 'linkedin', url: 'https://www.linkedin.com/company/clickbitau/' },
+      { platform: 'twitter', url: 'https://x.com/ClickBITau' },
+      { platform: 'github', url: 'https://github.com/clickbitau' }
+    ]
   });
   const [footerContent, setFooterContent] = useState<FooterContent>({
     companyDescription: 'Empowering businesses with innovative digital solutions to connect, engage, and grow.'

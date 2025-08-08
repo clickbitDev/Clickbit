@@ -6,7 +6,7 @@ import ContactForm from '../components/ContactForm';
 import Testimonials from '../components/Testimonials';
 import AddReview from '../components/AddReview';
 import { useContent } from '../contexts/ContentContext';
-import { Facebook, Instagram, Linkedin, Twitter, Youtube, Phone, Mail, MapPin, Clock } from 'lucide-react';
+import { Facebook, Instagram, Linkedin, Twitter, Youtube, Phone, Mail, MapPin, Clock, Github } from 'lucide-react';
 
 const ContactPage: React.FC = () => {
   const { contactInfo } = useContent();
@@ -18,6 +18,7 @@ const ContactPage: React.FC = () => {
     linkedin: Linkedin,
     twitter: Twitter,
     youtube: Youtube,
+    github: Github,
   };
 
   const getSocialIcon = (platform: string) => {

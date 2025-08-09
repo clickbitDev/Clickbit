@@ -148,30 +148,39 @@ const PortfolioPage: React.FC = () => {
               We take pride in projects powered by our services. Check out our excellent team and the complete portfolio they've crafted, showcasing our expertise and commitment to delivering exceptional results.
             </p>
 
-            {/* Category Filter */}
+            {/* Category Filter - Enhanced Responsive Design */}
             <div className="mb-12">
-              <div className="flex gap-2 md:gap-3 overflow-x-auto scrollbar-hide py-2 px-4 md:px-0 md:justify-center">
-                {['All', 'Featured', ...categories].map(category => (
-                  <button
-                    key={category}
-                    onClick={() => setActiveCategory(category)}
-                    className={`px-3 md:px-5 py-2 text-sm rounded-full font-semibold transition-all duration-300 whitespace-nowrap flex-shrink-0 ${
-                      activeCategory === category
-                        ? 'bg-[#1FBBD2] text-white shadow-lg'
-                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                    }`}
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
-              {/* Mobile scroll indicator */}
-              <div className="flex justify-center mt-2 md:hidden">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-300 rounded-full animate-pulse"></div>
-                  <div className="w-2 h-2 bg-gray-300 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                  <div className="w-2 h-2 bg-gray-300 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+              <div className="relative">
+                {/* Filter Container: mobile scroll, desktop wraps */}
+                <div className="flex gap-2 md:gap-3 overflow-x-auto md:overflow-visible flex-nowrap md:flex-wrap px-4 md:px-0 justify-start md:justify-center py-2 scroll-smooth">
+                  {['All', 'Featured', ...categories].map(category => (
+                    <button
+                      key={category}
+                      onClick={() => setActiveCategory(category)}
+                      className={`px-3 md:px-5 py-2 text-sm rounded-full font-semibold transition-all duration-300 whitespace-nowrap flex-shrink-0 border-2 ${
+                        activeCategory === category
+                          ? 'bg-[#1FBBD2] text-white shadow-lg border-[#1FBBD2]'
+                          : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600'
+                      }`}
+                    >
+                      {category}
+                    </button>
+                  ))}
                 </div>
+                
+                {/* Scroll Indicators */}
+                <div className="flex justify-center mt-3 md:hidden">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-[#1FBBD2] rounded-full"></div>
+                    <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                    <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                  </div>
+                </div>
+                
+                {/* Filter Instructions */}
+                <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-2 md:hidden">
+                  Swipe to see more categories
+                </p>
               </div>
             </div>
 

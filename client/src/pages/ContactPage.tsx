@@ -132,7 +132,13 @@ const ContactPage: React.FC = () => {
                   {contactInfo.socialLinks.length > 0 && (
                     <div className="mt-8 pt-6 border-t border-white/20">
                       <p className="font-semibold mb-4">Follow Us</p>
-                      <div className="flex space-x-4">
+                      {/* Debug: Show count of social links */}
+                      {process.env.NODE_ENV === 'development' && (
+                        <div className="text-xs text-white/70 mb-2 text-center">
+                          Social Links: {contactInfo.socialLinks.length} platforms
+                        </div>
+                      )}
+                      <div className="flex flex-wrap gap-3">
                         {contactInfo.socialLinks.map((social, index) => {
                           const IconComponent = getSocialIcon(social.platform);
                           return (
@@ -141,8 +147,9 @@ const ContactPage: React.FC = () => {
                               href={social.url} 
                               target="_blank" 
                               rel="noopener noreferrer" 
-                              className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center hover:bg-white/30 transition-colors"
+                              className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center hover:bg-white/30 transition-colors hover:scale-110 transform"
                               aria-label={social.platform}
+                              title={social.platform}
                             >
                               <IconComponent size={20} />
                             </a>

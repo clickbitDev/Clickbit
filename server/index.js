@@ -98,15 +98,38 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      connectSrc: ["'self'", "https://clickbit.com.au", "https://www.clickbit.com.au", "http://clickbit.com.au", "http://www.clickbit.com.au"],
+      connectSrc: ["'self'", "https://clickbit.com.au", "https://www.clickbit.com.au", "http://clickbit.com.au", "http://www.clickbit.com.au", "https://www.google-analytics.com", "https://analytics.google.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:"],
-      scriptSrc: ["'self'", "https://js.stripe.com"],
+      imgSrc: ["'self'", "data:", "https:", "https://www.google-analytics.com"],
+      scriptSrc: ["'self'", "https://js.stripe.com", "https://www.googletagmanager.com", "'unsafe-inline'"],
+      scriptSrcElem: ["'self'", "https://js.stripe.com", "https://www.googletagmanager.com", "'unsafe-inline'"],
       frameSrc: ["'self'", "https://js.stripe.com", "https://www.google.com", "https://maps.google.com"],
       upgradeInsecureRequests: null, //Disable HTTPS upgrade
     },
   },
+  permissionsPolicy: {
+    directives: {
+      "camera": [],
+      "microphone": [],
+      "geolocation": [],
+      "payment": [],
+      "usb": [],
+      "magnetometer": [],
+      "gyroscope": [],
+      "accelerometer": [],
+      "ambient-light-sensor": [],
+      "autoplay": [],
+      "encrypted-media": [],
+      "fullscreen": [],
+      "picture-in-picture": [],
+      "publickey-credentials-get": [],
+      "screen-wake-lock": [],
+      "sync-xhr": [],
+      "web-share": [],
+      "xr-spatial-tracking": []
+    }
+  }
 }));
 
 // Rate limiting with more lenient settings for development

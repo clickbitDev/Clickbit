@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSidebar } from '../contexts/SidebarContext';
-import { X, MapPin, Mail, Phone, Facebook, Instagram, Linkedin, PhoneCall, Twitter, Github } from 'lucide-react';
+import { X, MapPin, Mail, Phone, Facebook, Instagram, Linkedin, PhoneCall, Twitter, Youtube, Github } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { useTheme } from '../contexts/ThemeContext';
 import { Link } from 'react-router-dom';
@@ -41,6 +41,7 @@ const Sidebar: React.FC = () => {
     { icon: Instagram, href: "https://www.instagram.com/clickbitau/", name: "Instagram" },
     { icon: Linkedin, href: "https://www.linkedin.com/company/clickbitau/", name: "LinkedIn" },
     { icon: Twitter, href: "https://x.com/ClickBITau", name: "Twitter" },
+    { icon: Youtube, href: "https://www.youtube.com/@clickbitau", name: "YouTube" },
     { icon: Github, href: "https://github.com/clickbitau", name: "GitHub" },
   ];
 
@@ -84,10 +85,16 @@ const Sidebar: React.FC = () => {
                       <img src={theme === 'dark' ? '/images/logos/logo-full-dark.png' : '/images/logos/logo-full.png'} alt="ClickBit Logo" className="w-32" />
                     </Link>
                   </div>
-                  <div className="flex justify-center space-x-6 mb-6">
+                  <div className="flex flex-wrap justify-center gap-4 mb-6">
+                    {/* Debug: Show count of social links */}
+                    {process.env.NODE_ENV === 'development' && (
+                      <div className="text-xs text-gray-400 mb-2 w-full text-center">
+                        Social Links: {socialLinks.length} platforms
+                      </div>
+                    )}
                     {socialLinks.map((social) => (
-                      <a key={social.name} href={social.href} target="_blank" rel="noopener noreferrer" aria-label={social.name} className="text-gray-400 hover:text-[#1FBBD2] transition-colors duration-300">
-                        <social.icon size={24} />
+                      <a key={social.name} href={social.href} target="_blank" rel="noopener noreferrer" aria-label={social.name} className="text-gray-400 hover:text-[#1FBBD2] transition-colors duration-300 p-1 hover:scale-110 transform" title={social.name}>
+                        <social.icon size={22} />
                       </a>
                     ))}
                   </div>

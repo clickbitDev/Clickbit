@@ -151,34 +151,51 @@ const ServicesPage = () => {
             Explore our comprehensive range of services designed to help your business grow and succeed in the digital landscape.
           </p>
           
-          {/* Category Filter - Responsive Mobile Design */}
+          {/* Category Filter - Enhanced Responsive Design */}
           <div className="mb-12">
-            <div className="flex gap-2 md:gap-3 overflow-x-auto scrollbar-hide py-2 md:justify-center px-2 md:px-0">
-              <Link
-                to="/services"
-                onClick={() => setActiveCategory('All')}
-                className={`px-4 md:px-5 py-2 text-sm rounded-full font-semibold transition-all duration-300 whitespace-nowrap flex-shrink-0 ${
-                  activeCategory === 'All'
-                    ? 'bg-[#1FBBD2] text-white shadow-lg'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-              >
-                All Services
-              </Link>
-              {categories.map(category => (
+            <div className="relative">
+              {/* Filter Container: mobile scroll, desktop wraps */}
+              <div className="flex gap-2 md:gap-3 overflow-x-auto md:overflow-visible flex-nowrap md:flex-wrap justify-start md:justify-center px-2 md:px-0 py-2 scroll-smooth">
                 <Link
-                  key={category}
-                  to={`/services?category=${category.toLowerCase().replace(/\s+&\s+/g, '-and-').replace(/\s+/g, '-')}`}
-                  onClick={() => setActiveCategory(category)}
-                  className={`px-4 md:px-5 py-2 text-sm rounded-full font-semibold transition-all duration-300 whitespace-nowrap flex-shrink-0 ${
-                    activeCategory === category
-                      ? 'bg-[#1FBBD2] text-white shadow-lg'
-                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  to="/services"
+                  onClick={() => setActiveCategory('All')}
+                  className={`px-4 md:px-5 py-2 text-sm rounded-full font-semibold transition-all duration-300 whitespace-nowrap flex-shrink-0 border-2 ${
+                    activeCategory === 'All'
+                      ? 'bg-[#1FBBD2] text-white shadow-lg border-[#1FBBD2]'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600'
                   }`}
                 >
-                  {category}
+                  All Services
                 </Link>
-              ))}
+                {categories.map(category => (
+                  <Link
+                    key={category}
+                    to={`/services?category=${category.toLowerCase().replace(/\s+&\s+/g, '-and-').replace(/\s+/g, '-')}`}
+                    onClick={() => setActiveCategory(category)}
+                    className={`px-4 md:px-5 py-2 text-sm rounded-full font-semibold transition-all duration-300 whitespace-nowrap flex-shrink-0 border-2 ${
+                      activeCategory === category
+                        ? 'bg-[#1FBBD2] text-white shadow-lg border-[#1FBBD2]'
+                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-600'
+                    }`}
+                  >
+                    {category}
+                  </Link>
+                ))}
+              </div>
+              
+              {/* Scroll Indicators */}
+              <div className="flex justify-center mt-3 md:hidden">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-[#1FBBD2] rounded-full"></div>
+                  <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                  <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                </div>
+              </div>
+              
+              {/* Filter Instructions */}
+              <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-2 md:hidden">
+                Swipe to see more categories
+              </p>
             </div>
           </div>
 

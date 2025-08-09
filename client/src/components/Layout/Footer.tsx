@@ -86,7 +86,13 @@ const Footer: React.FC = () => {
             <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto md:mx-0">
               {footerContent.companyDescription || 'Empowering businesses with innovative digital solutions to connect, engage, and grow.'}
             </p>
-            <div className="flex space-x-4 justify-center md:justify-start">
+            <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+              {/* Debug: Show count of social links */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="text-xs text-gray-400 mb-2 w-full text-center">
+                  Social Links: {contactInfo.socialLinks.length} platforms
+                </div>
+              )}
               {contactInfo.socialLinks.map((social, index) => {
                 const IconComponent = getSocialIcon(social.platform);
                 return (
@@ -95,10 +101,11 @@ const Footer: React.FC = () => {
                     href={social.url} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-[#1FBBD2] dark:hover:text-[#1FBBD2] transition-colors duration-300"
+                    className="text-gray-400 hover:text-[#1FBBD2] dark:hover:text-[#1FBBD2] transition-colors duration-300 p-1 hover:scale-110 transform"
                     aria-label={social.platform}
+                    title={social.platform}
                   >
-                    <IconComponent size={24} />
+                    <IconComponent size={22} />
                   </a>
                 );
               })}

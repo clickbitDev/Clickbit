@@ -124,6 +124,7 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) =>
       { platform: 'instagram', url: 'https://www.instagram.com/clickbitau/' },
       { platform: 'linkedin', url: 'https://www.linkedin.com/company/clickbitau/' },
       { platform: 'twitter', url: 'https://x.com/ClickBITau' },
+      { platform: 'youtube', url: 'https://www.youtube.com/@clickbitau' },
       { platform: 'github', url: 'https://github.com/clickbitau' }
     ]
   });

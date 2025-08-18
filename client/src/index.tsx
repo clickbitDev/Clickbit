@@ -4,6 +4,20 @@ import App from './App';
 import './styles/globals.css';
 import './styles/blog.css';
 
+// Preload critical resources
+const preloadCriticalResources = () => {
+  // Preload hero image if exists
+  const heroImage = new Image();
+  heroImage.src = '/images/patterns/hero-pattern.svg';
+  
+  // Preload logo
+  const logo = new Image();
+  logo.src = '/logo.svg';
+};
+
+// Call preload function
+preloadCriticalResources();
+
 const rootElement = document.getElementById('root');
 const adminRootElement = document.getElementById('admin-root');
 

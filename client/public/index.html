@@ -34,6 +34,21 @@
     <meta property="twitter:description" content="Leading web development, digital marketing & IT solutions in Australia. Custom software, mobile apps, cloud solutions & comprehensive IT support for startups and small businesses." />
     <meta property="twitter:image" content="https://clickbit.com.au/images/logos/logo-full.png" />
     <link rel="canonical" href="https://clickbit.com.au/" />
+    <!-- Critical CSS for faster FCP -->
+    <style>
+      /* Critical above-the-fold styles */
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html { font-family: system-ui, -apple-system, sans-serif; }
+      body { background: white; color: #1f2937; line-height: 1.6; }
+      .container-custom { max-width: 1280px; margin: 0 auto; padding: 0 1rem; }
+      /* Loading spinner for lazy components */
+      .loading-spinner { 
+        display: flex; align-items: center; justify-content: center; 
+        min-height: 50vh; animation: spin 1s linear infinite; 
+      }
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+    
     <!-- Preconnect to critical external origins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,21 +57,15 @@
     <!-- Stripe preconnects for better payment performance -->
     <link rel="preconnect" href="https://js.stripe.com">
     <link rel="preconnect" href="https://m.stripe.network">
-    <!-- Font optimization -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;700&display=swap" as="style" id="font-preload">
+    
+    <!-- Resource hints for performance -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://www.google-analytics.com">
+    
+    <!-- Font optimization with faster loading -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;700&display=swap" as="style">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;700&display=swap" media="print" onload="this.media='all'; this.onload=null;">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;700&display=swap"></noscript>
-    <script>
-      // Load font stylesheet safely without inline handlers
-      (function() {
-        const fontLink = document.getElementById('font-preload');
-        if (fontLink) {
-          fontLink.onload = function() {
-            this.onload = null;
-            this.rel = 'stylesheet';
-          };
-        }
-      })();
-    </script>
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo.svg" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <title>ClickBIT - Web Development, Digital Marketing & IT Solutions Australia | Custom Software, Mobile Apps & Cloud Solutions</title>

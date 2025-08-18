@@ -51,16 +51,43 @@ const AboutPage: React.FC = () => {
 
   useEffect(() => {
     const handleResize = () => {
+      // Use ResizeObserver for better performance and avoid forced reflows
+      const updateColumns = () => {
+        const viewportWidth = window.innerWidth;
+        if (viewportWidth >= 1024) {
+          setNumCols(3); // Large screens - 3 columns
+        } else if (viewportWidth >= 768) {
+          setNumCols(2); // Medium screens - 2 columns  
+        } else {
+          setNumCols(1); // Small screens - 1 column
+        }
+      };
+      updateColumns();
+    };
+    
+    // Use ResizeObserver if available, fallback to window resize
+    if (window.ResizeObserver) {
       const grid = document.querySelector('.team-grid');
       if (grid) {
-        const gridWidth = grid.clientWidth;
-        const colWidth = 300; // Approximate width of a team card
-        setNumCols(Math.max(1, Math.floor(gridWidth / colWidth)));
+        const resizeObserver = new ResizeObserver(() => {
+          const viewportWidth = window.innerWidth;
+          if (viewportWidth >= 1024) {
+            setNumCols(3);
+          } else if (viewportWidth >= 768) {
+            setNumCols(2);
+          } else {
+            setNumCols(1);
+          }
+        });
+        resizeObserver.observe(grid);
+        return () => resizeObserver.disconnect();
       }
-    };
-    window.addEventListener('resize', handleResize);
-    handleResize(); // Initial call
-    return () => window.removeEventListener('resize', handleResize);
+    } else {
+      // Fallback for older browsers
+      window.addEventListener('resize', handleResize);
+      handleResize();
+      return () => window.removeEventListener('resize', handleResize);
+    }
   }, []);
 
   const placeholdersNeeded = numCols > 0 ? (numCols - (displayMembers.length % numCols)) % numCols : 0;

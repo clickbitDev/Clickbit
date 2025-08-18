@@ -95,7 +95,7 @@ router.get(
       // Recent activity
       const [recentContacts, recentOrders, recentComments] = await Promise.allSettled([
         Contact.findAll({
-          attributes: ['name', 'email', 'service_type', 'created_at'],
+          attributes: ['name', 'email', 'contact_type', 'created_at'],
           order: [['created_at', 'DESC']],
           limit: 5
         }),
@@ -115,10 +115,10 @@ router.get(
       // Service popularity
       const servicePopularity = await Contact.findAll({
         attributes: [
-          'service_type',
+          'contact_type',
           [sequelize.fn('COUNT', sequelize.col('id')), 'count']
         ],
-        group: ['service_type'],
+        group: ['contact_type'],
         order: [[sequelize.fn('COUNT', sequelize.col('id')), 'DESC']],
         limit: 10
       });

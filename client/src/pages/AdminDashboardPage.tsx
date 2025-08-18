@@ -70,13 +70,13 @@ interface DashboardStats {
     created_at: string;
   }>;
   servicePopularity: Array<{
-    service_type: string;
+    contact_type: string;
     count: number;
   }>;
   recentContacts: Array<{
     name: string;
     email: string;
-    service_type: string;
+    contact_type: string;
     created_at: string;
   }>;
   recentOrders: Array<{
@@ -538,14 +538,14 @@ const AdminDashboardPage: React.FC = () => {
             <div className="space-y-3">
               {stats.servicePopularity && stats.servicePopularity.length > 0 ? (
                 stats.servicePopularity.map((service, index) => (
-                  <div key={service.service_type} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700">
+                  <div key={service.contact_type} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mr-3">
                         <span className="text-xs font-bold text-green-600 dark:text-green-400">{index + 1}</span>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {service.service_type}
+                          {service.contact_type}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">{service.count} inquiries</p>
                       </div>
@@ -581,7 +581,7 @@ const AdminDashboardPage: React.FC = () => {
                     <div>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">{contact.name}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">{contact.email}</p>
-                      <p className="text-xs text-blue-600 dark:text-blue-400">{contact.service_type}</p>
+                      <p className="text-xs text-blue-600 dark:text-blue-400">{contact.contact_type}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-gray-500 dark:text-gray-400">

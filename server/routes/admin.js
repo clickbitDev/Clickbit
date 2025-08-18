@@ -2287,7 +2287,6 @@ router.get(
         attributes: [
           'status',
           'payment_status',
-          'total_amount',
           [sequelize.fn('COUNT', sequelize.col('id')), 'count'],
           [sequelize.fn('SUM', sequelize.col('total_amount')), 'revenue']
         ],

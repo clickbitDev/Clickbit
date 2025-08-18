@@ -248,49 +248,53 @@ const AdminBlogPage: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Post</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                <th scope="col" className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
+                <th scope="col" className="w-1/2 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Post</th>
+                <th scope="col" className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
+                <th scope="col" className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                <th scope="col" className="w-1/12 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th scope="col" className="w-1/12 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th scope="col" className="w-1/12 relative px-6 py-3"><span className="sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {filteredPosts.map(post => (
                 <tr key={post.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
+                  <td className="w-1/2 px-6 py-4">
+                    <div className="flex items-start">
                       {post.cover_image && (
                         <img 
                           src={post.cover_image} 
                           alt={post.title}
-                          className="h-12 w-16 object-cover rounded mr-4"
+                          className="h-12 w-16 object-cover rounded mr-4 flex-shrink-0"
                         />
                       )}
-                      <div>
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">{post.title}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">{post.excerpt}</div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white mb-1 truncate">
+                          {post.title}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 h-8 overflow-hidden leading-4">
+                          {post.excerpt?.length > 100 ? `${post.excerpt.substring(0, 100)}...` : post.excerpt}
+                        </div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="w-1/6 px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <User className="h-4 w-4 text-gray-400 mr-2" />
-                      <span className="text-sm text-gray-900 dark:text-white">{post.author}</span>
+                      <User className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
+                      <span className="text-sm text-gray-900 dark:text-white truncate">{post.author}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="w-1/6 px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <Tag className="h-4 w-4 text-gray-400 mr-2" />
-                      <span className="text-sm text-gray-900 dark:text-white">{post.category}</span>
+                      <Tag className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
+                      <span className="text-sm text-gray-900 dark:text-white truncate">{post.category}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="w-1/12 px-6 py-4 whitespace-nowrap">
                     <select
                       value={post.status}
                       onChange={(e) => handleStatusChange(post.id, e.target.value)}
-                      className="text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white w-full"
                     >
                       <option value="draft">Draft</option>
                       <option value="published">Published</option>
@@ -298,34 +302,39 @@ const AdminBlogPage: React.FC = () => {
                       <option value="archived">Archived</option>
                     </select>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="w-1/12 px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <Calendar className="h-4 w-4 text-gray-400 mr-2" />
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {new Date(post.created_at).toLocaleDateString()}
+                      <Calendar className="h-4 w-4 text-gray-400 mr-1 flex-shrink-0" />
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
-                    <Link 
-                      to={`/blog/${post.slug}`} 
-                      target="_blank"
-                      className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1"
-                    >
-                      <Eye className="h-5 w-5 inline" />
-                    </Link>
-                    <Link 
-                      to={`/admin/blog/edit/${post.id}`} 
-                      className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 p-1"
-                    >
-                      <Edit className="h-5 w-5 inline" />
-                    </Link>
-                    <button 
-                      onClick={() => handleDelete(post.id)} 
-                      className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1"
-                    >
-                      <Trash2 className="h-5 w-5 inline" />
-                    </button>
+                  <td className="w-1/12 px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center justify-end space-x-2">
+                      <Link 
+                        to={`/blog/${post.slug}`} 
+                        target="_blank"
+                        className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1"
+                        title="View Post"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Link>
+                      <Link 
+                        to={`/admin/blog/edit/${post.id}`} 
+                        className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 p-1"
+                        title="Edit Post"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Link>
+                      <button 
+                        onClick={() => handleDelete(post.id)} 
+                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1"
+                        title="Delete Post"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

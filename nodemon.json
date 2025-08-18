@@ -1,0 +1,24 @@
+{
+  "watch": ["server"],
+  "ext": "js",
+  "ignore": [
+    "logs/*",
+    "uploads/*",
+    "client/*",
+    "node_modules/*",
+    "*.test.js"
+  ],
+  "delay": "1500",
+  "signal": "SIGTERM",
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "execMap": {
+    "js": "node"
+  },
+  "events": {
+    "restart": "echo 'Server restarting due to changes...'",
+    "crash": "echo 'Server crashed! Waiting for changes before restart...'"
+  },
+  "verbose": false
+}

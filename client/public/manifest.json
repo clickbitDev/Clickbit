@@ -1,0 +1,15 @@
+{
+  "short_name": "ClickBit",
+  "name": "ClickBit - Web Solutions",
+  "icons": [
+    {
+      "src": "logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1fbbd2",
+  "background_color": "#ffffff"
+} 

@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev:*)",
+      "Bash(cat:*)",
+      "Bash(pkill:*)",
+      "Bash(curl:*)",
+      "Bash(mysql:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(node:*)",
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(pm2 status:*)",
+      "Bash(pm2 logs:*)",
+      "Bash(sudo cp:*)",
+      "Bash(sudo systemctl:*)",
+      "Bash(openssl rand:*)",
+      "Bash(sudo ls:*)",
+      "Bash(sudo httpd:*)",
+      "Bash(ls:*)",
+      "Bash(sudo find:*)",
+      "Bash(sudo dnf module:*)",
+      "Bash(sudo dnf install:*)",
+      "Bash(rg:*)",
+      "Bash(tar:*)"
+    ],
+    "deny": []
+  }
+}

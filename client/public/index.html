@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/logo.svg" />
+    <link rel="alternate icon" href="%PUBLIC_URL%/logo.svg" />
+    <link rel="shortcut icon" href="%PUBLIC_URL%/logo.svg" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1fbbd2" />
+    <meta name="keywords" content="web development, digital marketing, IT solutions, custom software, mobile apps, cloud solutions, IT support, web design, Australia, Sydney, Melbourne, Brisbane, Perth, Adelaide, startup, small business, e-commerce, SEO, social media marketing" />
+    <meta name="author" content="ClickBIT" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="English" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="distribution" content="global" />
+    <meta
+      name="description"
+      content="ClickBIT - Leading Web Development, Digital Marketing & IT Solutions in Australia. Custom software, mobile apps, cloud solutions, and comprehensive IT support for startups and small businesses. Get expert web design, development, and digital marketing services."
+    />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://clickbit.com.au/" />
+    <meta property="og:title" content="ClickBIT - Web Development, Digital Marketing & IT Solutions Australia" />
+    <meta property="og:description" content="Leading web development, digital marketing & IT solutions in Australia. Custom software, mobile apps, cloud solutions & comprehensive IT support for startups and small businesses." />
+    <meta property="og:image" content="https://clickbit.com.au/images/logos/logo-full.png" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://clickbit.com.au/" />
+    <meta property="twitter:title" content="ClickBIT - Web Development, Digital Marketing & IT Solutions Australia" />
+    <meta property="twitter:description" content="Leading web development, digital marketing & IT solutions in Australia. Custom software, mobile apps, cloud solutions & comprehensive IT support for startups and small businesses." />
+    <meta property="twitter:image" content="https://clickbit.com.au/images/logos/logo-full.png" />
+    <link rel="canonical" href="https://clickbit.com.au/" />
+    <!-- Preconnect to critical external origins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <link rel="preconnect" href="https://stats.g.doubleclick.net">
+    <!-- Stripe preconnects for better payment performance -->
+    <link rel="preconnect" href="https://js.stripe.com">
+    <link rel="preconnect" href="https://m.stripe.network">
+    <!-- Font optimization -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;700&display=swap" as="style" id="font-preload">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;700&display=swap"></noscript>
+    <script>
+      // Load font stylesheet safely without inline handlers
+      (function() {
+        const fontLink = document.getElementById('font-preload');
+        if (fontLink) {
+          fontLink.onload = function() {
+            this.onload = null;
+            this.rel = 'stylesheet';
+          };
+        }
+      })();
+    </script>
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo.svg" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>ClickBIT - Web Development, Digital Marketing & IT Solutions Australia | Custom Software, Mobile Apps & Cloud Solutions</title>
+    
+    <!-- Google Analytics (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G2SP59398M"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-G2SP59398M');
+      
+      // Custom event tracking for key business interactions
+      function trackEvent(eventName, parameters = {}) {
+        gtag('event', eventName, parameters);
+      }
+      
+      // Track form submissions
+      document.addEventListener('DOMContentLoaded', function() {
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+          form.addEventListener('submit', function() {
+            trackEvent('form_submit', {
+              form_name: form.getAttribute('data-form-name') || 'contact_form',
+              page_location: window.location.pathname
+            });
+          });
+        });
+        
+        // Track CTA button clicks
+        const ctaButtons = document.querySelectorAll('a[href*="/contact"], a[href*="/get-started"], a[href*="/services"]');
+        ctaButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            trackEvent('cta_click', {
+              button_text: button.textContent.trim(),
+              destination: button.href,
+              page_location: window.location.pathname
+            });
+          });
+        });
+        
+        // Track phone number clicks
+        const phoneLinks = document.querySelectorAll('a[href^="tel:"]');
+        phoneLinks.forEach(link => {
+          link.addEventListener('click', function() {
+            trackEvent('phone_click', {
+              phone_number: link.href.replace('tel:', ''),
+              page_location: window.location.pathname
+            });
+          });
+        });
+        
+        // Track email clicks
+        const emailLinks = document.querySelectorAll('a[href^="mailto:"]');
+        emailLinks.forEach(link => {
+          link.addEventListener('click', function() {
+            trackEvent('email_click', {
+              email_address: link.href.replace('mailto:', ''),
+              page_location: window.location.pathname
+            });
+          });
+        });
+      });
+    </script>
+    
+    <!-- Schema.org structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "ClickBIT",
+      "url": "https://clickbit.com.au",
+      "logo": "https://clickbit.com.au/images/logos/logo-full.png",
+      "description": "Leading web development, digital marketing & IT solutions in Australia. Custom software, mobile apps, cloud solutions & comprehensive IT support for startups and small businesses.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "AU"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "availableLanguage": "English"
+      },
+      "sameAs": [
+        "https://www.linkedin.com/company/clickbit",
+        "https://x.com/ClickBITau",
+        "https://github.com/clickbitau"
+      ],
+      "serviceArea": {
+        "@type": "Country",
+        "name": "Australia"
+      },
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "IT Services",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Web Development",
+              "description": "Custom web development and design services"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Digital Marketing",
+              "description": "Comprehensive digital marketing solutions"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "IT Support",
+              "description": "Complete IT support and infrastructure services"
+            }
+          }
+        ]
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <!-- For admin portal, create admin.html with <div id='admin-root'></div> -->
+  </body>
+</html> 

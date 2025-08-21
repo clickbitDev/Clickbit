@@ -69,15 +69,7 @@ const Header: React.FC = () => {
   const [serviceCategories, setServiceCategories] = useState<any[]>([]);
   const [isMobileUserTooltipOpen, setIsMobileUserTooltipOpen] = useState(false);
 
-  // Debug authentication state
-  useEffect(() => {
-    console.log('Header auth state:', {
-      isAuthenticated,
-      isLoading,
-      userRole: user?.role,
-      shouldShowDashboard: isAuthenticated && (user?.role === 'admin' || user?.role === 'manager')
-    });
-  }, [isAuthenticated, isLoading, user]);
+
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);

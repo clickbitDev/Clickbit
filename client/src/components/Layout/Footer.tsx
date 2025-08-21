@@ -80,7 +80,7 @@ const Footer: React.FC = () => {
             <div className="flex justify-center md:justify-start">
               <Link to="/" className="mb-6 inline-block">
                 <img 
-                  src={theme === 'dark' ? '/images/logos/clickbit-logo-single-color-light.svg' : '/images/logos/Click_Bit_Logo_Vec.png'} 
+                  src={theme === 'dark' ? '/images/logos/clickbit-logo-single-color-light.png' : '/images/logos/Click Bit Logo Vec Full.png'} 
                   alt="ClickBit Logo" 
                   className="w-40"
                   loading="lazy" 

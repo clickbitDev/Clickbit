@@ -312,11 +312,11 @@ const PayPalCheckoutForm: React.FC<Omit<CheckoutFormProps, 'paymentMethod'>> = (
 
   const handlePayPalApprove = async (data: any, actions: any) => {
     try {
-      console.log('PayPal payment approved:', data);
+      
       
       // For mock testing, skip the capture step
       if (data.orderID && data.orderID.startsWith('MOCK_ORDER_')) {
-        console.log('Processing mock PayPal order');
+
         
         const orderData = await paymentsAPI.confirmPayment({
           paypalOrderId: data.orderID,
@@ -326,14 +326,14 @@ const PayPalCheckoutForm: React.FC<Omit<CheckoutFormProps, 'paymentMethod'>> = (
           paypalDetails: { id: data.orderID, status: 'COMPLETED' }
         });
         
-        console.log('Mock payment confirmed:', orderData);
+        
         onSuccess(orderData.data);
         return;
       }
       
       // Real PayPal flow
       const details = await actions.order.capture();
-      console.log('PayPal payment captured:', details);
+      
       
       const orderData = await paymentsAPI.confirmPayment({
         paypalOrderId: details.id,
@@ -343,7 +343,7 @@ const PayPalCheckoutForm: React.FC<Omit<CheckoutFormProps, 'paymentMethod'>> = (
         paypalDetails: details
       });
       
-      console.log('Payment confirmed:', orderData);
+      
       onSuccess(orderData.data);
     } catch (error: any) {
       console.error('PayPal payment approval failed:', error);
@@ -353,7 +353,7 @@ const PayPalCheckoutForm: React.FC<Omit<CheckoutFormProps, 'paymentMethod'>> = (
 
   const createPayPalOrder = async () => {
     try {
-      console.log('Creating PayPal order with:', { amount, currency, items, customerInfo });
+      
       
       if (!customerInfo.email || !customerInfo.name) {
         throw new Error('Please fill in your email and name before proceeding with PayPal payment');
@@ -366,7 +366,7 @@ const PayPalCheckoutForm: React.FC<Omit<CheckoutFormProps, 'paymentMethod'>> = (
         customerInfo
       });
       
-      console.log('PayPal order created:', data);
+      
       return data.orderID;
     } catch (error: any) {
       console.error('PayPal order creation failed:', error);
@@ -484,7 +484,7 @@ const PayPalCheckoutForm: React.FC<Omit<CheckoutFormProps, 'paymentMethod'>> = (
           onError('PayPal payment failed: ' + (err?.message || 'Unknown error'));
         }}
         onCancel={(data) => {
-          console.log('PayPal payment cancelled:', data);
+  
         }}
         style={{
           layout: 'vertical',

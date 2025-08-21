@@ -24,7 +24,7 @@ const ServicesPage = () => {
       setError(null);
       try {
         const res = await api.get('/services');
-        console.log('Fetched services data:', res.data); // DEBUG LOG
+
         setServices(res.data);
       } catch (err: any) {
         setError(err.message || 'Error fetching services');
@@ -52,25 +52,19 @@ const ServicesPage = () => {
 
   // Compute categories from fetched services
   const categories = useMemo(() => {
-    console.log('Services in categories useMemo:', services); // DEBUG LOG
     const cats = Array.from(new Set(services.map(s => s.category)));
     const result = ['Popular', ...cats.sort()];
-    console.log('Computed categories:', result); // DEBUG LOG
     return result;
   }, [services]);
 
   // Compute popular services (max 9)
   const popularServices = useMemo(() => {
-    console.log('Services in popularServices useMemo:', services); // DEBUG LOG
     const popular = services.filter(s => s.isPopular).slice(0, 9);
-    console.log('Popular services:', popular); // DEBUG LOG
     return popular;
   }, [services]);
 
   // Filtered services by category
   const filteredServices = useMemo(() => {
-    console.log('Services in filteredServices useMemo:', services); // DEBUG LOG
-    console.log('Active category:', activeCategory); // DEBUG LOG
     let result;
     if (activeCategory === 'All') {
       result = services;
@@ -79,7 +73,6 @@ const ServicesPage = () => {
     } else {
       result = services.filter(s => s.category === activeCategory);
     }
-    console.log('Filtered services result:', result); // DEBUG LOG
     return result;
   }, [activeCategory, services, popularServices]);
 

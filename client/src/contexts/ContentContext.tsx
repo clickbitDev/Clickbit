@@ -185,10 +185,10 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) =>
 
       // Handle site identity data
       if (siteIdentityRes.status === 'fulfilled' && siteIdentityRes.value.data) {
-        console.log('Setting site identity:', siteIdentityRes.value.data);
+
         setSiteIdentity(siteIdentityRes.value.data);
       } else {
-        console.log('Site identity fetch failed:', siteIdentityRes);
+
       }
 
       // Handle contact info data
@@ -198,10 +198,10 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) =>
 
       // Handle footer content data
       if (footerContentRes.status === 'fulfilled' && footerContentRes.value.data) {
-        console.log('Setting footer content:', footerContentRes.value.data);
+
         setFooterContent(footerContentRes.value.data);
       } else {
-        console.log('Footer content fetch failed:', footerContentRes);
+
       }
 
       // Handle navigation data

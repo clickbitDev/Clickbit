@@ -28,8 +28,9 @@ const compressImage = async (inputPath, outputPath, options = {}) => {
       .webp({ quality })
       .toFile(outputPath);
 
-    // Remove original file after compression
+    // Replace original file with compressed version
     fs.unlinkSync(inputPath);
+    fs.renameSync(outputPath, inputPath);
     
     return true;
   } catch (error) {

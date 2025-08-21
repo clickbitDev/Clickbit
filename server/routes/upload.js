@@ -36,10 +36,9 @@ router.post('/portfolio',
       }
 
       const originalPath = req.file.path;
-      const compressedPath = originalPath; // Will be overwritten by compression
       
       // Compress the image (portfolio images: max 800x600, 85% quality)
-      const compressionSuccess = await compressImage(originalPath, compressedPath, {
+      const compressionSuccess = await compressImage(originalPath, originalPath + '_temp', {
         width: 800,
         height: 600,
         quality: 85
@@ -50,13 +49,13 @@ router.post('/portfolio',
       }
 
       // Copy to production build directory if needed
-      copyToProduction(compressedPath, req.file.filename, 'portfolio');
+      copyToProduction(originalPath, req.file.filename, 'portfolio');
       
       // Return the URL path that can be used in the frontend
       const imageUrl = `/images/uploads/portfolio/${req.file.filename}`;
       
       // Get compressed file size
-      const compressedStats = fs.statSync(compressedPath);
+      const compressedStats = fs.statSync(originalPath);
       
       res.status(200).json({
         message: 'Portfolio image uploaded and compressed successfully',
@@ -88,10 +87,9 @@ router.post('/blog',
       }
 
       const originalPath = req.file.path;
-      const compressedPath = originalPath;
       
       // Compress the image (blog images: max 1000x750, 80% quality)
-      const compressionSuccess = await compressImage(originalPath, compressedPath, {
+      const compressionSuccess = await compressImage(originalPath, originalPath + '_temp', {
         width: 1000,
         height: 750,
         quality: 80
@@ -102,13 +100,13 @@ router.post('/blog',
       }
 
       // Copy to production build directory if needed
-      copyToProduction(compressedPath, req.file.filename, 'blog');
+      copyToProduction(originalPath, req.file.filename, 'blog');
       
       // Return the URL path that can be used in the frontend
       const imageUrl = `/images/uploads/blog/${req.file.filename}`;
       
       // Get compressed file size
-      const compressedStats = fs.statSync(compressedPath);
+      const compressedStats = fs.statSync(originalPath);
       
       res.status(200).json({
         message: 'Blog image uploaded and compressed successfully',
@@ -140,10 +138,9 @@ router.post('/team',
       }
 
       const originalPath = req.file.path;
-      const compressedPath = originalPath;
       
       // Compress the image (team images: max 400x400, 85% quality)
-      const compressionSuccess = await compressImage(originalPath, compressedPath, {
+      const compressionSuccess = await compressImage(originalPath, originalPath + '_temp', {
         width: 400,
         height: 400,
         quality: 85
@@ -154,13 +151,13 @@ router.post('/team',
       }
 
       // Copy to production build directory if needed
-      copyToProduction(compressedPath, req.file.filename, 'team');
+      copyToProduction(originalPath, req.file.filename, 'team');
       
       // Return the URL path that can be used in the frontend
       const imageUrl = `/images/uploads/team/${req.file.filename}`;
       
       // Get compressed file size
-      const compressedStats = fs.statSync(compressedPath);
+      const compressedStats = fs.statSync(originalPath);
       
       res.status(200).json({
         message: 'Team image uploaded and compressed successfully',

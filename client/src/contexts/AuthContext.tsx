@@ -153,15 +153,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const token = localStorage.getItem('token');
       const storedUser = getUserFromStorage();
       
-      console.log('Auth check - Token:', !!token, 'Stored user:', !!storedUser);
-      console.log('Stored user role:', storedUser?.role);
+
       
       if (token && storedUser) {
         try {
           dispatch({ type: 'AUTH_START' });
           const response = await authAPI.getCurrentUser();
-          console.log('Auth check successful - User role:', response.data.data.user.role);
-          console.log('Full response:', response.data);
+
           dispatch({
             type: 'AUTH_SUCCESS',
             payload: { user: response.data.data.user, token },
@@ -178,8 +176,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         try {
           dispatch({ type: 'AUTH_START' });
           const response = await authAPI.getCurrentUser();
-          console.log('User data fetched successfully - User role:', response.data.data.user.role);
-          console.log('Full response:', response.data);
+
           dispatch({
             type: 'AUTH_SUCCESS',
             payload: { user: response.data.data.user, token },
@@ -192,7 +189,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       } else {
         // No token - user is not authenticated
-        console.log('No authentication data found');
         dispatch({ type: 'SET_LOADING', payload: false });
       }
     };
@@ -247,7 +243,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
       const { user, token } = response.data.data;
-      console.log('Login successful, user:', user, 'token:', token);
+
       localStorage.setItem('token', token);
       dispatch({ type: 'AUTH_SUCCESS', payload: { user, token } });
       

@@ -133,13 +133,13 @@ const PricingSection: React.FC<PricingSectionProps> = ({ pricing }) => {
     const tierName = tier.name;
     const minQuantity = getMinQuantity(tierName.toLowerCase().replace(/\s+/g, '-'));
 
-    console.log('handlePricingClick called with:', { tier, serviceSlug, tierName, minQuantity, action });
+
 
     if (action.type === 'cart') {
-      console.log('Calling addItemByServiceAndTier with:', { serviceSlug, tierName, minQuantity });
+      
       addItemByServiceAndTier(serviceSlug, tierName, minQuantity);
       showNotification(`${tierName} has been added to cart!`);
-      console.log('Added to cart:', tierName);
+      
     } else {
       navigate(action.href);
     }

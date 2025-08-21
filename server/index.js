@@ -104,33 +104,12 @@ app.use(helmet({
       imgSrc: ["'self'", "data:", "https:", "https://www.google-analytics.com"],
       scriptSrc: ["'self'", "https://js.stripe.com", "https://www.googletagmanager.com", "'unsafe-inline'"],
       scriptSrcElem: ["'self'", "https://js.stripe.com", "https://www.googletagmanager.com", "'unsafe-inline'"],
+      scriptSrcAttr: ["'unsafe-inline'"],
       frameSrc: ["'self'", "https://js.stripe.com", "https://www.google.com", "https://maps.google.com"],
       upgradeInsecureRequests: null, //Disable HTTPS upgrade
     },
   },
-  permissionsPolicy: {
-    directives: {
-      "camera": [],
-      "microphone": [],
-      "geolocation": [],
-      "payment": [],
-      "usb": [],
-      "magnetometer": [],
-      "gyroscope": [],
-      "accelerometer": [],
-      "ambient-light-sensor": [],
-      "autoplay": [],
-      "encrypted-media": [],
-      "fullscreen": [],
-      "picture-in-picture": [],
-      "publickey-credentials-get": [],
-      "screen-wake-lock": [],
-      "sync-xhr": [],
-      "web-share": [],
-      "xr-spatial-tracking": [],
-      "browsing-topics": [] // Add this to fix the error
-    }
-  }
+
 }));
 
 // Rate limiting with more lenient settings for development

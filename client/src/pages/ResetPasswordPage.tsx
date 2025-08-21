@@ -90,7 +90,7 @@ const ResetPasswordPage: React.FC = () => {
           <Link to="/" className="inline-block mb-8">
             <img
               className="h-12 w-auto"
-              src={theme === 'dark' ? '/logo-full-dark.svg' : '/logo-full.svg'}
+              src={theme === 'dark' ? '/images/logos/clickbit-logo-single-color-light.png' : '/images/logos/Click Bit Logo Vec Full.png'}
               alt="ClickBit"
               loading="eager"
             />

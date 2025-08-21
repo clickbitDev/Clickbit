@@ -85,7 +85,7 @@ const Sidebar: React.FC = () => {
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
                   <div className="flex items-center justify-center h-32 border-b border-gray-200 dark:border-gray-800 mb-8">
                     <Link to="/" className="flex items-center space-x-2 p-8 pb-12">
-                      <img src={theme === 'dark' ? '/images/logos/clickbit-logo-single-color-light.svg' : '/images/logos/Click_Bit_Logo_Vec.png'} alt="ClickBit Logo" className="w-32" loading="lazy" />
+                      <img src={theme === 'dark' ? '/images/logos/clickbit-logo-single-color-light.png' : '/images/logos/Click Bit Logo Vec Full.png'} alt="ClickBit Logo" className="w-32" loading="lazy" />
                     </Link>
                   </div>
                   <div className="flex flex-wrap justify-center gap-4 mb-6">

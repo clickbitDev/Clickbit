@@ -31,7 +31,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
   // Get theme-appropriate logo (matching public site)
   const getLogo = () => {
-    return theme === 'dark' ? '/logo-dark.svg' : '/logo.svg';
+    return theme === 'dark' ? '/images/logos/clickbit-logo-single-color-light.png' : '/images/logos/Click Bit Logo Vec Full.png';
   };
 
   const NavContent = () => (

@@ -8,8 +8,7 @@ import { getServiceIcon } from '../services/SERVICE_ICONS_MAPPING';
 import { ChevronRight, Sparkles } from 'lucide-react';
 import api from '../services/api';
 
-// Debug: Print all top-level variables to check for accidental hoisting or shadowing
-console.log('Services component loaded');
+// Component loaded
 
 // Fallback static data in case API fails
 const staticServices = [
@@ -45,7 +44,7 @@ const Services = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('Popular');
 
-  console.log('Services component render - services count:', services.length, 'activeCategory:', activeCategory); // DEBUG LOG
+
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -53,12 +52,11 @@ const Services = () => {
       setError(null);
       try {
         const res = await api.get('/services');
-        console.log('Fetched services data (homepage):', res.data); // DEBUG LOG
-        console.log('First service isPopular value:', res.data[0]?.isPopular, typeof res.data[0]?.isPopular); // DEBUG LOG
+
         setServices(res.data);
       } catch (err: any) {
         setError(err.message || 'Error fetching services');
-        console.error('Service fetch error (homepage):', err); // DEBUG LOG
+
         // Use fallback data if API fails
         setServices(staticServices);
       } finally {
@@ -70,39 +68,27 @@ const Services = () => {
 
   // Compute categories from fetched services
   const categories = useMemo(() => {
-    console.log('Services in categories useMemo (homepage):', services); // DEBUG LOG
     const cats = Array.from(new Set(services.map(s => s.category)));
     const result = ['Popular', 'All', ...cats.sort()];
-    console.log('Computed categories (homepage):', result); // DEBUG LOG
     return result;
   }, [services]);
 
   // Compute popular services
   const popularServices = useMemo(() => {
-    console.log('Services in popularServices useMemo (homepage):', services); // DEBUG LOG
-    console.log('Services with isPopular field:', services.map(s => ({ name: s.name, isPopular: s.isPopular }))); // DEBUG LOG
     const popular = services.filter(s => s.isPopular);
-    console.log('Popular services (homepage):', popular); // DEBUG LOG
-    console.log('Popular services count:', popular.length); // DEBUG LOG
-    console.log('All services count:', services.length); // DEBUG LOG
     return popular;
   }, [services]);
 
   // Filtered services by category
   const filteredServices = useMemo(() => {
-    console.log('Services in filteredServices useMemo (homepage):', services); // DEBUG LOG
-    console.log('Active category (homepage):', activeCategory); // DEBUG LOG
-    console.log('Popular services count:', popularServices.length); // DEBUG LOG
     let result;
     if (activeCategory === 'All') {
       result = services;
     } else if (activeCategory === 'Popular') {
       result = popularServices;
-      console.log('Filtering for Popular category, result:', result); // DEBUG LOG
     } else {
       result = services.filter(s => s.category === activeCategory);
     }
-    console.log('Filtered services result (homepage):', result); // DEBUG LOG
     return result;
   }, [activeCategory, services, popularServices]);
   
@@ -122,8 +108,7 @@ const Services = () => {
   if (loading) return <div className="text-center py-16">Loading services...</div>;
   if (error) return <div className="text-center py-16 text-red-500">{error}</div>;
 
-  console.log('About to render - filteredServices:', filteredServices); // DEBUG LOG
-  console.log('About to render - filteredServices length:', filteredServices.length); // DEBUG LOG
+
 
   return (
     <div className="bg-white dark:bg-gray-900 py-16 md:py-24">
@@ -139,10 +124,7 @@ const Services = () => {
           {categories.map(category => (
             <button
               key={category}
-              onClick={() => {
-                console.log('Category button clicked:', category); // DEBUG LOG
-                setActiveCategory(category);
-              }}
+              onClick={() => setActiveCategory(category)}
               className={`px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 ${
                 activeCategory === category 
                 ? 'bg-[#1FBBD2] text-white' 

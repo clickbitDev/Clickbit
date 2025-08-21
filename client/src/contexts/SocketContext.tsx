@@ -45,7 +45,7 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
     // Connection events
     newSocket.on('connect', () => {
-      console.log('Socket connected:', newSocket.id);
+  
       setIsConnected(true);
       setConnectionError(null);
       
@@ -56,7 +56,7 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     });
 
     newSocket.on('disconnect', (reason) => {
-      console.log('Socket disconnected:', reason);
+  
       setIsConnected(false);
       setIsAuthenticated(false);
       setActiveSessionUser(null);
@@ -70,7 +70,7 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
     // Authentication events
     newSocket.on('authenticated', (data) => {
-      console.log('Socket authenticated:', data.user);
+      
       setIsAuthenticated(true);
       setActiveSessionUser(data.user);
       setConnectionError(null);
@@ -84,13 +84,13 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     });
 
     newSocket.on('login_success', (data) => {
-      console.log('Socket login success:', data.user);
+      
       setIsAuthenticated(true);
       setActiveSessionUser(data.user);
     });
 
     newSocket.on('logged_out', () => {
-      console.log('Socket logged out');
+      
       setIsAuthenticated(false);
       setActiveSessionUser(null);
     });

@@ -31,7 +31,7 @@ const AnimatedNumber = ({ to, from = 0, duration = 2, trigger = 'auto' }: Animat
           if (entry.isIntersecting && !hasAnimated) {
             // Add a small delay to ensure the element is fully visible
             setTimeout(() => {
-              console.log('AnimatedNumber: Element is visible, starting animation');
+          
               setIsVisible(true);
               setHasAnimated(true);
             }, 100);

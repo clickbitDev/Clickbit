@@ -159,9 +159,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Add item by service slug and tier name
   const addItemByServiceAndTier = (serviceSlug: string, tierName: string, quantity: number = 1) => {
-    console.log('addItemByServiceAndTier called with:', { serviceSlug, tierName, quantity });
+
     const cartItemData = createCartItemData(serviceSlug, tierName);
-    console.log('cartItemData result:', cartItemData);
+    
     if (cartItemData) {
       const cartItem: Omit<CartItem, 'quantity'> = {
         id: cartItemData.productId.toString(),
@@ -172,7 +172,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         price: cartItemData.price,
         description: cartItemData.description,
       };
-      console.log('Dispatching cart item:', cartItem);
+      
       dispatch({ type: 'ADD_ITEM', payload: { ...cartItem, quantity } });
     } else {
       console.error('Failed to create cart item data for:', { serviceSlug, tierName });

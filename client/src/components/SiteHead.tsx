@@ -80,6 +80,26 @@ const SiteHead: React.FC<SiteHeadProps> = ({
       <link rel="canonical" href={currentUrl} />
       <meta name="robots" content="index, follow" />
       
+      {/* Structured Data for Organization Logo */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "ClickBIT",
+          "url": "https://clickbit.com.au",
+          "logo": "https://clickbit.com.au/images/logos/logo-full.png",
+          "description": "Leading web development, digital marketing & IT solutions in Australia",
+          "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "AU"
+          },
+          "sameAs": [
+            "https://linkedin.clickbit.com.au",
+            "https://x.clickbit.com.au"
+          ]
+        })}
+      </script>
+      
       {/* Google Analytics with Consent Mode */}
       {marketingIntegrations.googleAnalyticsId && (
         <>

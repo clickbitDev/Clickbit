@@ -52,24 +52,24 @@ const generateMetaTags = async (url) => {
   // Handle root and common pages
   if (url === '/' || url === '') {
     metaData = {
-      title: 'ClickBIT - Web Development, Digital Marketing & IT Solutions Australia',
-      description: 'Leading web development, digital marketing & IT solutions in Australia. Custom software, mobile apps, cloud solutions & comprehensive IT support for startups and small businesses.',
+      title: 'ClickBIT Home',
+      description: 'Empowering businesses with innovative digital solutions to connect, engage, and grow. Expert web development, custom applications, and IT support services.',
       image: 'https://clickbit.com.au/images/logos/logo-full.png',
       url: 'https://clickbit.com.au/',
       type: 'website'
     };
   } else if (url === '/about') {
     metaData = {
-      title: 'About ClickBIT - Our Team & Mission | Web Development Australia',
-      description: 'Learn about ClickBIT\'s mission to deliver exceptional web development, digital marketing, and IT solutions across Australia. Meet our expert team.',
+      title: 'About Us',
+      description: 'Meet the ClickBit team - passionate experts delivering customized IT solutions. Learn about our mission to empower businesses with innovative digital strategies.',
       image: 'https://clickbit.com.au/images/logos/logo-full.png',
       url: 'https://clickbit.com.au/about',
       type: 'website'
     };
   } else if (url === '/contact') {
     metaData = {
-      title: 'Contact ClickBIT - Get Your Free Quote | Web Development Australia',
-      description: 'Ready to start your project? Contact ClickBIT for a free consultation. Expert web development, digital marketing, and IT solutions across Australia.',
+      title: 'Contact Us',
+      description: 'Get in touch with ClickBit\'s expert team. Ready to start your project? Contact us for professional web development, software solutions, and IT services.',
       image: 'https://clickbit.com.au/images/logos/logo-full.png',
       url: 'https://clickbit.com.au/contact',
       type: 'website'
@@ -84,7 +84,7 @@ const generateMetaTags = async (url) => {
     };
   } else if (url === '/services') {
     metaData = {
-      title: 'Our Services - Web Development & Digital Marketing | ClickBIT',
+      title: 'Our Services',
       description: 'Comprehensive web development, digital marketing, and IT solutions. Custom software, mobile apps, cloud solutions, and IT support across Australia.',
       image: 'https://clickbit.com.au/images/logos/logo-full.png',
       url: 'https://clickbit.com.au/services',

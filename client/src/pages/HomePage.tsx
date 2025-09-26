@@ -18,7 +18,7 @@ const HomePage = () => {
   return (
     <>
       <SiteHead 
-        title="Custom Web & Software Solutions | Professional IT Services"
+        title="ClickBIT Home"
         description="Empowering businesses with innovative digital solutions to connect, engage, and grow. Expert web development, custom applications, and IT support services."
       />
       <motion.div

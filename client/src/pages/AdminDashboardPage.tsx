@@ -16,7 +16,17 @@ import {
   Database,
   Activity,
   Settings,
-  Zap
+  Zap,
+  DollarSign,
+  ShoppingCart,
+  Mail,
+  BarChart3,
+  Calendar,
+  Star,
+  ArrowUp,
+  ArrowDown,
+  Globe,
+  Phone
 } from 'lucide-react';
 
 interface Comment {
@@ -37,8 +47,46 @@ interface Comment {
 interface DashboardStats {
   totalUsers: number;
   totalBlogPosts: number;
+  publishedPosts: number;
   totalPortfolioItems: number;
+  totalComments: number;
   pendingComments: number;
+  totalContacts: number;
+  totalServices: number;
+  totalTeamMembers: number;
+  totalOrders: number;
+  totalAnalyticsEvents: number;
+  totalRevenue: number;
+  monthlyRevenue: number;
+  newContactsThisWeek: number;
+  newContactsThisMonth: number;
+  userGrowth: number;
+  contactGrowth: number;
+  topBlogPosts: Array<{
+    id: number;
+    title: string;
+    slug: string;
+    view_count: number;
+    created_at: string;
+  }>;
+  servicePopularity: Array<{
+    contact_type: string;
+    count: number;
+  }>;
+  recentContacts: Array<{
+    name: string;
+    email: string;
+    contact_type: string;
+    created_at: string;
+  }>;
+  recentOrders: Array<{
+    id: number;
+    order_number: string;
+    total_amount: number;
+    status: string;
+    created_at: string;
+  }>;
+  newCommentsThisWeek: number;
 }
 
 const AdminDashboardPage: React.FC = () => {
@@ -46,8 +94,26 @@ const AdminDashboardPage: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     totalBlogPosts: 0,
+    publishedPosts: 0,
     totalPortfolioItems: 0,
-    pendingComments: 0
+    totalComments: 0,
+    pendingComments: 0,
+    totalContacts: 0,
+    totalServices: 0,
+    totalTeamMembers: 0,
+    totalOrders: 0,
+    totalAnalyticsEvents: 0,
+    totalRevenue: 0,
+    monthlyRevenue: 0,
+    newContactsThisWeek: 0,
+    newContactsThisMonth: 0,
+    userGrowth: 0,
+    contactGrowth: 0,
+    topBlogPosts: [],
+    servicePopularity: [],
+    recentContacts: [],
+    recentOrders: [],
+    newCommentsThisWeek: 0
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -144,56 +210,188 @@ const AdminDashboardPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Stats Cards */}
+        {/* Revenue & Business Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Revenue</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  ${stats.totalRevenue?.toFixed(2) || '0.00'}
+                </p>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Users</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalUsers}</p>
+              <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <div className="flex items-center">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Monthly Revenue</p>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  ${stats.monthlyRevenue?.toFixed(2) || '0.00'}
+                </p>
+              </div>
+              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <BarChart3 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Orders</p>
+                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{stats.totalOrders}</p>
+              </div>
+              <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                <ShoppingCart className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Users</p>
+                <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{stats.totalUsers}</p>
+                {stats.userGrowth !== 0 && (
+                  <div className="flex items-center mt-1">
+                    {stats.userGrowth > 0 ? (
+                      <ArrowUp className="h-4 w-4 text-green-500 mr-1" />
+                    ) : (
+                      <ArrowDown className="h-4 w-4 text-red-500 mr-1" />
+                    )}
+                    <span className={`text-sm font-medium ${stats.userGrowth > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      {Math.abs(stats.userGrowth)}% from last month
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                <Users className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Lead Generation & Marketing Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Leads</p>
+                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{stats.totalContacts}</p>
+                {stats.contactGrowth !== 0 && (
+                  <div className="flex items-center mt-1">
+                    {stats.contactGrowth > 0 ? (
+                      <ArrowUp className="h-4 w-4 text-green-500 mr-1" />
+                    ) : (
+                      <ArrowDown className="h-4 w-4 text-red-500 mr-1" />
+                    )}
+                    <span className={`text-sm font-medium ${stats.contactGrowth > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      {Math.abs(stats.contactGrowth)}% from last month
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                <Mail className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">This Week</p>
+                <p className="text-2xl font-bold text-teal-600 dark:text-teal-400">{stats.newContactsThisWeek}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">New leads</p>
+              </div>
+              <div className="p-3 bg-teal-100 dark:bg-teal-900/30 rounded-lg">
+                <Calendar className="h-6 w-6 text-teal-600 dark:text-teal-400" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">This Month</p>
+                <p className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">{stats.newContactsThisMonth}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">New leads</p>
+              </div>
+              <div className="p-3 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg">
+                <TrendingUp className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Website Traffic</p>
+                <p className="text-2xl font-bold text-pink-600 dark:text-pink-400">{stats.totalAnalyticsEvents}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Total events</p>
+              </div>
+              <div className="p-3 bg-pink-100 dark:bg-pink-900/30 rounded-lg">
+                <Globe className="h-6 w-6 text-pink-600 dark:text-pink-400" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Content & Engagement Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Published Posts</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.publishedPosts}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">of {stats.totalBlogPosts} total</p>
+              </div>
               <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
                 <FileText className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Blog Posts</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {stats.totalBlogPosts}
-                </p>
-              </div>
             </div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <div className="flex items-center">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Portfolio Items</p>
+                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{stats.totalPortfolioItems}</p>
+              </div>
               <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
                 <Image className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Portfolio Items</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {stats.totalPortfolioItems}
-                </p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Comments</p>
+                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{stats.pendingComments}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Need review</p>
+              </div>
+              <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                <MessageSquare className="h-6 w-6 text-orange-600 dark:text-orange-400" />
               </div>
             </div>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-                <MessageSquare className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Services</p>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.totalServices}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Available</p>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Comments</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.pendingComments}</p>
+              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <Settings className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
           </div>
@@ -295,7 +493,154 @@ const AdminDashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Quick Actions & Content Overview have been simplified and merged */}
+        {/* Top Performing Content & Popular Services */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+              <Star className="h-5 w-5 mr-2 text-yellow-500" />
+              Top Performing Blog Posts
+            </h2>
+            <div className="space-y-3">
+              {stats.topBlogPosts && stats.topBlogPosts.length > 0 ? (
+                stats.topBlogPosts.map((post, index) => (
+                  <div key={post.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mr-3">
+                        <span className="text-xs font-bold text-blue-600 dark:text-blue-400">{index + 1}</span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {post.title}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{post.view_count} views</p>
+                      </div>
+                    </div>
+                    <Link 
+                      to={`/blog/${post.slug}`} 
+                      target="_blank"
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Link>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 dark:text-gray-400 text-sm">No blog post analytics yet</p>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+              <BarChart3 className="h-5 w-5 mr-2 text-green-500" />
+              Most Requested Services
+            </h2>
+            <div className="space-y-3">
+              {stats.servicePopularity && stats.servicePopularity.length > 0 ? (
+                stats.servicePopularity.map((service, index) => (
+                  <div key={service.contact_type} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mr-3">
+                        <span className="text-xs font-bold text-green-600 dark:text-green-400">{index + 1}</span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {service.contact_type}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{service.count} inquiries</p>
+                      </div>
+                    </div>
+                    <div className="w-16 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                      <div 
+                        className="bg-green-500 h-2 rounded-full" 
+                        style={{
+                          width: `${Math.min((service.count / (stats.servicePopularity[0]?.count || 1)) * 100, 100)}%`
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 dark:text-gray-400 text-sm">No service analytics yet</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+              <Mail className="h-5 w-5 mr-2 text-orange-500" />
+              Recent Leads
+            </h2>
+            <div className="space-y-3">
+              {stats.recentContacts && stats.recentContacts.length > 0 ? (
+                stats.recentContacts.map((contact) => (
+                  <div key={contact.email} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">{contact.name}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{contact.email}</p>
+                      <p className="text-xs text-blue-600 dark:text-blue-400">{contact.contact_type}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {new Date(contact.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 dark:text-gray-400 text-sm">No recent contacts</p>
+              )}
+            </div>
+            <Link 
+              to="/admin/contacts"
+              className="mt-4 inline-flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+            >
+              View all contacts →
+            </Link>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+              <ShoppingCart className="h-5 w-5 mr-2 text-purple-500" />
+              Recent Orders
+            </h2>
+            <div className="space-y-3">
+              {stats.recentOrders && stats.recentOrders.length > 0 ? (
+                stats.recentOrders.map((order) => (
+                  <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        Order #{order.order_number}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Status: {order.status}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-green-600 dark:text-green-400">
+                        ${order.total_amount.toFixed(2)}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {new Date(order.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 dark:text-gray-400 text-sm">No recent orders</p>
+              )}
+            </div>
+            <Link 
+              to="/admin/orders"
+              className="mt-4 inline-flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+            >
+              View all orders →
+            </Link>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h2>

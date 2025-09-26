@@ -36,7 +36,10 @@ router.get(
   authorize('dashboard:view'),
   async (req, res) => {
     try {
-      // Get counts with proper error handling for each model
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+      // Basic counts
       const [
         totalUsers,
         totalBlogPosts,
@@ -45,45 +48,175 @@ router.get(
         pendingComments,
         totalContacts,
         totalServices,
-        totalTeamMembers
+        totalTeamMembers,
+        totalOrders,
+        totalAnalytics
       ] = await Promise.allSettled([
         User.count(),
         BlogPost.count(),
         PortfolioItem.count(),
-        Comment.count().catch(() => 0), // If comments table doesn't exist, default to 0
+        Comment.count().catch(() => 0),
         Comment.count({ where: { status: 'pending' } }).catch(() => 0),
         Contact.count(),
         Service.count(),
-        Team.count()
+        Team.count(),
+        Order.count(),
+        Analytics.count().catch(() => 0)
       ]);
 
-      // Extract values from settled promises with fallbacks
+      // Revenue calculations
+      const [totalRevenue, monthlyRevenue] = await Promise.allSettled([
+        Order.sum('total_amount', { where: { payment_status: 'paid' } }),
+        Order.sum('total_amount', { 
+          where: { 
+            payment_status: 'paid',
+            created_at: { [Op.gte]: thirtyDaysAgo }
+          }
+        })
+      ]);
+
+      // Contact analytics (lead generation)
+      const [newContactsThisWeek, newContactsThisMonth] = await Promise.allSettled([
+        Contact.count({ where: { created_at: { [Op.gte]: sevenDaysAgo } } }),
+        Contact.count({ where: { created_at: { [Op.gte]: thirtyDaysAgo } } })
+      ]);
+
+      // Blog performance
+      const [publishedPosts, topBlogPosts] = await Promise.allSettled([
+        BlogPost.count({ where: { status: 'published' } }),
+        BlogPost.findAll({
+          where: { status: 'published' },
+          attributes: ['id', 'title', 'slug', 'view_count', 'created_at'],
+          order: [['view_count', 'DESC']],
+          limit: 5
+        })
+      ]);
+
+      // Recent activity
+      const [recentContacts, recentOrders, recentComments] = await Promise.allSettled([
+        Contact.findAll({
+          attributes: ['name', 'email', 'contact_type', 'created_at'],
+          order: [['created_at', 'DESC']],
+          limit: 5
+        }),
+        Order.findAll({
+          attributes: ['id', 'order_number', 'total_amount', 'status', 'created_at'],
+          order: [['created_at', 'DESC']],
+          limit: 5
+        }),
+        Comment.count({ 
+          where: { 
+            created_at: { [Op.gte]: sevenDaysAgo },
+            status: 'pending'
+          }
+        }).catch(() => 0)
+      ]);
+
+      // Service popularity
+      const servicePopularity = await Contact.findAll({
+        attributes: [
+          'contact_type',
+          [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+        ],
+        group: ['contact_type'],
+        order: [[sequelize.fn('COUNT', sequelize.col('id')), 'DESC']],
+        limit: 10
+      });
+
+      // Monthly growth calculations
+      const lastMonthStart = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
+      const [usersLastMonth, contactsLastMonth] = await Promise.allSettled([
+        User.count({ 
+          where: { 
+            created_at: { 
+              [Op.gte]: lastMonthStart,
+              [Op.lt]: thirtyDaysAgo
+            }
+          }
+        }),
+        Contact.count({ 
+          where: { 
+            created_at: { 
+              [Op.gte]: lastMonthStart,
+              [Op.lt]: thirtyDaysAgo
+            }
+          }
+        })
+      ]);
+
+      // Calculate growth percentages
+      const currentMonthUsers = totalUsers.status === 'fulfilled' ? totalUsers.value : 0;
+      const prevMonthUsers = usersLastMonth.status === 'fulfilled' ? usersLastMonth.value : 0;
+      const userGrowth = prevMonthUsers > 0 ? ((currentMonthUsers - prevMonthUsers) / prevMonthUsers * 100).toFixed(1) : 0;
+
+      const currentMonthContacts = newContactsThisMonth.status === 'fulfilled' ? newContactsThisMonth.value : 0;
+      const prevMonthContactsValue = contactsLastMonth.status === 'fulfilled' ? contactsLastMonth.value : 0;
+      const contactGrowth = prevMonthContactsValue > 0 ? ((currentMonthContacts - prevMonthContactsValue) / prevMonthContactsValue * 100).toFixed(1) : 0;
+
       const stats = {
+        // Basic counts
         totalUsers: totalUsers.status === 'fulfilled' ? totalUsers.value : 0,
         totalBlogPosts: totalBlogPosts.status === 'fulfilled' ? totalBlogPosts.value : 0,
+        publishedPosts: publishedPosts.status === 'fulfilled' ? publishedPosts.value : 0,
         totalPortfolioItems: totalPortfolioItems.status === 'fulfilled' ? totalPortfolioItems.value : 0,
         totalComments: totalComments.status === 'fulfilled' ? totalComments.value : 0,
         pendingComments: pendingComments.status === 'fulfilled' ? pendingComments.value : 0,
         totalContacts: totalContacts.status === 'fulfilled' ? totalContacts.value : 0,
         totalServices: totalServices.status === 'fulfilled' ? totalServices.value : 0,
-        totalTeamMembers: totalTeamMembers.status === 'fulfilled' ? totalTeamMembers.value : 0
+        totalTeamMembers: totalTeamMembers.status === 'fulfilled' ? totalTeamMembers.value : 0,
+        totalOrders: totalOrders.status === 'fulfilled' ? totalOrders.value : 0,
+        totalAnalyticsEvents: totalAnalytics.status === 'fulfilled' ? totalAnalytics.value : 0,
+
+        // Revenue analytics
+        totalRevenue: totalRevenue.status === 'fulfilled' ? (totalRevenue.value || 0) : 0,
+        monthlyRevenue: monthlyRevenue.status === 'fulfilled' ? (monthlyRevenue.value || 0) : 0,
+
+        // Lead generation analytics
+        newContactsThisWeek: newContactsThisWeek.status === 'fulfilled' ? newContactsThisWeek.value : 0,
+        newContactsThisMonth: newContactsThisMonth.status === 'fulfilled' ? newContactsThisMonth.value : 0,
+
+        // Growth analytics
+        userGrowth: parseFloat(userGrowth),
+        contactGrowth: parseFloat(contactGrowth),
+
+        // Popular content
+        topBlogPosts: topBlogPosts.status === 'fulfilled' ? topBlogPosts.value : [],
+        servicePopularity: servicePopularity || [],
+
+        // Recent activity
+        recentContacts: recentContacts.status === 'fulfilled' ? recentContacts.value : [],
+        recentOrders: recentOrders.status === 'fulfilled' ? recentOrders.value : [],
+        newCommentsThisWeek: recentComments.status === 'fulfilled' ? recentComments.value : 0
       };
 
       res.status(200).json(stats);
     } catch (error) {
       console.error('Dashboard stats error:', error);
-      res.status(500).json({ 
-        message: 'Error fetching dashboard statistics', 
+      res.status(500).json({
+        message: 'Error fetching dashboard statistics',
         error: error.message,
         // Return default stats on error
         totalUsers: 0,
         totalBlogPosts: 0,
+        publishedPosts: 0,
         totalPortfolioItems: 0,
         totalComments: 0,
         pendingComments: 0,
         totalContacts: 0,
         totalServices: 0,
-        totalTeamMembers: 0
+        totalTeamMembers: 0,
+        totalOrders: 0,
+        totalRevenue: 0,
+        monthlyRevenue: 0,
+        newContactsThisWeek: 0,
+        newContactsThisMonth: 0,
+        userGrowth: 0,
+        contactGrowth: 0,
+        topBlogPosts: [],
+        servicePopularity: [],
+        recentContacts: [],
+        recentOrders: [],
+        newCommentsThisWeek: 0
       });
     }
   }

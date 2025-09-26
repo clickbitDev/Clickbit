@@ -1,6 +1,6 @@
 import React, { ReactNode, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Users, FileText, Image, MessageSquare, Settings, LogOut, Layers, Home, Briefcase, BookOpen, Grid, UserCircle, Menu, X, Star, Mail, Edit, TrendingUp, CreditCard, ShoppingBag } from 'lucide-react';
+import { Users, FileText, Image, MessageSquare, Settings, LogOut, Layers, Home, Briefcase, BookOpen, Grid, UserCircle, Menu, X, Star, Mail, Edit, TrendingUp, CreditCard, ShoppingBag, BarChart3 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import ThemeToggle from '../ThemeToggle';
@@ -19,6 +19,7 @@ const navLinks = [
   { to: '/admin/team', label: 'Team', icon: UserCircle, permission: 'team:list' },
   { to: '/admin/contacts', label: 'Contacts', icon: Mail, permission: 'contacts:list' },
   { to: '/admin/users', label: 'Users', icon: Users, permission: 'users:list' },
+  { to: '/admin/analytics', label: 'Analytics', icon: BarChart3, permission: 'dashboard:view' },
   { to: '/admin/marketing', label: 'Marketing', icon: TrendingUp, permission: 'marketing:view' },
   { to: '/admin/billing', label: 'Billing', icon: CreditCard, permission: 'billing:view' },
 ];

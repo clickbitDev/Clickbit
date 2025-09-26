@@ -26,6 +26,7 @@ const ServiceDetailPage = React.lazy(() => import('../pages/ServiceDetailPage'))
 const PortfolioPage = React.lazy(() => import('../pages/PortfolioPage'));
 const BlogPage = React.lazy(() => import('../pages/BlogPage'));
 const BlogPostPage = React.lazy(() => import('../pages/BlogPostPage'));
+const PortfolioItemPage = React.lazy(() => import('../pages/PortfolioItemPage'));
 const PowerYourProjectPage = React.lazy(() => import('../pages/PowerYourProjectPage'));
 const PrivacyPolicyPage = React.lazy(() => import('../pages/PrivacyPolicyPage'));
 const FAQPage = React.lazy(() => import('../pages/FAQPage'));
@@ -52,6 +53,9 @@ const AdminServicesPage = React.lazy(() => import('../pages/AdminServicesPage'))
 const AdminTeamPage = React.lazy(() => import('../pages/AdminTeamPage'));
 const AdminMarketingIntegrationsPage = React.lazy(() => import('../pages/AdminMarketingIntegrationsPage'));
 const AdminBillingSettingsPage = React.lazy(() => import('../pages/AdminBillingSettingsPage'));
+const CheckoutCancelledPage = React.lazy(() => import('../pages/CheckoutCancelledPage'));
+const CheckoutSuccessPage = React.lazy(() => import('../pages/CheckoutSuccessPage'));
+const TestSuccessPage = React.lazy(() => import('../pages/TestSuccessPage'));
 
 const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
@@ -76,6 +80,7 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/it-support" element={<Suspense fallback={<PageLoadingSpinner />}><ServicesPage /></Suspense>} />
         <Route path="/cloud-solutions" element={<Suspense fallback={<PageLoadingSpinner />}><ServicesPage /></Suspense>} />
         <Route path="/portfolio" element={<Suspense fallback={<PageLoadingSpinner />}><PortfolioPage /></Suspense>} />
+        <Route path="/portfolio/:slug" element={<Suspense fallback={<PageLoadingSpinner />}><PortfolioItemPage /></Suspense>} />
         <Route path="/blog" element={<Suspense fallback={<PageLoadingSpinner />}><BlogPage /></Suspense>} />
         <Route path="/blog/:slug" element={<Suspense fallback={<PageLoadingSpinner />}><BlogPostPage /></Suspense>} />
         <Route path="/contact" element={<Suspense fallback={<PageLoadingSpinner />}><ContactPage /></Suspense>} />
@@ -85,6 +90,10 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/cart" element={<Suspense fallback={<PageLoadingSpinner />}><CartPage /></Suspense>} />
         <Route path="/checkout" element={<Suspense fallback={<PageLoadingSpinner />}><CheckoutPage /></Suspense>} />
         <Route path="/order-confirmation" element={<Suspense fallback={<PageLoadingSpinner />}><OrderConfirmationPage /></Suspense>} />
+        <Route path="/checkout/success" element={<Suspense fallback={<PageLoadingSpinner />}><CheckoutSuccessPage /></Suspense>} />
+        <Route path="/success" element={<Suspense fallback={<PageLoadingSpinner />}><TestSuccessPage /></Suspense>} />
+        <Route path="/checkout-success" element={<Suspense fallback={<PageLoadingSpinner />}><TestSuccessPage /></Suspense>} />
+        <Route path="/checkout-cancelled" element={<Suspense fallback={<PageLoadingSpinner />}><CheckoutCancelledPage /></Suspense>} />
         <Route path="/privacy" element={<Suspense fallback={<PageLoadingSpinner />}><PrivacyPolicyPage /></Suspense>} />
         <Route path="/faq" element={<Suspense fallback={<PageLoadingSpinner />}><FAQPage /></Suspense>} />
         <Route path="/terms" element={<Suspense fallback={<PageLoadingSpinner />}><TermsOfServicePage /></Suspense>} />

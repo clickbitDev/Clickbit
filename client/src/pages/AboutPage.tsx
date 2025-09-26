@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { pageVariants, pageTransition } from '../animations';
+import SiteHead from '../components/SiteHead';
 import PageHeader from '../components/PageHeader';
 import Mission from '../components/Mission';
 import OurProcess from '../components/OurProcess';
@@ -94,13 +95,18 @@ const AboutPage: React.FC = () => {
   const displayItems = [...displayMembers, ...Array(placeholdersNeeded).fill(null)];
 
   return (
-    <motion.div
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
-    >
+    <>
+      <SiteHead 
+        title="About Us"
+        description="Meet the ClickBit team - passionate experts delivering customized IT solutions. Learn about our mission to empower businesses with innovative digital strategies."
+      />
+      <motion.div
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
       <div className="bg-white dark:bg-gray-900">
         <PageHeader 
           title="About Us"
@@ -233,7 +239,8 @@ const AboutPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </motion.div>
+      </motion.div>
+    </>
   );
 };
 

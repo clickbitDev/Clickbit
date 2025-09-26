@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { pageVariants, pageTransition } from '../animations';
+import SiteHead from '../components/SiteHead';
 import PageHeader from '../components/PageHeader';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import InteractiveCard from '../components/InteractiveCard';
@@ -123,14 +124,19 @@ const ServicesPage = () => {
   }
 
   return (
-    <motion.div
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
-      className="min-h-screen bg-white dark:bg-gray-900"
-    >
+    <>
+      <SiteHead 
+        title={activeCategory !== 'All' ? `${activeCategory} Services` : "Our Services"}
+        description={`Professional ${activeCategory !== 'All' ? activeCategory.toLowerCase() : 'IT'} services by ClickBit. Comprehensive digital solutions to help your business grow and succeed.`}
+      />
+      <motion.div
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+        className="min-h-screen bg-white dark:bg-gray-900"
+      >
       <PageHeader 
         title="Our Services" 
         breadcrumbs={[
@@ -231,7 +237,8 @@ const ServicesPage = () => {
           )}
         </div>
       </div>
-    </motion.div>
+      </motion.div>
+    </>
   );
 };
 

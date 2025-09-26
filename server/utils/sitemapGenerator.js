@@ -61,6 +61,31 @@ class SitemapGenerator {
         console.warn('Could not fetch services for sitemap, using static routes only:', dbError.message);
       }
 
+      // Try to add portfolio items if database is available
+      try {
+        const { PortfolioItem } = require('../models');
+        const portfolioItems = await PortfolioItem.findAll({
+          where: { status: 'published' },
+          attributes: ['id', 'title', 'slug', 'updated_at']
+        });
+
+        portfolioItems.forEach(item => {
+          const lastmod = item.updated_at ? 
+            new Date(item.updated_at).toISOString().split('T')[0] : 
+            new Date().toISOString().split('T')[0];
+          
+          sitemap += `
+  <url>
+    <loc>${this.baseUrl}/portfolio/${item.slug}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>`;
+        });
+      } catch (dbError) {
+        console.warn('Could not fetch portfolio items for sitemap:', dbError.message);
+      }
+
       // Close XML sitemap
       sitemap += `
 </urlset>`;

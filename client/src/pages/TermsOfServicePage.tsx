@@ -1,17 +1,23 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { pageVariants, pageTransition } from '../animations';
+import SiteHead from '../components/SiteHead';
 import PageHeader from '../components/PageHeader';
 
 const TermsOfServicePage = () => {
   return (
-    <motion.div
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
-    >
+    <>
+      <SiteHead 
+        title="Terms of Service"
+        description="ClickBit's Terms of Service - Read our service terms, conditions, and policies for using our website and services."
+      />
+      <motion.div
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
       <PageHeader 
         title="Terms of Service"
         breadcrumbs={[
@@ -274,7 +280,8 @@ const TermsOfServicePage = () => {
           </div>
         </div>
       </div>
-    </motion.div>
+      </motion.div>
+    </>
   );
 };
 

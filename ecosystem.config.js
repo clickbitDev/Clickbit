@@ -9,7 +9,7 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 5001,
         FRONTEND_URL: 'https://clickbit.com.au',
-        NODE_OPTIONS: '--max-old-space-size=256 --gc-interval=100'
+        NODE_OPTIONS: '--max-old-space-size=256 --gc-interval=100 --tls-cipher-list="ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384"'
       },
       // Memory management - optimized for performance
       max_memory_restart: '400M',

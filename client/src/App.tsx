@@ -11,8 +11,9 @@ import Layout from './components/Layout/Layout';
 import AdminLayout from './components/Layout/AdminLayout';
 import ScrollToTop from './components/ScrollToTop';
 import AnimatedRoutes from './components/AnimatedRoutes';
-import SiteHead from './components/SiteHead';
+
 import { ErrorHandler } from './utils/errorHandler';
+import './services/analytics'; // Initialize analytics service
 
 // Lazy load Admin components for better performance
 import AdminRoute from './components/AdminRoute';
@@ -34,6 +35,7 @@ const AdminContentManagementPage = React.lazy(() => import('./pages/AdminContent
 const AdminServicesDetailPage = React.lazy(() => import('./pages/AdminServicesDetailPage'));
 const AdminMarketingIntegrationsPage = React.lazy(() => import('./pages/AdminMarketingIntegrationsPage'));
 const AdminBillingSettingsPage = React.lazy(() => import('./pages/AdminBillingSettingsPage'));
+const AdminAnalyticsPage = React.lazy(() => import('./pages/AdminAnalyticsPage'));
 
 // Component to handle layout switching
 const AppContent: React.FC = () => {
@@ -73,8 +75,9 @@ const AppContent: React.FC = () => {
               <Route path="reviews" element={<AdminReviewsPage />} />
               <Route path="content" element={<AdminContentManagementPage />} />
               <Route path="services/:slug/detail" element={<AdminServicesDetailPage />} />
-              <Route path="marketing" element={<AdminMarketingIntegrationsPage />} />
+                            <Route path="marketing" element={<AdminMarketingIntegrationsPage />} />
               <Route path="billing" element={<AdminBillingSettingsPage />} />
+              <Route path="analytics" element={<AdminAnalyticsPage />} />
             </Route>
           </Routes>
         </React.Suspense>
@@ -100,7 +103,6 @@ const App: React.FC = () => {
               <CartProvider>
                 <ContentProvider>
                   <HelmetProvider>
-                    <SiteHead />
                     <AppContent />
                   </HelmetProvider>
                 </ContentProvider>

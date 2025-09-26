@@ -44,16 +44,16 @@ const Hero = () => {
           &lt;div&gt;
         </div>
         <div className="absolute top-1/3 right-12 text-xs text-blue-500/30 dark:text-blue-400/30 font-mono animate-bounce" style={{ animationDelay: '1.5s' }}>
-          {`{code}`}
+          &lt;code&gt;
         </div>
         <div className="absolute bottom-1/3 left-16 text-xs text-purple-500/30 dark:text-purple-400/30 font-mono animate-bounce" style={{ animationDelay: '2.5s' }}>
           &lt;/div&gt;
         </div>
         <div className="absolute bottom-1/4 right-8 text-xs text-green-500/30 dark:text-green-400/30 font-mono animate-bounce" style={{ animationDelay: '0.8s' }}>
-          function()
+          &lt;function&gt;
         </div>
         <div className="absolute top-3/4 left-1/2 text-xs text-orange-500/30 dark:text-orange-400/30 font-mono animate-bounce" style={{ animationDelay: '1.2s' }}>
-          ...props
+          &lt;props&gt;
         </div>
         
         {/* Animated Lines */}

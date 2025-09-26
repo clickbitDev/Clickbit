@@ -99,6 +99,12 @@ const RegisterPage: React.FC = () => {
       const { confirmPassword, ...registerData } = formData;
       await register(registerData);
       setSuccessMessage('Registration successful! Please check your email to verify your account.');
+      
+      // Track Meta Pixel CompleteRegistration event
+      if (typeof window.fbq === 'function') {
+        window.fbq('track', 'CompleteRegistration');
+      }
+      
       setFormData({
         email: '',
         password: '',

@@ -24,6 +24,22 @@ const SiteHead: React.FC<SiteHeadProps> = ({
   const currentUrl = url || `${window.location.origin}${location.pathname}`;
   const pageTitle = title ? `${title} | ${siteIdentity.siteTitle}` : siteIdentity.siteTitle;
   const metaDescription = description || siteIdentity.metaDescription;
+  
+  // Ensure image URL is absolute for social media previews
+  const getAbsoluteImageUrl = (imageUrl: string) => {
+    if (!imageUrl) return `${window.location.origin}/logo.svg`;
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    // Handle relative URLs
+    if (imageUrl.startsWith('/')) {
+      return `${window.location.origin}${imageUrl}`;
+    }
+    // Handle URLs without leading slash
+    return `${window.location.origin}/${imageUrl}`;
+  };
+  
+  const absoluteImageUrl = getAbsoluteImageUrl(image);
 
   return (
     <Helmet>
@@ -46,21 +62,25 @@ const SiteHead: React.FC<SiteHeadProps> = ({
       {/* Open Graph */}
       <meta property="og:title" content={pageTitle} />
       <meta property="og:description" content={metaDescription} />
-      <meta property="og:image" content={image} />
+      <meta property="og:image" content={absoluteImageUrl} />
       <meta property="og:url" content={currentUrl} />
       <meta property="og:type" content={type} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content={pageTitle} />
       
       {/* Twitter Card */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={pageTitle} />
       <meta name="twitter:description" content={metaDescription} />
-      <meta name="twitter:image" content={image} />
+      <meta name="twitter:image" content={absoluteImageUrl} />
+      <meta name="twitter:image:alt" content={pageTitle} />
       
       {/* Additional SEO */}
       <link rel="canonical" href={currentUrl} />
       <meta name="robots" content="index, follow" />
       
-      {/* Google Analytics */}
+      {/* Google Analytics with Consent Mode */}
       {marketingIntegrations.googleAnalyticsId && (
         <>
           <script async src={`https://www.googletagmanager.com/gtag/js?id=${marketingIntegrations.googleAnalyticsId}`} />
@@ -69,7 +89,35 @@ const SiteHead: React.FC<SiteHeadProps> = ({
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', '${marketingIntegrations.googleAnalyticsId}');
+              
+              // Initialize consent mode (denied by default for GDPR compliance)
+              gtag('consent', 'default', {
+                analytics_storage: 'denied',
+                ad_storage: 'denied',
+                functionality_storage: 'granted',
+                personalization_storage: 'denied',
+                security_storage: 'granted',
+                wait_for_update: 500
+              });
+              
+              gtag('config', '${marketingIntegrations.googleAnalyticsId}', {
+                anonymize_ip: true,
+                allow_google_signals: false,
+                allow_ad_personalization_signals: false
+              });
+              
+              // Custom event tracking for key business interactions
+              function trackEvent(eventName, parameters = {}) {
+                if (typeof gtag !== 'undefined') {
+                  gtag('event', eventName, parameters);
+                  console.log('GA4 Event Tracked:', eventName, parameters);
+                } else {
+                  console.warn('GA4 not loaded, event not tracked:', eventName, parameters);
+                }
+              }
+              
+              // Make trackEvent globally available
+              window.trackEvent = trackEvent;
             `}
           </script>
         </>

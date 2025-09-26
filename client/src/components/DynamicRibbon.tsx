@@ -6,7 +6,7 @@ const DynamicRibbon: React.FC = () => {
   
   // Get dynamic content with fallback
   const text = getContent('home', 'ribbon', 'text') || 'Creative Solutions / Data-Driven Results / Web Development / Digital Marketing /';
-  const repeatedText = Array(10).fill(text).join(' ');
+  const repeatedText = Array(3).fill(text).join(' '); // Reduced from 10 to 3 repetitions
 
   const RibbonContent = ({ reverse = false }: { reverse?: boolean }) => (
     <div className={`flex ${reverse ? 'animate-marquee-reverse-mobile md:animate-marquee-reverse' : 'animate-marquee-mobile md:animate-marquee'}`}>

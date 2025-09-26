@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { PayPalButtons } from '@paypal/react-paypal-js';
-import api, { paymentsAPI } from '../services/api';
+import { paymentsAPI } from '../services/api';
 
 interface CartItem {
   id: string;
@@ -27,8 +26,6 @@ const StripeCheckoutForm: React.FC<Omit<CheckoutFormProps, 'paymentMethod'>> = (
   onSuccess,
   onError
 }) => {
-  const stripe = useStripe();
-  const elements = useElements();
   const [processing, setProcessing] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
     email: '',
@@ -48,17 +45,6 @@ const StripeCheckoutForm: React.FC<Omit<CheckoutFormProps, 'paymentMethod'>> = (
   const handleStripeSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!stripe || !elements) {
-      onError('Stripe has not loaded yet.');
-      return;
-    }
-
-    const cardElement = elements.getElement(CardElement);
-    if (!cardElement) {
-      onError('Card element not found.');
-      return;
-    }
-
     if (!customerInfo.email || !customerInfo.name) {
       onError('Please fill in all required fields.');
       return;
@@ -67,44 +53,18 @@ const StripeCheckoutForm: React.FC<Omit<CheckoutFormProps, 'paymentMethod'>> = (
     setProcessing(true);
 
     try {
-      const { data } = await paymentsAPI.createPaymentIntent({
-        amount: Math.round(amount * 100),
+      // Create Stripe Checkout session and redirect
+      const { data } = await paymentsAPI.createCheckoutSession({
+        amount,
         currency: currency.toLowerCase(),
         items,
         customerInfo
       });
 
-      const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
-        payment_method: {
-          card: cardElement,
-          billing_details: {
-            name: customerInfo.name,
-            email: customerInfo.email,
-            address: {
-              line1: customerInfo.address,
-              city: customerInfo.city,
-              postal_code: customerInfo.postcode,
-              state: customerInfo.state,
-              country: customerInfo.country
-            }
-          }
-        }
-      });
-
-      if (error) {
-        onError(error.message || 'Payment failed');
-      } else if (paymentIntent.status === 'succeeded') {
-        const orderData = await paymentsAPI.confirmPayment({
-          paymentIntentId: paymentIntent.id,
-          items,
-          customerInfo,
-          paymentMethod: 'stripe'
-        });
-        onSuccess(orderData.data);
-      }
+      // Redirect to Stripe Checkout
+      window.location.href = data.url;
     } catch (error: any) {
       onError(error.response?.data?.message || 'Payment processing failed');
-    } finally {
       setProcessing(false);
     }
   };
@@ -142,24 +102,6 @@ const StripeCheckoutForm: React.FC<Omit<CheckoutFormProps, 'paymentMethod'>> = (
     }
   };
 
-  const cardElementOptions = {
-    style: {
-      base: {
-        fontSize: '16px',
-        color: '#424770',
-        ':-webkit-autofill': {
-          color: '#fefefe',
-        },
-        '::placeholder': {
-          color: '#aab7c4',
-        },
-      },
-      invalid: {
-        color: '#fa755a',
-        iconColor: '#fa755a',
-      },
-    },
-  };
 
   return (
     <div className="space-y-6">
@@ -264,24 +206,32 @@ const StripeCheckoutForm: React.FC<Omit<CheckoutFormProps, 'paymentMethod'>> = (
 
       <form onSubmit={handleStripeSubmit}>
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Card Details
-          </label>
-          <div className="p-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md">
-            <CardElement options={cardElementOptions} />
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  You will be redirected to Stripe's secure checkout page to complete your payment.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
         
         <button
           type="submit"
-          disabled={!stripe || processing}
+          disabled={processing}
           className={`w-full py-3 px-4 rounded-md font-medium ${
             processing
               ? 'bg-gray-400 cursor-not-allowed'
               : 'bg-blue-600 hover:bg-blue-700 text-white'
           }`}
         >
-          {processing ? 'Processing...' : `Pay $${amount.toFixed(2)} ${currency}`}
+          {processing ? 'Redirecting...' : `Pay $${amount.toFixed(2)} ${currency}`}
         </button>
       </form>
     </div>

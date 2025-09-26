@@ -85,6 +85,13 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
       // Store user data in localStorage
       localStorage.setItem('user', JSON.stringify(action.payload.user));
       localStorage.setItem('token', action.payload.token);
+      localStorage.setItem('userId', action.payload.user.id.toString());
+      
+      // Update GA4 User-ID tracking
+      if (typeof window.analytics?.setUserId === 'function') {
+        window.analytics.setUserId(action.payload.user.id.toString());
+      }
+      
       return {
         ...state,
         user: action.payload.user,
@@ -109,6 +116,13 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
       // Clear user data from localStorage
       localStorage.removeItem('user');
       localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+      
+      // Clear GA4 User-ID tracking
+      if (typeof window.analytics?.clearUserId === 'function') {
+        window.analytics.clearUserId();
+      }
+      
       return {
         ...state,
         user: null,
@@ -285,6 +299,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('userId');
+    
+    // Clear GA4 User-ID tracking
+    if (typeof window.analytics?.clearUserId === 'function') {
+      window.analytics.clearUserId();
+    }
+    
     dispatch({ type: 'AUTH_LOGOUT' });
     toast.success('Logged out successfully');
     navigate('/');

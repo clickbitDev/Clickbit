@@ -155,6 +155,18 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Add item to cart
   const addItem = (item: Omit<CartItem, 'quantity'>, quantity: number = 1) => {
     dispatch({ type: 'ADD_ITEM', payload: { ...item, quantity } });
+    
+    // Track Meta Pixel AddToCart event
+    if (typeof window.fbq === 'function') {
+      window.fbq('track', 'AddToCart', {
+        content_name: item.name,
+        content_category: item.serviceName,
+        content_ids: [item.id],
+        content_type: 'product',
+        value: item.price * quantity,
+        currency: 'AUD'
+      });
+    }
   };
 
   // Add item by service slug and tier name
@@ -174,6 +186,18 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       };
       
       dispatch({ type: 'ADD_ITEM', payload: { ...cartItem, quantity } });
+      
+      // Track Meta Pixel AddToCart event
+      if (typeof window.fbq === 'function') {
+        window.fbq('track', 'AddToCart', {
+          content_name: cartItem.name,
+          content_category: cartItem.serviceName,
+          content_ids: [cartItem.id],
+          content_type: 'product',
+          value: cartItem.price * quantity,
+          currency: 'AUD'
+        });
+      }
     } else {
       console.error('Failed to create cart item data for:', { serviceSlug, tierName });
     }
@@ -193,6 +217,18 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         description: cartItemData.description,
       };
       dispatch({ type: 'ADD_ITEM', payload: { ...cartItem, quantity } });
+      
+      // Track Meta Pixel AddToCart event
+      if (typeof window.fbq === 'function') {
+        window.fbq('track', 'AddToCart', {
+          content_name: cartItem.name,
+          content_category: cartItem.serviceName,
+          content_ids: [cartItem.id],
+          content_type: 'product',
+          value: cartItem.price * quantity,
+          currency: 'AUD'
+        });
+      }
     }
   };
 

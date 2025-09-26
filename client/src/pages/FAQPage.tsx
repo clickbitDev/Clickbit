@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { pageVariants, pageTransition } from '../animations';
+import SiteHead from '../components/SiteHead';
 import PageHeader from '../components/PageHeader';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -156,13 +157,18 @@ const FAQPage = () => {
   };
 
   return (
-    <motion.div
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
-    >
+    <>
+      <SiteHead 
+        title="FAQ"
+        description="Find answers to frequently asked questions about ClickBit's services, pricing, processes, and support. Get the information you need to start your project."
+      />
+      <motion.div
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
       <PageHeader 
         title="Frequently Asked Questions"
         breadcrumbs={[
@@ -252,7 +258,8 @@ const FAQPage = () => {
           </div>
         </div>
       </div>
-    </motion.div>
+      </motion.div>
+    </>
   );
 };
 

@@ -1904,9 +1904,9 @@ router.get('/contact-info', protect, async (req, res) => {
         businessHours: 'Monday - Friday: 9:00 AM - 6:00 PM\nWeekend: By appointment',
         googleMapsUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3310.643330663454!2d150.9133093152115!3d-33.9249269806403!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b1295a3c9a35e7d%3A0x8f4f4c9c1c4f2e5a!2s44%20Shoreline%20Rd%2C%20Moorebank%20NSW%202170%2C%20Australia!5e0!3m2!1sen!2sau!4v1620211993456!5m2!1sen!2sus',
         socialLinks: [
-          { platform: 'Facebook', url: 'https://www.facebook.com/clickbitau/' },
-          { platform: 'Instagram', url: 'https://www.instagram.com/clickbitau/' },
-          { platform: 'LinkedIn', url: 'https://www.linkedin.com/company/clickbitau/' }
+          { platform: 'Facebook', url: 'https://facebook.clickbit.com.au' },
+          { platform: 'Instagram', url: 'https://instagram.clickbit.com.au' },
+          { platform: 'LinkedIn', url: 'https://linkedin.clickbit.com.au' }
         ]
       };
 
@@ -2287,7 +2287,6 @@ router.get(
         attributes: [
           'status',
           'payment_status',
-          'total_amount',
           [sequelize.fn('COUNT', sequelize.col('id')), 'count'],
           [sequelize.fn('SUM', sequelize.col('total_amount')), 'revenue']
         ],

@@ -59,8 +59,14 @@ router.post('/create-payment-intent', async (req, res) => {
       return res.status(400).json({ message: 'Missing required payment information' });
     }
 
+    // Calculate GST and totals for payment intent
+    const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const gstRate = 0.10; // 10% GST for Australia
+    const gst = subtotal * gstRate;
+    const total = subtotal + gst;
+
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100),
+      amount: Math.round(total * 100), // Use total including GST
       currency: currency.toLowerCase(),
       automatic_payment_methods: {
         enabled: true,
@@ -68,7 +74,10 @@ router.post('/create-payment-intent', async (req, res) => {
       metadata: {
         items: JSON.stringify(items),
         customerEmail: customerInfo.email,
-        customerName: customerInfo.name
+        customerName: customerInfo.name,
+        subtotal: subtotal.toString(),
+        gst: gst.toString(),
+        total: total.toString()
       }
     });
 
@@ -79,6 +88,73 @@ router.post('/create-payment-intent', async (req, res) => {
   } catch (error) {
     console.error('Create payment intent error:', error);
     res.status(500).json({ message: 'Failed to create payment intent' });
+  }
+});
+
+// New Stripe Checkout endpoint
+router.post('/create-checkout-session', async (req, res) => {
+  try {
+    if (!stripe) {
+      return res.status(400).json({ message: 'Stripe is not configured' });
+    }
+
+    const { amount, currency, items, customerInfo } = req.body;
+
+    if (!amount || !currency || !items || !customerInfo) {
+      return res.status(400).json({ message: 'Missing required payment information' });
+    }
+
+    // Calculate GST and totals
+    const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const gstRate = 0.10; // 10% GST for Australia
+    const gst = subtotal * gstRate;
+    const total = subtotal + gst;
+
+    // Convert items to Stripe line items format with GST included
+    const lineItems = items.map(item => ({
+      price_data: {
+        currency: currency.toLowerCase(),
+        product_data: {
+          name: item.name,
+        },
+        unit_amount: Math.round(item.price * 100), // Convert to cents
+      },
+      quantity: item.quantity,
+    }));
+
+    // Add GST as a separate line item
+    lineItems.push({
+      price_data: {
+        currency: currency.toLowerCase(),
+        product_data: {
+          name: `GST (${(gstRate * 100).toFixed(0)}%)`,
+        },
+        unit_amount: Math.round(gst * 100), // Convert to cents
+      },
+      quantity: 1,
+    });
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      line_items: lineItems,
+      customer_email: customerInfo.email,
+      success_url: `${req.protocol}://${req.get('host')}/order-confirmation?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.protocol}://${req.get('host')}/checkout-cancelled`,
+      metadata: {
+        items: JSON.stringify(items),
+        customerEmail: customerInfo.email,
+        customerName: customerInfo.name,
+        subtotal: subtotal.toString(),
+        gst: gst.toString(),
+        total: total.toString()
+      }
+    });
+
+    res.json({ url: session.url });
+  } catch (error) {
+    console.error('Create checkout session error:', error);
+    res.status(500).json({ message: 'Failed to create checkout session' });
   }
 });
 
@@ -246,6 +322,69 @@ router.post('/confirm-payment', async (req, res) => {
   }
 });
 
+// Get order by Stripe session ID (for checkout success page)
+router.get('/order/:sessionId', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    
+    if (!stripe) {
+      return res.status(400).json({ message: 'Stripe is not configured' });
+    }
+
+    // Retrieve the checkout session from Stripe
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    
+    if (!session || session.payment_status !== 'paid') {
+      return res.status(404).json({ message: 'Payment session not found or not completed' });
+    }
+
+    // Find the order by Stripe session ID in metadata or by customer email
+    const order = await Order.findOne({
+      where: {
+        customer_email: session.customer_email
+      },
+      include: [{
+        model: Payment,
+        as: 'payments',
+        where: {
+          transaction_id: sessionId
+        },
+        required: false
+      }],
+      order: [['created_at', 'DESC']] // Get the most recent order
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found for this session' });
+    }
+
+    // Format the response to match what the frontend expects
+    const response = {
+      order: {
+        id: order.id,
+        orderNumber: order.order_number,
+        total: parseFloat(order.total),
+        currency: order.currency,
+        status: order.status,
+        items: order.items || [],
+        customer_email: order.customer_email,
+        created_at: order.created_at
+      },
+      payment: {
+        id: order.payments?.[0]?.id || null,
+        method: order.payments?.[0]?.payment_method || 'stripe',
+        transactionId: sessionId,
+        status: 'completed'
+      }
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Get order by session error:', error);
+    res.status(500).json({ message: 'Failed to retrieve order' });
+  }
+});
+
 router.get('/order/:orderId', protect, async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -291,10 +430,84 @@ router.post('/webhook/stripe', express.raw({ type: 'application/json' }), async 
     }
     
     switch (event.type) {
+      case 'checkout.session.completed':
+        const session = event.data.object;
+        console.log('Checkout session completed:', session.id);
+        
+        // Create order from checkout session
+        try {
+          const items = JSON.parse(session.metadata.items || '[]');
+          const customerInfo = {
+            email: session.customer_email,
+            name: session.metadata.customerName
+          };
+          
+          const subtotal = parseFloat(session.metadata.subtotal || '0');
+          const gst = parseFloat(session.metadata.gst || '0');
+          const total = parseFloat(session.metadata.total || '0');
+          
+          // Create order
+          const order = await Order.create({
+            order_number: `ORD-${Date.now().toString().slice(-6)}`,
+            guest_email: customerInfo.email,
+            status: 'confirmed',
+            subtotal: subtotal,
+            tax_amount: gst,
+            total_amount: total,
+            currency: session.currency.toUpperCase(),
+            payment_status: 'paid',
+            payment_method: 'card',
+            payment_transaction_id: session.id,
+            items: items,
+            billing_address: {
+              email: customerInfo.email,
+              name: customerInfo.name
+            },
+            notes: 'Order created from Stripe Checkout'
+          });
+          
+          // Create order items
+          try {
+            await Promise.all(items.map(item => 
+              OrderItem.create({
+                order_id: order.id,
+                product_name: item.name,
+                quantity: item.quantity,
+                unit_price: item.price,
+                total_price: item.price * item.quantity,
+                tax_amount: (item.price * item.quantity) * 0.1, // 10% GST
+                status: 'confirmed'
+              })
+            ));
+          } catch (orderItemError) {
+            console.warn('Could not create order items:', orderItemError.message);
+          }
+          
+          // Create payment record
+          await Payment.create({
+            order_id: order.id,
+            amount: total,
+            currency: session.currency.toUpperCase(),
+            payment_provider: 'stripe',
+            payment_method: 'card',
+            transaction_id: session.id,
+            status: 'completed',
+            gateway_response: JSON.stringify(session),
+            ip_address: session.customer_details?.ip_address || '',
+            user_agent: session.customer_details?.user_agent || ''
+          });
+          
+          console.log('Order created successfully:', order.id);
+        } catch (orderError) {
+          console.error('Failed to create order from checkout session:', orderError);
+        }
+        break;
+        
       case 'payment_intent.succeeded':
         const paymentIntent = event.data.object;
         console.log('PaymentIntent succeeded:', paymentIntent.id);
         break;
+        
       case 'payment_intent.payment_failed':
         const failedPayment = event.data.object;
         console.log('PaymentIntent failed:', failedPayment.id);
@@ -304,6 +517,7 @@ router.post('/webhook/stripe', express.raw({ type: 'application/json' }), async 
           { where: { transaction_id: failedPayment.id } }
         );
         break;
+        
       default:
         console.log(`Unhandled event type ${event.type}`);
     }
@@ -322,6 +536,81 @@ router.post('/webhook/paypal', async (req, res) => {
   } catch (error) {
     console.error('PayPal webhook error:', error);
     res.status(500).json({ message: 'Webhook processing failed' });
+  }
+});
+
+// Test endpoint to manually create an order (for testing purposes)
+router.post('/test/create-order', async (req, res) => {
+  try {
+    const { items, customerInfo } = req.body;
+    
+    if (!items || !customerInfo) {
+      return res.status(400).json({ message: 'Missing items or customerInfo' });
+    }
+    
+    const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const gst = subtotal * 0.10;
+    const total = subtotal + gst;
+    
+    // Create order
+    const order = await Order.create({
+      order_number: `ORD-${Date.now().toString().slice(-6)}`,
+      guest_email: customerInfo.email,
+      status: 'confirmed',
+      subtotal: subtotal,
+      tax_amount: gst,
+      total_amount: total,
+      currency: 'AUD',
+      payment_status: 'paid',
+      payment_method: 'card',
+      payment_transaction_id: `test_${Date.now()}`,
+      items: items,
+      billing_address: {
+        email: customerInfo.email,
+        name: customerInfo.name
+      },
+      notes: 'Test order created manually'
+    });
+    
+    // Create order items
+    await Promise.all(items.map(item => 
+      OrderItem.create({
+        order_id: order.id,
+        product_name: item.name,
+        quantity: item.quantity,
+        unit_price: item.price,
+        total_price: item.price * item.quantity,
+        tax_amount: (item.price * item.quantity) * 0.1,
+        status: 'confirmed'
+      })
+    ));
+    
+    // Create payment record
+    await Payment.create({
+      order_id: order.id,
+      amount: total,
+      currency: 'AUD',
+      payment_provider: 'stripe',
+      payment_method: 'card',
+      transaction_id: `test_${Date.now()}`,
+      status: 'completed',
+      gateway_response: JSON.stringify({ test: true }),
+      ip_address: req.ip,
+      user_agent: req.get('User-Agent') || ''
+    });
+    
+    res.json({
+      success: true,
+      order: {
+        id: order.id,
+        order_number: order.order_number,
+        total: total,
+        status: order.status
+      }
+    });
+  } catch (error) {
+    console.error('Test order creation error:', error);
+    res.status(500).json({ message: 'Failed to create test order' });
   }
 });
 

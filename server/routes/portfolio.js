@@ -90,7 +90,7 @@ router.get('/featured', async (req, res) => {
       }
     });
 
-    res.json(items);
+    res.json({ items });
   } catch (error) {
     console.error('Error fetching featured portfolio items:', error);
     res.status(500).json({ message: 'Error fetching featured portfolio items', error: error.message });

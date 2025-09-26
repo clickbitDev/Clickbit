@@ -214,6 +214,7 @@ export const ordersAPI = {
 // Payments API
 export const paymentsAPI = {
   createPaymentIntent: (data: any) => api.post('/payments/create-payment-intent', data),
+  createCheckoutSession: (data: any) => api.post('/payments/create-checkout-session', data),
   createPayPalOrder: (data: any) => api.post('/payments/create-paypal-order', data),
   confirmPayment: (data: any) => api.post('/payments/confirm-payment', data),
   getOrder: (id: string) => api.get(`/payments/order/${id}`),

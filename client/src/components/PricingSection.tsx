@@ -133,14 +133,40 @@ const PricingSection: React.FC<PricingSectionProps> = ({ pricing }) => {
     const tierName = tier.name;
     const minQuantity = getMinQuantity(tierName.toLowerCase().replace(/\s+/g, '-'));
 
-
+    // Track service interest
+    if (typeof window.trackServiceInterest === 'function') {
+      window.trackServiceInterest(`${serviceSlug} - ${tierName}`);
+    }
 
     if (action.type === 'cart') {
+      // Track add to cart event
+      if (typeof window.trackEvent === 'function') {
+        const priceStr = tier.price.replace(/[$,]/g, '').replace(/from\s+/i, '');
+        const price = parseFloat(priceStr) || 0;
+        
+        window.trackEvent('add_to_cart', {
+          event_category: 'ecommerce',
+          currency: 'AUD',
+          value: price * minQuantity,
+          items: [{
+            item_id: `${serviceSlug}_${tierName.toLowerCase().replace(/\s+/g, '_')}`,
+            item_name: `${serviceSlug} - ${tierName}`,
+            category: 'Service',
+            quantity: minQuantity,
+            price: price
+          }]
+        });
+      }
       
       addItemByServiceAndTier(serviceSlug, tierName, minQuantity);
       showNotification(`${tierName} has been added to cart!`);
       
     } else {
+      // Track quote request
+      if (typeof window.trackQuoteRequest === 'function') {
+        window.trackQuoteRequest(`${serviceSlug} - ${tierName}`);
+      }
+      
       navigate(action.href);
     }
   };

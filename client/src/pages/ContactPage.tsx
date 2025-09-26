@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { pageVariants, pageTransition } from '../animations';
+import SiteHead from '../components/SiteHead';
 import PageHeader from '../components/PageHeader';
 import ContactForm from '../components/ContactForm';
 import Testimonials from '../components/Testimonials';
@@ -30,13 +31,18 @@ const ContactPage: React.FC = () => {
   };
 
   return (
-    <motion.div
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
-    >
+    <>
+      <SiteHead 
+        title="Contact Us"
+        description="Get in touch with ClickBit's expert team. Ready to start your project? Contact us for professional web development, software solutions, and IT services."
+      />
+      <motion.div
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
       <div className="bg-white dark:bg-gray-900">
         <PageHeader
           title="Contact Us"
@@ -194,7 +200,8 @@ const ContactPage: React.FC = () => {
           )}
         </div>
       </div>
-    </motion.div>
+      </motion.div>
+    </>
   );
 };
 

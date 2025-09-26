@@ -26,6 +26,27 @@ const ContactForm = () => {
         ...data
       });
       
+      // Track successful form submission as conversion
+      if (typeof window.trackLead === 'function') {
+        window.trackLead('contact_form');
+      }
+      
+      // Track form submission event
+      if (typeof window.trackEvent === 'function') {
+        window.trackEvent('form_submit', {
+          form_name: 'contact_form',
+          form_type: 'contact',
+          page_location: window.location.pathname,
+          conversion: true,
+          conversion_value: 10 // Assign $10 value to contact form submissions
+        });
+      }
+      
+      // Track Meta Pixel Contact event
+      if (typeof window.fbq === 'function') {
+        window.fbq('track', 'Contact');
+      }
+      
       setSuccess(true);
       reset();
     } catch (err) {
@@ -59,29 +80,140 @@ const ContactForm = () => {
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">First Name</label>
-          <input type="text" {...register('firstName', { required: true })} id="firstName" className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-          {errors.firstName && <span className="text-red-500 text-sm">This field is required</span>}
+          <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            First Name <span className="text-red-500">*</span>
+          </label>
+          <input 
+            type="text" 
+            {...register('firstName', { 
+              required: 'First name is required',
+              minLength: { value: 2, message: 'First name must be at least 2 characters' }
+            })} 
+            id="firstName" 
+            className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
+              errors.firstName 
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                : 'border-gray-300 dark:border-gray-600 focus:border-indigo-500 focus:ring-indigo-500'
+            } bg-white dark:bg-gray-800`} 
+          />
+          {errors.firstName && (
+            <div className="flex items-center mt-1 text-sm text-red-600">
+              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              {errors.firstName.message}
+            </div>
+          )}
         </div>
         <div>
-          <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Name</label>
-          <input type="text" {...register('lastName', { required: true })} id="lastName" className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-          {errors.lastName && <span className="text-red-500 text-sm">This field is required</span>}
+          <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Last Name <span className="text-red-500">*</span>
+          </label>
+          <input 
+            type="text" 
+            {...register('lastName', { 
+              required: 'Last name is required',
+              minLength: { value: 2, message: 'Last name must be at least 2 characters' }
+            })} 
+            id="lastName" 
+            className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
+              errors.lastName 
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                : 'border-gray-300 dark:border-gray-600 focus:border-indigo-500 focus:ring-indigo-500'
+            } bg-white dark:bg-gray-800`} 
+          />
+          {errors.lastName && (
+            <div className="flex items-center mt-1 text-sm text-red-600">
+              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              {errors.lastName.message}
+            </div>
+          )}
         </div>
       </div>
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-        <input type="email" {...register('email', { required: true })} id="email" className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-        {errors.email && <span className="text-red-500 text-sm">This field is required</span>}
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Email Address <span className="text-red-500">*</span>
+        </label>
+        <input 
+          type="email" 
+          {...register('email', { 
+            required: 'Email address is required',
+            pattern: {
+              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              message: 'Please enter a valid email address'
+            }
+          })} 
+          id="email" 
+          className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
+            errors.email 
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+              : 'border-gray-300 dark:border-gray-600 focus:border-indigo-500 focus:ring-indigo-500'
+          } bg-white dark:bg-gray-800`} 
+        />
+        {errors.email && (
+          <div className="flex items-center mt-1 text-sm text-red-600">
+            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            {errors.email.message}
+          </div>
+        )}
       </div>
       <div>
-        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone</label>
-        <input type="tel" {...register('phone')} id="phone" className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Phone Number
+        </label>
+        <input 
+          type="tel" 
+          {...register('phone', {
+            pattern: {
+              value: /^[\+]?[\s\-\(\)]?[\d\s\-\(\)]{7,15}$/,
+              message: 'Please enter a valid phone number'
+            }
+          })} 
+          id="phone" 
+          className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
+            errors.phone 
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+              : 'border-gray-300 dark:border-gray-600 focus:border-indigo-500 focus:ring-indigo-500'
+          } bg-white dark:bg-gray-800`} 
+        />
+        {errors.phone && (
+          <div className="flex items-center mt-1 text-sm text-red-600">
+            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            {errors.phone.message}
+          </div>
+        )}
       </div>
       <div>
-        <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Message</label>
-        <textarea {...register('message', { required: true })} id="message" rows={4} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
-        {errors.message && <span className="text-red-500 text-sm">This field is required</span>}
+        <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Message <span className="text-red-500">*</span>
+        </label>
+        <textarea 
+          {...register('message', { 
+            required: 'Message is required',
+            minLength: { value: 10, message: 'Message must be at least 10 characters long' }
+          })} 
+          id="message" 
+          rows={4} 
+          className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
+            errors.message 
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+              : 'border-gray-300 dark:border-gray-600 focus:border-indigo-500 focus:ring-indigo-500'
+          } bg-white dark:bg-gray-800`}
+        ></textarea>
+        {errors.message && (
+          <div className="flex items-center mt-1 text-sm text-red-600">
+            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            {errors.message.message}
+          </div>
+        )}
       </div>
       <div>
         <button 

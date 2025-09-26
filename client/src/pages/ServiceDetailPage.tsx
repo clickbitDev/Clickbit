@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { pageVariants, pageTransition } from '../animations';
+import SiteHead from '../components/SiteHead';
 import ServicePageHeader from '../components/ServicePageHeader';
 import PricingSection from '../components/PricingSection';
 import TechnologyLogos from '../components/TechnologyLogos';
@@ -27,6 +28,15 @@ const ServiceDetailPage: React.FC = () => {
         } else {
           const data = await res.json();
           setService(data);
+          
+          // Track Meta Pixel ViewContent event for service view
+          if (typeof window.fbq === 'function') {
+            window.fbq('track', 'ViewContent', {
+              content_type: 'service',
+              content_name: data.title || data.name,
+              content_category: 'Services'
+            });
+          }
         }
       } catch (err: any) {
         setError(err.message || 'Error fetching service');
@@ -54,19 +64,26 @@ const ServiceDetailPage: React.FC = () => {
   const useGridView = service.sections && Array.isArray(service.sections) && service.sections.every((section: any) => !section.image);
 
   return (
-    <motion.div
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
-      className="bg-gray-50 dark:bg-gray-900"
-    >
+    <>
+      <SiteHead 
+        title={service.title || service.name}
+        description={service.excerpt || `Professional ${service.title || service.name} services by ClickBit. Custom solutions tailored to your business needs.`}
+        image={service.headerImage || service.featured_image}
+      />
+      <motion.div
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+        className="bg-gray-50 dark:bg-gray-900"
+      >
       <ServicePageHeader title={service.title || service.name} image={service.headerImage} slug={service.slug} />
       <PricingSection pricing={{ ...service.pricing, serviceSlug: service.slug }} />
       <ServiceSectionGrid sections={service.sections || []} />
       <TechnologyLogos serviceSlug={service.slug} />
-    </motion.div>
+      </motion.div>
+    </>
   );
 };
 

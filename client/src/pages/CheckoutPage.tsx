@@ -45,6 +45,16 @@ const CheckoutPage: React.FC = () => {
       return;
     }
     
+    // Track Meta Pixel InitiateCheckout event when user arrives at checkout
+    if (typeof window.fbq === 'function') {
+      const totals = calculateTotals();
+      window.fbq('track', 'InitiateCheckout', {
+        value: totals.total,
+        currency: billingSettings?.currencyCode || 'AUD',
+        num_items: items.length
+      });
+    }
+    
     fetchBillingSettings();
   }, [items, navigate]);
 
@@ -70,6 +80,50 @@ const CheckoutPage: React.FC = () => {
   };
 
   const handlePaymentSuccess = (paymentData: any) => {
+    // Track purchase conversion
+    if (typeof window.trackPurchase === 'function') {
+      const totals = calculateTotals();
+      window.trackPurchase(
+        paymentData.order?.id || `order_${Date.now()}`,
+        totals.total,
+        billingSettings?.currencyCode || 'AUD',
+        items.map(item => ({
+          id: item.id,
+          name: item.name,
+          category: 'Service',
+          quantity: item.quantity,
+          price: item.price
+        }))
+      );
+    }
+    
+    // Track checkout completion
+    if (typeof window.trackEvent === 'function') {
+      const totals = calculateTotals();
+      window.trackEvent('purchase', {
+        event_category: 'ecommerce',
+        transaction_id: paymentData.order?.id || `order_${Date.now()}`,
+        value: totals.total,
+        currency: billingSettings?.currencyCode || 'AUD',
+        items: items.map(item => ({
+          item_id: item.id,
+          item_name: item.name,
+          category: 'Service',
+          quantity: item.quantity,
+          price: item.price
+        }))
+      });
+    }
+    
+    // Track Meta Pixel Purchase event
+    if (typeof window.fbq === 'function') {
+      const totals = calculateTotals();
+      window.fbq('track', 'Purchase', {
+        value: totals.total,
+        currency: billingSettings?.currencyCode || 'AUD'
+      });
+    }
+    
     toast.success('Payment successful!');
     clearCart();
     navigate('/order-confirmation', { state: { orderData: paymentData } });

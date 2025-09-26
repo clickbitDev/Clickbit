@@ -6,7 +6,12 @@ gtag('config', 'G-G2SP59398M');
 
 // Custom event tracking for key business interactions
 function trackEvent(eventName, parameters = {}) {
-  gtag('event', eventName, parameters);
+  if (typeof gtag !== 'undefined') {
+    gtag('event', eventName, parameters);
+    console.log('GA4 Event Tracked:', eventName, parameters);
+  } else {
+    console.warn('GA4 not loaded, event not tracked:', eventName, parameters);
+  }
 }
 
 // Track form submissions

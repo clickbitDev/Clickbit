@@ -1,17 +1,23 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { pageVariants, pageTransition } from '../animations';
+import SiteHead from '../components/SiteHead';
 import PageHeader from '../components/PageHeader';
 
 const PrivacyPolicyPage = () => {
   return (
-    <motion.div
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
-    >
+    <>
+      <SiteHead 
+        title="Privacy Policy"
+        description="ClickBit's Privacy Policy - Learn how we collect, use, and protect your personal information when you use our services."
+      />
+      <motion.div
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
       <PageHeader 
         title="Privacy Policy"
         breadcrumbs={[
@@ -199,7 +205,8 @@ const PrivacyPolicyPage = () => {
           </div>
         </div>
       </div>
-    </motion.div>
+      </motion.div>
+    </>
   );
 };
 

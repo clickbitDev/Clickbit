@@ -2,6 +2,7 @@ import React from 'react';
 import Header from './Header';
 import Footer from './Footer';
 import Sidebar from '../Sidebar';
+import CookieConsent from '../CookieConsent';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -14,6 +15,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <Header />
       <main className="flex-grow">{children}</main>
       <Footer />
+      <CookieConsent />
     </div>
   );
 };

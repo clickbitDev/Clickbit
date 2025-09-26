@@ -681,9 +681,62 @@ const Header: React.FC = () => {
                     </ul>
                   ) : (
                     <div className="text-center py-12">
-                      <p className="text-gray-500 dark:text-gray-400">
-                        {searchQuery.trim().length > 0 ? "No results found." : "Start typing to search."}
-                      </p>
+                      {searchQuery.trim().length > 0 ? (
+                        <div>
+                          <div className="mx-auto w-12 h-12 mb-4 text-gray-400">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                          </div>
+                          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No results found</h3>
+                          <p className="text-gray-500 dark:text-gray-400 mb-4">
+                            We couldn't find anything matching "{searchQuery}"
+                          </p>
+                          <div className="space-y-2">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Try searching for:</p>
+                            <div className="flex flex-wrap justify-center gap-2">
+                              {['Web Development', 'Digital Marketing', 'Mobile Apps', 'SEO', 'E-commerce'].map((suggestion) => (
+                                <button
+                                  key={suggestion}
+                                  onClick={() => setSearchQuery(suggestion)}
+                                  className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                >
+                                  {suggestion}
+                                </button>
+                              ))}
+                            </div>
+                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
+                              Or browse our <Link to="/services" className="text-cyan-600 hover:text-cyan-700">services</Link> or <Link to="/portfolio" className="text-cyan-600 hover:text-cyan-700">portfolio</Link>
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="mx-auto w-12 h-12 mb-4 text-gray-400">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                          </div>
+                          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Start typing to search</h3>
+                          <p className="text-gray-500 dark:text-gray-400 mb-4">
+                            Search for services, team members, or pages
+                          </p>
+                          <div className="space-y-2">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Popular searches:</p>
+                            <div className="flex flex-wrap justify-center gap-2">
+                              {['Web Development', 'Digital Marketing', 'Mobile Apps', 'SEO', 'E-commerce'].map((suggestion) => (
+                                <button
+                                  key={suggestion}
+                                  onClick={() => setSearchQuery(suggestion)}
+                                  className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                >
+                                  {suggestion}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

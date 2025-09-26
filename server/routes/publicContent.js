@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Content } = require('../models');
+const { Content, SiteSetting } = require('../models');
 
 // @desc    Get site identity (public)
 // @route   GET /api/public/site-identity
@@ -59,13 +59,13 @@ router.get('/contact-info', async (req, res) => {
         businessHours: 'Monday - Friday: 9:00 AM - 6:00 PM\nWeekend: By appointment',
         googleMapsUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3310.643330663454!2d150.9133093152115!3d-33.9249269806403!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b1295a3c9a35e7d%3A0x8f4f4c9c1c4f2e5a!2s44%20Shoreline%20Rd%2C%20Moorebank%20NSW%202170%2C%20Australia!5e0!3m2!1sen!2sau!4v1620211993456!5m2!1sen!2sus',
         socialLinks: [
-          { platform: 'facebook', url: 'https://www.facebook.com/clickbitau/' },
-          { platform: 'instagram', url: 'https://www.instagram.com/clickbitau/' },
-          { platform: 'linkedin', url: 'https://www.linkedin.com/company/clickbitau/' },
-          { platform: 'twitter', url: 'https://x.com/ClickBITau' },
-          { platform: 'tiktok', url: 'https://www.tiktok.com/@clickbitau' },
-          { platform: 'youtube', url: 'https://www.youtube.com/@clickbitau' },
-          { platform: 'github', url: 'https://github.com/clickbitau' }
+          { platform: 'facebook', url: 'https://facebook.clickbit.com.au' },
+          { platform: 'instagram', url: 'https://instagram.clickbit.com.au' },
+          { platform: 'linkedin', url: 'https://linkedin.clickbit.com.au' },
+          { platform: 'twitter', url: 'https://x.clickbit.com.au' },
+          { platform: 'tiktok', url: 'https://tiktok.clickbit.com.au' },
+          { platform: 'youtube', url: 'https://youtube.clickbit.com.au' },
+          { platform: 'github', url: 'https://github.clickbit.com.au' }
         ]
       };
       return res.json(defaultContactInfo);
@@ -84,13 +84,13 @@ router.get('/contact-info', async (req, res) => {
       businessHours: 'Monday - Friday: 9:00 AM - 6:00 PM\nWeekend: By appointment',
               googleMapsUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3310.643330663454!2d150.9133093152115!3d-33.9249269806403!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b1295a3c9a35e7d%3A0x8f4f4c9c1c4f2e5a!2s44%20Shoreline%20Rd%2C%20Moorebank%20NSW%202170%2C%20Australia!5e0!3m2!1sen!2sau!4v1620211993456!5m2!1sen!2sus',
       socialLinks: [
-        { platform: 'facebook', url: 'https://www.facebook.com/clickbitau/' },
-        { platform: 'instagram', url: 'https://www.instagram.com/clickbitau/' },
-        { platform: 'linkedin', url: 'https://www.linkedin.com/company/clickbitau/' },
-        { platform: 'twitter', url: 'https://x.com/ClickBITau' },
-        { platform: 'tiktok', url: 'https://www.tiktok.com/@clickbitau' },
-        { platform: 'youtube', url: 'https://www.youtube.com/@clickbitau' },
-        { platform: 'github', url: 'https://github.com/clickbitau' }
+        { platform: 'facebook', url: 'https://facebook.clickbit.com.au' },
+        { platform: 'instagram', url: 'https://instagram.clickbit.com.au' },
+        { platform: 'linkedin', url: 'https://linkedin.clickbit.com.au' },
+        { platform: 'twitter', url: 'https://x.clickbit.com.au' },
+        { platform: 'tiktok', url: 'https://tiktok.clickbit.com.au' },
+        { platform: 'youtube', url: 'https://youtube.clickbit.com.au' },
+        { platform: 'github', url: 'https://github.clickbit.com.au' }
       ]
     });
   }
@@ -272,14 +272,14 @@ router.get('/mission-points', async (req, res) => {
 // @access  Public
 router.get('/marketing-integrations', async (req, res) => {
   try {
-    let marketingIntegrations = await Content.findOne({ 
+    // Use the same data source as admin panel (SiteSetting table)
+    let marketingSetting = await SiteSetting.findOne({ 
       where: { 
-        slug: 'marketing-integrations',
-        content_type: 'custom'
+        setting_key: 'marketing_integrations'
       } 
     });
 
-    if (!marketingIntegrations) {
+    if (!marketingSetting) {
       // Return default marketing integrations if they don't exist
       const defaultMarketingIntegrations = {
         headerScripts: '',
@@ -291,7 +291,7 @@ router.get('/marketing-integrations', async (req, res) => {
       return res.json(defaultMarketingIntegrations);
     }
 
-    const marketingData = JSON.parse(marketingIntegrations.content);
+    const marketingData = JSON.parse(marketingSetting.setting_value);
     res.json(marketingData);
   } catch (error) {
     console.error('Error fetching public marketing integrations:', error);

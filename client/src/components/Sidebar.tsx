@@ -39,13 +39,13 @@ const Sidebar: React.FC = () => {
   ]
 
   const socialLinks: any[] = [
-    { icon: Facebook, href: "https://www.facebook.com/clickbitau/", name: "Facebook" },
-    { icon: Instagram, href: "https://www.instagram.com/clickbitau/", name: "Instagram" },
-    { icon: Linkedin, href: "https://www.linkedin.com/company/clickbitau/", name: "LinkedIn" },
-    { icon: XIcon, href: "https://x.com/ClickBITau", name: "X" },
-    { icon: SiTiktok, href: "https://www.tiktok.com/@clickbitau", name: "TikTok" },
-    { icon: Youtube, href: "https://www.youtube.com/@clickbitau", name: "YouTube" },
-    { icon: Github, href: "https://github.com/clickbitau", name: "GitHub" },
+    { icon: Facebook, href: "https://facebook.clickbit.com.au", name: "Facebook" },
+    { icon: Instagram, href: "https://instagram.clickbit.com.au", name: "Instagram" },
+    { icon: Linkedin, href: "https://linkedin.clickbit.com.au", name: "LinkedIn" },
+    { icon: XIcon, href: "https://x.clickbit.com.au", name: "X" },
+    { icon: SiTiktok, href: "https://tiktok.clickbit.com.au", name: "TikTok" },
+    { icon: Youtube, href: "https://youtube.clickbit.com.au", name: "YouTube" },
+    { icon: Github, href: "https://github.clickbit.com.au", name: "GitHub" },
   ];
 
   return (

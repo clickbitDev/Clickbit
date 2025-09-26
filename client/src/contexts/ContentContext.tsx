@@ -120,13 +120,13 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({ children }) =>
     businessHours: 'Monday - Friday: 9:00 AM - 6:00 PM\nWeekend: By appointment',
     googleMapsUrl: '',
     socialLinks: [
-      { platform: 'facebook', url: 'https://www.facebook.com/clickbitau/' },
-      { platform: 'instagram', url: 'https://www.instagram.com/clickbitau/' },
-      { platform: 'linkedin', url: 'https://www.linkedin.com/company/clickbitau/' },
-      { platform: 'twitter', url: 'https://x.com/ClickBITau' },
-      { platform: 'tiktok', url: 'https://www.tiktok.com/@clickbitau' },
-      { platform: 'youtube', url: 'https://www.youtube.com/@clickbitau' },
-      { platform: 'github', url: 'https://github.com/clickbitau' }
+      { platform: 'facebook', url: 'https://facebook.clickbit.com.au' },
+      { platform: 'instagram', url: 'https://instagram.clickbit.com.au' },
+      { platform: 'linkedin', url: 'https://linkedin.clickbit.com.au' },
+      { platform: 'twitter', url: 'https://x.clickbit.com.au' },
+      { platform: 'tiktok', url: 'https://tiktok.clickbit.com.au' },
+      { platform: 'youtube', url: 'https://youtube.clickbit.com.au' },
+      { platform: 'github', url: 'https://github.clickbit.com.au' }
     ]
   });
   const [footerContent, setFooterContent] = useState<FooterContent>({

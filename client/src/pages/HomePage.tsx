@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { pageVariants, pageTransition } from '../animations';
+import SiteHead from '../components/SiteHead';
 
 import Hero from '../components/Hero';
 import Services from '../components/Services';
@@ -15,13 +16,18 @@ import CTA from '../components/CTA';
 
 const HomePage = () => {
   return (
-    <motion.div
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
-    >
+    <>
+      <SiteHead 
+        title="Custom Web & Software Solutions | Professional IT Services"
+        description="Empowering businesses with innovative digital solutions to connect, engage, and grow. Expert web development, custom applications, and IT support services."
+      />
+      <motion.div
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
       <Hero />
       <ShowcaseGrid />
       <DynamicRibbon />
@@ -32,7 +38,8 @@ const HomePage = () => {
       <FeaturedWork />
       <Testimonials />
       <CTA />
-    </motion.div>
+      </motion.div>
+    </>
   );
 };
 

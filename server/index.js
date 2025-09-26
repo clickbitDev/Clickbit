@@ -35,9 +35,12 @@ const reviewsRoutes = require('./routes/reviews');
 const publicContentRoutes = require('./routes/publicContent');
 const uploadRoutes = require('./routes/upload');
 const SocketService = require('./services/socketService');
+const { botHandler } = require('./middleware/botDetection');
+const { socialMediaCrawlerMiddleware } = require('./middleware/socialMediaCrawler');
 
-// Import blog scheduler
+// Import blog scheduler and analytics alerts
 const blogScheduler = require('./services/blogScheduler');
+const analyticsAlerts = require('./services/analyticsAlerts');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -45,13 +48,22 @@ const PORT = process.env.PORT || 5001;
 // Trust proxy for rate limiting behind reverse proxy
 app.set('trust proxy', 1);
 
+// SSL/TLS configuration for proxy compatibility
+app.use((req, res, next) => {
+  // Ensure proper headers for SSL termination at proxy level
+  if (req.headers['x-forwarded-proto'] === 'https') {
+    req.secure = true;
+  }
+  next();
+});
+
 // Create HTTP server
 const httpServer = createServer(app);
 
 // Global server instance for graceful shutdown
 let server;
 
-// Initialize Socket.IO
+// Initialize Socket.IO with SSL-optimized configuration
 const io = new Server(httpServer, {
   cors: {
     origin: function (origin, callback) {
@@ -91,6 +103,19 @@ const io = new Server(httpServer, {
     },
     credentials: true,
   },
+  // SSL/TLS optimization for proxy environments
+  transports: ['polling', 'websocket'],
+  allowEIO3: true,
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  // Better handling of SSL termination at proxy level
+  serveClient: false,
+  allowUpgrades: true,
+  perMessageDeflate: {
+    threshold: 1024,
+    concurrencyLimit: 10,
+    memLevel: 7
+  }
 });
 
 // Security middleware
@@ -98,12 +123,12 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      connectSrc: ["'self'", "https://clickbit.com.au", "https://www.clickbit.com.au", "http://clickbit.com.au", "http://www.clickbit.com.au", "https://www.google-analytics.com", "https://analytics.google.com", "https://stats.g.doubleclick.net"],
+      connectSrc: ["'self'", "https://clickbit.com.au", "https://www.clickbit.com.au", "http://clickbit.com.au", "http://www.clickbit.com.au", "https://www.google-analytics.com", "https://analytics.google.com", "https://stats.g.doubleclick.net", "https://connect.facebook.net"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:", "https://www.google-analytics.com"],
-      scriptSrc: ["'self'", "https://js.stripe.com", "https://www.googletagmanager.com", "'unsafe-inline'"],
-      scriptSrcElem: ["'self'", "https://js.stripe.com", "https://www.googletagmanager.com", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:", "https://www.google-analytics.com", "https://www.facebook.com"],
+      scriptSrc: ["'self'", "https://js.stripe.com", "https://www.googletagmanager.com", "https://connect.facebook.net", "'unsafe-inline'"],
+      scriptSrcElem: ["'self'", "https://js.stripe.com", "https://www.googletagmanager.com", "https://connect.facebook.net", "'unsafe-inline'"],
       scriptSrcAttr: ["'unsafe-inline'"],
       frameSrc: ["'self'", "https://js.stripe.com", "https://www.google.com", "https://maps.google.com"],
       upgradeInsecureRequests: null, //Disable HTTPS upgrade
@@ -281,6 +306,9 @@ app.get('/sitemap.xml', async (req, res) => {
   }
 });
 
+// Social media crawler middleware (must be before static file serving)
+app.use(socialMediaCrawlerMiddleware);
+
 // Serve React app in production with optimized caching
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/build'), {
@@ -301,9 +329,17 @@ if (process.env.NODE_ENV === 'production') {
 // Error handling middleware
 app.use(errorHandler);
 
+// Bot detection middleware for SEO (must be before catch-all)
+app.use(botHandler);
+
 // Serve React app catch-all in production (must be after API routes)
 if (process.env.NODE_ENV === 'production') {
-  app.get('*', (req, res) => {
+  // Only serve React app for non-API routes
+  app.get('*', (req, res, next) => {
+    // Skip API routes
+    if (req.path.startsWith('/api/')) {
+      return next();
+    }
     res.sendFile(path.join(__dirname, '../client/build/index.html'));
   });
 } else {
@@ -366,9 +402,24 @@ const startServer = async () => {
     const socketService = new SocketService(io);
     app.set('socketService', socketService);
 
-    // Set keep-alive timeout
+    // Set keep-alive timeout and SSL optimization
     server.keepAliveTimeout = 65000; // 65 seconds
     server.headersTimeout = 66000; // 66 seconds
+    
+    // SSL/TLS optimization for proxy environments
+    server.on('clientError', (err, socket) => {
+      // Handle SSL/TLS errors gracefully
+      if (err.code === 'EPROTO' || err.code === 'ECONNRESET') {
+        logger.warn('SSL/TLS connection error handled gracefully:', {
+          code: err.code,
+          message: err.message
+        });
+        socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
+      } else {
+        logger.error('Client error:', err);
+        socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
+      }
+    });
     
     // Initialize connection monitor with sequelize instance
     const { sequelize } = require('./config/database');
@@ -380,6 +431,10 @@ const startServer = async () => {
     // Start blog scheduler
     blogScheduler.start();
     logger.info('Blog scheduler started');
+    
+    // Start analytics alerts
+    analyticsAlerts.startAlertScheduler();
+    logger.info('Analytics alerts scheduler started');
     
     // Generate sitemap
     try {

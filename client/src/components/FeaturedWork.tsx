@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { X, ExternalLink } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { X } from 'lucide-react';
+import PortfolioFlipCard from './PortfolioFlipCard';
 
 import api from '../services/api';
 
@@ -10,9 +11,13 @@ interface PortfolioItem {
   category: string;
   image_url?: string;
   cover_image?: string;
+  featured_image?: string;
   description: string;
+  short_description?: string;
   externalUrl?: string;
+  live_url?: string;
   tags: string[];
+  slug?: string;
 }
 
 // Fallback static data in case API fails
@@ -44,27 +49,40 @@ const staticPortfolioItems: PortfolioItem[] = [
 ];
 
 const FeaturedWork = () => {
+  const navigate = useNavigate();
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [lightboxTitle, setLightboxTitle] = useState<string>('');
+  const [lightboxDescription, setLightboxDescription] = useState<string>('');
 
   useEffect(() => {
     const fetchPortfolioItems = async () => {
       try {
         setLoading(true);
         const response = await api.get('/portfolio/featured?limit=6');
-        const portfolioData = response.data.items || response.data;
-        // Get the latest 6 items for gallery display
-        const latestItems = portfolioData.slice(0, 6).map((item: any) => ({
-          ...item,
-          image_url: item.featured_image || item.cover_image || item.image_url,
-          cover_image: item.featured_image || item.cover_image || item.image_url,
-          tags: Array.isArray(item.technologies) ? item.technologies : (Array.isArray(item.tags) ? item.tags : []),
-          externalUrl: item.live_url || item.externalUrl,
-        }));
-        setPortfolioItems(latestItems);
+        const portfolioData = response.data.items || [];
+        
+        // Defensive check: ensure portfolioData is an array
+        if (Array.isArray(portfolioData)) {
+          // Get the latest 6 items for gallery display
+          const latestItems = portfolioData.slice(0, 6).map((item: any) => ({
+            ...item,
+            image_url: item.featured_image || item.cover_image || item.image_url,
+            cover_image: item.featured_image || item.cover_image || item.image_url,
+            tags: Array.isArray(item.technologies) ? item.technologies : (Array.isArray(item.tags) ? item.tags : []),
+            externalUrl: item.live_url || item.externalUrl,
+            // Ensure slug is properly mapped
+            slug: item.slug,
+            // Ensure description is available for lightbox
+            description: item.description || item.short_description,
+          }));
+          setPortfolioItems(latestItems);
+        } else {
+          console.warn('Featured portfolio data is not an array:', portfolioData);
+          setPortfolioItems([]);
+        }
         setError(null);
       } catch (err) {
         console.error('Error fetching portfolio items:', err);
@@ -80,19 +98,32 @@ const FeaturedWork = () => {
   }, []);
 
   const handleImageClick = (item: PortfolioItem) => {
-    if (item.externalUrl) {
-      // Open external URL in new tab
-      window.open(item.externalUrl, '_blank', 'noopener,noreferrer');
+    console.log('Portfolio item clicked:', item);
+    console.log('Item slug:', item.slug);
+    console.log('Item externalUrl:', item.externalUrl);
+    console.log('Item live_url:', item.live_url);
+    
+    // If item has slug, navigate to individual portfolio page using React Router
+    if (item.slug) {
+      console.log('Navigating to portfolio page:', `/portfolio/${item.slug}`);
+      navigate(`/portfolio/${item.slug}`);
+    } else if (item.externalUrl || item.live_url) {
+      // Open external URL if available
+      console.log('Opening external URL:', item.externalUrl || item.live_url);
+      window.open(item.externalUrl || item.live_url, '_blank', 'noopener,noreferrer');
     } else {
-      // Open lightbox
+      // Show lightbox with portfolio details
+      console.log('Showing lightbox for item:', item.title);
       setLightboxImage(item.cover_image || item.image_url || '/images/work/project1.jpg');
       setLightboxTitle(item.title);
+      setLightboxDescription(item.description || item.short_description || '');
     }
   };
 
   const closeLightbox = () => {
     setLightboxImage(null);
     setLightboxTitle('');
+    setLightboxDescription('');
   };
 
   if (loading) {
@@ -144,51 +175,14 @@ const FeaturedWork = () => {
 
 
 
-          {/* Image Gallery Grid */}
+          {/* Image Gallery Grid with Flip Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {portfolioItems.map((project) => (
-              <div 
-                key={project.id} 
-                className="group relative overflow-hidden rounded-xl cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl"
-                onClick={() => handleImageClick(project)}
-              >
-                {/* Main Image */}
-                <div className="aspect-[4/3] overflow-hidden bg-gray-200 dark:bg-gray-700">
-                  <img 
-                    src={project.cover_image || project.image_url || '/images/work/project1.jpg'} 
-                    alt={project.title} 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                    onError={(e) => {
-                      e.currentTarget.src = '/images/work/project1.jpg';
-                    }}
-                  />
-                </div>
-
-                {/* Overlay with description */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-semibold uppercase tracking-wider text-[#1FBBD2]">
-                        {project.category}
-                      </span>
-                      {project.externalUrl && (
-                        <ExternalLink className="h-4 w-4 text-white/80" />
-                      )}
-                    </div>
-                    <h3 className="text-xl font-bold mb-2">{project.title}</h3>
-                    <p className="text-sm text-white/90 line-clamp-2">{project.description}</p>
-                  </div>
-                </div>
-
-                {/* Click indicator */}
-                <div className="absolute top-4 right-4 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  {project.externalUrl ? (
-                    <ExternalLink className="h-4 w-4 text-white" />
-                  ) : (
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
-                  )}
-                </div>
-              </div>
+              <PortfolioFlipCard 
+                key={project.id}
+                item={project} 
+                onClick={handleImageClick}
+              />
             ))}
           </div>
 
@@ -202,25 +196,50 @@ const FeaturedWork = () => {
           className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
           onClick={closeLightbox}
         >
-          <div className="relative max-w-4xl max-h-full">
+          <div className="relative max-w-4xl max-h-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
             <button
               onClick={closeLightbox}
-              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+              className="absolute top-4 right-4 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white transition-colors z-10 bg-white/80 dark:bg-gray-800/80 rounded-full p-2"
               aria-label="Close lightbox"
             >
-              <X className="h-8 w-8" />
+              <X className="h-6 w-6" />
             </button>
-            <img
-              src={lightboxImage}
-              alt={lightboxTitle}
-              className="max-w-full max-h-[80vh] object-contain rounded-lg"
-              onClick={(e) => e.stopPropagation()}
-            />
-            {lightboxTitle && (
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 rounded-b-lg">
-                <h3 className="text-white text-xl font-bold">{lightboxTitle}</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+              <div className="relative">
+                <img
+                  src={lightboxImage}
+                  alt={lightboxTitle}
+                  className="w-full h-64 lg:h-full object-cover"
+                  onClick={(e) => e.stopPropagation()}
+                />
               </div>
-            )}
+              <div className="p-6 flex flex-col justify-center">
+                {lightboxTitle && (
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                    {lightboxTitle}
+                  </h3>
+                )}
+                {lightboxDescription && (
+                  <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                    {lightboxDescription}
+                  </p>
+                )}
+                <div className="flex gap-3">
+                  <Link 
+                    to="/portfolio" 
+                    className="bg-[#1FBBD2] hover:bg-[#1A9DAA] text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                  >
+                    View All Projects
+                  </Link>
+                  <button
+                    onClick={closeLightbox}
+                    className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 px-6 py-3 rounded-lg font-semibold transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

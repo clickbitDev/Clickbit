@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { pageVariants, pageTransition } from '../animations';
+import SiteHead from '../components/SiteHead';
 import api from '../services/api';
 import PageHeader from '../components/PageHeader';
 import LazyImage from '../components/LazyImage';
@@ -87,14 +88,21 @@ const BlogPostPage: React.FC = () => {
   }
 
   return (
-    <motion.div
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
-      className="bg-white dark:bg-gray-900"
-    >
+    <>
+      <SiteHead 
+        title={post.title}
+        description={post.excerpt || `${post.title} - Read the latest insights and updates from the ClickBit team.`}
+        image={post.featured_image}
+        type="article"
+      />
+      <motion.div
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+        className="bg-white dark:bg-gray-900"
+      >
       <PageHeader
         title={post.title}
         breadcrumbs={[
@@ -215,7 +223,8 @@ const BlogPostPage: React.FC = () => {
           />
         </article>
       </div>
-    </motion.div>
+      </motion.div>
+    </>
   );
 };
 

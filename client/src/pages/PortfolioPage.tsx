@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { pageVariants, pageTransition } from '../animations';
+import SiteHead from '../components/SiteHead';
 import PageHeader from '../components/PageHeader';
 import CTA from '../components/CTA';
+import PortfolioFlipCard from '../components/PortfolioFlipCard';
 import api from '../services/api';
 import { ExternalLink } from 'lucide-react';
 
@@ -10,13 +13,16 @@ interface PortfolioItem {
   id: number;
   title: string;
   category: string;
-  image_url: string;
+  image_url?: string;
   cover_image?: string;
+  featured_image?: string;
   description: string;
+  short_description?: string;
   tags: string[];
   live_url?: string;
   externalUrl?: string;
   featured?: boolean;
+  slug?: string;
 }
 
 const PortfolioPage: React.FC = () => {
@@ -41,14 +47,21 @@ const PortfolioPage: React.FC = () => {
         
         // Handle items
         if (itemsResponse.status === 'fulfilled') {
-          const portfolioData = itemsResponse.value.data.items || itemsResponse.value.data;
-          const data: PortfolioItem[] = portfolioData.map((item: any) => ({
-            ...item,
-            tags: Array.isArray(item.technologies) ? item.technologies : (Array.isArray(item.tags) ? item.tags : []),
-            cover_image: item.featured_image || item.cover_image || item.image_url,
-            live_url: item.live_url || item.externalUrl,
-          }));
-          setItems(data);
+          const portfolioData = itemsResponse.value.data.items || [];
+          
+          // Defensive check: ensure portfolioData is an array
+          if (Array.isArray(portfolioData)) {
+            const data: PortfolioItem[] = portfolioData.map((item: any) => ({
+              ...item,
+              tags: Array.isArray(item.technologies) ? item.technologies : (Array.isArray(item.tags) ? item.tags : []),
+              cover_image: item.featured_image || item.cover_image || item.image_url,
+              live_url: item.live_url || item.externalUrl,
+            }));
+            setItems(data);
+          } else {
+            console.warn('Portfolio data is not an array:', portfolioData);
+            setItems([]);
+          }
         }
         
         // Handle categories - use dedicated endpoint if available, otherwise extract from items
@@ -56,9 +69,16 @@ const PortfolioPage: React.FC = () => {
           setCategories(categoriesResponse.value.data);
         } else if (itemsResponse.status === 'fulfilled') {
           // Fallback to extracting from items
-          const portfolioData = itemsResponse.value.data.items || itemsResponse.value.data;
-          const uniqueCategories = Array.from(new Set(portfolioData.map((item: any) => item.category).filter(Boolean))) as string[];
-          setCategories(uniqueCategories);
+          const portfolioData = itemsResponse.value.data.items || [];
+          
+          // Defensive check: ensure portfolioData is an array before mapping
+          if (Array.isArray(portfolioData)) {
+            const uniqueCategories = Array.from(new Set(portfolioData.map((item: any) => item.category).filter(Boolean))) as string[];
+            setCategories(uniqueCategories);
+          } else {
+            console.warn('Portfolio data for categories is not an array:', portfolioData);
+            setCategories([]);
+          }
         }
         
         setError(null);
@@ -127,6 +147,10 @@ const PortfolioPage: React.FC = () => {
 
   return (
     <>
+      <SiteHead 
+        title="Our Work"
+        description="Explore ClickBit's portfolio of successful projects. See our expertise in web development, custom applications, and digital solutions for businesses."
+      />
       <motion.div
         initial="initial"
         animate="in"
@@ -145,7 +169,7 @@ const PortfolioPage: React.FC = () => {
         <div className="py-16">
           <div className="container mx-auto px-4">
             <p className="text-center text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-12">
-              We take pride in projects powered by our services. Check out our excellent team and the complete portfolio they've crafted, showcasing our expertise and commitment to delivering exceptional results.
+              We take pride in projects powered by our <Link to="/services" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline font-medium">services</Link>. Check out our excellent <Link to="/about" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline font-medium">team</Link> and the complete portfolio they've crafted, showcasing our expertise and commitment to delivering exceptional results.
             </p>
 
             {/* Category Filter - Enhanced Responsive Design */}
@@ -197,64 +221,11 @@ const PortfolioPage: React.FC = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ duration: 0.3 }}
-                  className="group relative overflow-hidden rounded-xl cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-2xl"
-                  onClick={() => handleImageClick(project)}
                 >
-                  {/* Main Image */}
-                  <div className="aspect-[4/3] overflow-hidden bg-gray-200 dark:bg-gray-700">
-                    <img 
-                      src={project.cover_image || project.image_url || '/images/work/project1.jpg'} 
-                      alt={project.title} 
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                      onError={(e) => {
-                        e.currentTarget.src = '/images/work/project1.jpg';
-                      }}
-                    />
-                  </div>
-
-                  {/* Overlay with description */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-semibold uppercase tracking-wider text-[#1FBBD2]">
-                          {project.category}
-                        </span>
-                        {(project.externalUrl || project.live_url) && (
-                          <ExternalLink className="h-4 w-4 text-white/80" />
-                        )}
-                      </div>
-                      <h3 className="text-xl font-bold mb-2">{project.title}</h3>
-                      <p className="text-sm text-white/90 line-clamp-2">{project.description}</p>
-                      
-                      {/* Tags */}
-                      {project.tags && project.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-3">
-                          {project.tags.slice(0, 3).map((tag, index) => (
-                            <span 
-                              key={index}
-                              className="text-xs bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                          {project.tags.length > 3 && (
-                            <span className="text-xs bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full">
-                              +{project.tags.length - 3}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Click indicator */}
-                  <div className="absolute top-4 right-4 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    {(project.externalUrl || project.live_url) ? (
-                      <ExternalLink className="h-4 w-4 text-white" />
-                    ) : (
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                    )}
-                  </div>
+                  <PortfolioFlipCard 
+                    item={project} 
+                    onClick={handleImageClick}
+                  />
                 </motion.div>
               ))}
             </motion.div>

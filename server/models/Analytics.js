@@ -1,4 +1,4 @@
-const { DataTypes } = require('sequelize');
+const { DataTypes, Op } = require('sequelize');
 const { sequelize } = require('../config/database');
 
 const Analytics = sequelize.define('Analytics', {
@@ -238,7 +238,7 @@ Analytics.getPageViews = function(pageUrl = null, period = null) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - period);
     whereClause.created_at = {
-      [sequelize.Op.gte]: startDate
+      [Op.gte]: startDate
     };
   }
   
@@ -255,7 +255,7 @@ Analytics.getEventsByType = function(eventType, period = null) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - period);
     whereClause.created_at = {
-      [sequelize.Op.gte]: startDate
+      [Op.gte]: startDate
     };
   }
   
@@ -272,7 +272,7 @@ Analytics.getUserEvents = function(userId, period = null) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - period);
     whereClause.created_at = {
-      [sequelize.Op.gte]: startDate
+      [Op.gte]: startDate
     };
   }
   
@@ -296,7 +296,7 @@ Analytics.getTopPages = async function(limit = 10, period = null) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - period);
     whereClause.created_at = {
-      [sequelize.Op.gte]: startDate
+      [Op.gte]: startDate
     };
   }
   
@@ -321,7 +321,7 @@ Analytics.getTopReferrers = async function(limit = 10, period = null) {
   const whereClause = { 
     event_type: 'page_view',
     referrer_url: {
-      [sequelize.Op.ne]: null
+      [Op.ne]: null
     }
   };
   
@@ -329,7 +329,7 @@ Analytics.getTopReferrers = async function(limit = 10, period = null) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - period);
     whereClause.created_at = {
-      [sequelize.Op.gte]: startDate
+      [Op.gte]: startDate
     };
   }
   
@@ -351,7 +351,7 @@ Analytics.getTopCountries = async function(limit = 10, period = null) {
   const whereClause = { 
     event_type: 'page_view',
     country: {
-      [sequelize.Op.ne]: null
+      [Op.ne]: null
     }
   };
   
@@ -359,7 +359,7 @@ Analytics.getTopCountries = async function(limit = 10, period = null) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - period);
     whereClause.created_at = {
-      [sequelize.Op.gte]: startDate
+      [Op.gte]: startDate
     };
   }
   
@@ -381,7 +381,7 @@ Analytics.getDeviceStats = async function(period = null) {
   const whereClause = { 
     event_type: 'page_view',
     device_type: {
-      [sequelize.Op.ne]: null
+      [Op.ne]: null
     }
   };
   
@@ -389,7 +389,7 @@ Analytics.getDeviceStats = async function(period = null) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - period);
     whereClause.created_at = {
-      [sequelize.Op.gte]: startDate
+      [Op.gte]: startDate
     };
   }
   
@@ -410,7 +410,7 @@ Analytics.getBrowserStats = async function(period = null) {
   const whereClause = { 
     event_type: 'page_view',
     browser: {
-      [sequelize.Op.ne]: null
+      [Op.ne]: null
     }
   };
   
@@ -418,7 +418,7 @@ Analytics.getBrowserStats = async function(period = null) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - period);
     whereClause.created_at = {
-      [sequelize.Op.gte]: startDate
+      [Op.gte]: startDate
     };
   }
   
@@ -443,7 +443,7 @@ Analytics.getConversionStats = async function(period = null) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - period);
     whereClause.created_at = {
-      [sequelize.Op.gte]: startDate
+      [Op.gte]: startDate
     };
   }
   
@@ -465,7 +465,7 @@ Analytics.getUTMStats = async function(period = null) {
   const whereClause = { 
     event_type: 'page_view',
     utm_source: {
-      [sequelize.Op.ne]: null
+      [Op.ne]: null
     }
   };
   
@@ -473,7 +473,7 @@ Analytics.getUTMStats = async function(period = null) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - period);
     whereClause.created_at = {
-      [sequelize.Op.gte]: startDate
+      [Op.gte]: startDate
     };
   }
   
@@ -505,7 +505,7 @@ Analytics.getDailyStats = async function(days = 30) {
     ],
     where: {
       created_at: {
-        [sequelize.Op.gte]: startDate
+        [Op.gte]: startDate
       }
     },
     group: [sequelize.fn('DATE', sequelize.col('created_at'))],
@@ -522,7 +522,7 @@ Analytics.getBounceRate = async function(period = null) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - period);
     whereClause.created_at = {
-      [sequelize.Op.gte]: startDate
+      [Op.gte]: startDate
     };
   }
   
@@ -544,7 +544,7 @@ Analytics.getAverageSessionDuration = async function(period = null) {
   const whereClause = { 
     event_type: 'page_view',
     duration: {
-      [sequelize.Op.ne]: null
+      [Op.ne]: null
     }
   };
   
@@ -552,7 +552,7 @@ Analytics.getAverageSessionDuration = async function(period = null) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - period);
     whereClause.created_at = {
-      [sequelize.Op.gte]: startDate
+      [Op.gte]: startDate
     };
   }
   
@@ -573,7 +573,7 @@ Analytics.getUniqueVisitors = async function(period = null) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - period);
     whereClause.created_at = {
-      [sequelize.Op.gte]: startDate
+      [Op.gte]: startDate
     };
   }
   
@@ -591,7 +591,7 @@ Analytics.getReturningVisitors = async function(period = null) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - period);
     whereClause.created_at = {
-      [sequelize.Op.gte]: startDate
+      [Op.gte]: startDate
     };
   }
   
@@ -606,6 +606,38 @@ Analytics.getReturningVisitors = async function(period = null) {
   });
   
   return userCounts.length;
+};
+
+Analytics.getGeographicStats = async function(period = null) {
+  const whereClause = { 
+    event_type: 'page_view',
+    country: {
+      [Op.ne]: null
+    }
+  };
+  
+  if (period) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - period);
+    whereClause.created_at = {
+      [Op.gte]: startDate
+    };
+  }
+  
+  const results = await this.findAll({
+    attributes: [
+      'country',
+      'region',
+      'city',
+      [sequelize.fn('COUNT', sequelize.col('id')), 'visits']
+    ],
+    where: whereClause,
+    group: ['country', 'region', 'city'],
+    order: [[sequelize.fn('COUNT', sequelize.col('id')), 'DESC']],
+    limit: 50
+  });
+  
+  return results;
 };
 
 // Associations

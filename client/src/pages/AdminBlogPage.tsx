@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
-import { PlusCircle, Edit, Trash2, Eye, Calendar, User, Tag } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Eye, Calendar, User, Tag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { teamMembers } from '../services/TEAM_MEMBERS_DATA';
 
 interface Post {
@@ -36,6 +36,8 @@ const AdminBlogPage: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [filterAuthor, setFilterAuthor] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [postsPerPage] = useState<number>(5);
   const { token } = useAuth();
 
   const fetchPosts = async () => {
@@ -47,9 +49,7 @@ const AdminBlogPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/admin/posts', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/blog/admin/all');
       setPosts(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       setError('Failed to fetch posts.');
@@ -61,9 +61,7 @@ const AdminBlogPage: React.FC = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await api.get('/admin/categories', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get('/admin/categories');
       setCategories(response.data);
     } catch (err) {
       console.error('Failed to fetch categories:', err);
@@ -80,9 +78,7 @@ const AdminBlogPage: React.FC = () => {
   const handleDelete = async (postId: number) => {
     if (window.confirm('Are you sure you want to delete this post?')) {
       try {
-        await api.delete(`/admin/posts/${postId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await api.delete(`/admin/posts/${postId}`);
         setPosts(Array.isArray(posts) ? posts.filter(p => p.id !== postId) : []);
       } catch (err) {
         setError('Failed to delete post.');
@@ -94,8 +90,7 @@ const AdminBlogPage: React.FC = () => {
   const handleStatusChange = async (postId: number, newStatus: string) => {
     try {
       await api.patch(`/admin/posts/${postId}`, 
-        { status: newStatus },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { status: newStatus }
       );
       setPosts(Array.isArray(posts) ? posts.map(p => p.id === postId ? { ...p, status: newStatus } : p) : []);
     } catch (err) {
@@ -127,6 +122,18 @@ const AdminBlogPage: React.FC = () => {
     const authorMatch = filterAuthor === 'all' || post.author === filterAuthor;
     return statusMatch && categoryMatch && authorMatch;
   }) : [];
+
+  // Pagination logic
+  const totalPosts = filteredPosts.length;
+  const totalPages = Math.ceil(totalPosts / postsPerPage);
+  const startIndex = (currentPage - 1) * postsPerPage;
+  const endIndex = startIndex + postsPerPage;
+  const paginatedPosts = filteredPosts.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterStatus, filterCategory, filterAuthor]);
 
   const uniqueCategories = Array.isArray(posts) ? Array.from(new Set(posts.map(post => post.category))) : [];
   const uniqueAuthors = Array.isArray(posts) ? Array.from(new Set(posts.map(post => post.author))) : [];
@@ -257,7 +264,7 @@ const AdminBlogPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredPosts.map(post => (
+              {paginatedPosts.map(post => (
                 <tr key={post.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td className="px-6 py-4">
                     <div className="flex items-center">
@@ -270,7 +277,6 @@ const AdminBlogPage: React.FC = () => {
                       )}
                       <div>
                         <div className="text-sm font-medium text-gray-900 dark:text-white">{post.title}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">{post.excerpt}</div>
                       </div>
                     </div>
                   </td>
@@ -335,7 +341,7 @@ const AdminBlogPage: React.FC = () => {
 
         {/* Mobile Cards */}
         <div className="lg:hidden">
-          {filteredPosts.map(post => (
+          {paginatedPosts.map(post => (
             <div key={post.id} className="border-b border-gray-200 dark:border-gray-700 p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
               <div className="flex items-start mb-3">
                 {post.cover_image && (
@@ -348,9 +354,6 @@ const AdminBlogPage: React.FC = () => {
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">
                     {post.title}
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-2">
-                    {post.excerpt}
                   </div>
                   <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-1">
                     <User className="h-3 w-3 mr-1" />
@@ -411,7 +414,75 @@ const AdminBlogPage: React.FC = () => {
         </div>
       </div>
 
-      {filteredPosts.length === 0 && (
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 sm:px-6">
+          <div className="flex-1 flex justify-between sm:hidden">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="h-5 w-5" />
+              Previous
+            </button>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                Showing{" "}
+                <span className="font-medium">{startIndex + 1}</span>
+                {" "}to{" "}
+                <span className="font-medium">{Math.min(endIndex, totalPosts)}</span>
+                {" "}of{" "}
+                <span className="font-medium">{totalPosts}</span>
+                {" "}results
+              </p>
+            </div>
+            <div>
+              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                      page === currentPage
+                        ? "z-10 bg-blue-50 dark:bg-blue-900 border-blue-500 dark:border-blue-400 text-blue-600 dark:text-blue-200"
+                        : "bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {totalPosts === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500 dark:text-gray-400">No posts found matching your filters.</p>
         </div>
@@ -421,4 +492,4 @@ const AdminBlogPage: React.FC = () => {
   );
 };
 
-export default AdminBlogPage; 
+export default AdminBlogPage;

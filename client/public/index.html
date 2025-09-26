@@ -3,9 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="48x48" href="%PUBLIC_URL%/favicon-48x48.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="%PUBLIC_URL%/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="%PUBLIC_URL%/favicon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/favicon-16x16.png" />
     <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/logo.svg" />
-    <link rel="alternate icon" href="%PUBLIC_URL%/logo.svg" />
-    <link rel="shortcut icon" href="%PUBLIC_URL%/logo.svg" />
+    <link rel="shortcut icon" href="%PUBLIC_URL%/favicon-48x48.png" />
     
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#1fbbd2" />
@@ -20,14 +24,14 @@
       content="ClickBIT - Leading Web Development, Digital Marketing & IT Solutions in Australia. Custom software, mobile apps, cloud solutions, and comprehensive IT support for startups and small businesses. Get expert web design, development, and digital marketing services."
     />
     
-    <!-- Open Graph / Facebook -->
+    <!-- Open Graph / Facebook - Dynamic meta tags will be set by React Helmet -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://clickbit.com.au/" />
     <meta property="og:title" content="ClickBIT - Web Development, Digital Marketing & IT Solutions Australia" />
     <meta property="og:description" content="Leading web development, digital marketing & IT solutions in Australia. Custom software, mobile apps, cloud solutions & comprehensive IT support for startups and small businesses." />
     <meta property="og:image" content="https://clickbit.com.au/images/logos/logo-full.png" />
     
-    <!-- Twitter -->
+    <!-- Twitter - Dynamic meta tags will be set by React Helmet -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://clickbit.com.au/" />
     <meta property="twitter:title" content="ClickBIT - Web Development, Digital Marketing & IT Solutions Australia" />
@@ -66,70 +70,14 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;700&display=swap" as="style">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;700&display=swap" media="print" onload="this.media='all'; this.onload=null;">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;700&display=swap"></noscript>
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo.svg" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/apple-touch-icon.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <title>ClickBIT - Web Development, Digital Marketing & IT Solutions Australia | Custom Software, Mobile Apps & Cloud Solutions</title>
     
-    <!-- Google Analytics (GA4) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G2SP59398M"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-G2SP59398M');
-      
-      // Custom event tracking for key business interactions
-      function trackEvent(eventName, parameters = {}) {
-        gtag('event', eventName, parameters);
-      }
-      
-      // Track form submissions
-      document.addEventListener('DOMContentLoaded', function() {
-        const forms = document.querySelectorAll('form');
-        forms.forEach(form => {
-          form.addEventListener('submit', function() {
-            trackEvent('form_submit', {
-              form_name: form.getAttribute('data-form-name') || 'contact_form',
-              page_location: window.location.pathname
-            });
-          });
-        });
-        
-        // Track CTA button clicks
-        const ctaButtons = document.querySelectorAll('a[href*="/contact"], a[href*="/get-started"], a[href*="/services"]');
-        ctaButtons.forEach(button => {
-          button.addEventListener('click', function() {
-            trackEvent('cta_click', {
-              button_text: button.textContent.trim(),
-              destination: button.href,
-              page_location: window.location.pathname
-            });
-          });
-        });
-        
-        // Track phone number clicks
-        const phoneLinks = document.querySelectorAll('a[href^="tel:"]');
-        phoneLinks.forEach(link => {
-          link.addEventListener('click', function() {
-            trackEvent('phone_click', {
-              phone_number: link.href.replace('tel:', ''),
-              page_location: window.location.pathname
-            });
-          });
-        });
-        
-        // Track email clicks
-        const emailLinks = document.querySelectorAll('a[href^="mailto:"]');
-        emailLinks.forEach(link => {
-          link.addEventListener('click', function() {
-            trackEvent('email_click', {
-              email_address: link.href.replace('mailto:', ''),
-              page_location: window.location.pathname
-            });
-          });
-        });
-      });
-    </script>
+    <!-- Google Search Console Verification -->
+    <meta name="google-site-verification" content="FQDzsv5yqc4-86Y8cX5IO1j1PNlwiGXywjC7tE7Pzas" />
+    
+    <!-- GA4 Analytics loaded dynamically via SiteHead component -->
     
     <!-- Schema.org structured data -->
     <script type="application/ld+json">
@@ -150,9 +98,9 @@
         "availableLanguage": "English"
       },
       "sameAs": [
-        "https://www.linkedin.com/company/clickbit",
-        "https://x.com/ClickBITau",
-        "https://github.com/clickbitau"
+        "https://linkedin.clickbit.com.au",
+        "https://x.clickbit.com.au",
+        "https://github.clickbit.com.au"
       ],
       "serviceArea": {
         "@type": "Country",
@@ -190,9 +138,54 @@
       }
     }
     </script>
+    
+    <!-- Meta Pixel Code -->
+    <script>
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '1339343867819058');
+      fbq('track', 'PageView');
+    </script>
+    <noscript>
+      <img height="1" width="1" src="https://www.facebook.com/tr?id=1339343867819058&ev=PageView&noscript=1"/>
+    </noscript>
+    <!-- End Meta Pixel Code -->
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript>
+      You need to enable JavaScript to run this app.
+      
+      <!-- Static content for search engines when JS is disabled -->
+      <div style="max-width: 1200px; margin: 0 auto; padding: 20px; font-family: system-ui, sans-serif;">
+        <h1>ClickBIT - Web Development, Digital Marketing & IT Solutions Australia</h1>
+        <p>Leading web development, digital marketing & IT solutions in Australia. Custom software, mobile apps, cloud solutions & comprehensive IT support for startups and small businesses.</p>
+        
+        <h2>Our Services</h2>
+        <ul>
+          <li>Custom Web Development & Design</li>
+          <li>Mobile App Development (iOS & Android)</li>
+          <li>Digital Marketing & SEO</li>
+          <li>Cloud Solutions & IT Infrastructure</li>
+          <li>Custom Software Development</li>
+          <li>UI/UX Design & Branding</li>
+        </ul>
+        
+        <h2>Our Portfolio</h2>
+        <p>Explore our successful projects including:</p>
+        <ul>
+          <li>High-Performance E-Commerce Website Build</li>
+          <li>Turning Social Platforms into a Lead-Generating Machine</li>
+          <li>From Brand Idea to Brand Identity: Making It Unforgettable</li>
+          <li>UI/UX Design Solutions for Healthcare Apps</li>
+          <li>Custom CRM Development</li>
+          <li>Digital Marketing Campaigns for Retail Brands</li>
+        </ul>
+        
+        <h2>About ClickBIT</h2>
+        <p>Our excellent team crafts exceptional digital solutions, showcasing our expertise and commitment to delivering exceptional results for businesses across Australia.</p>
+        
+        <p><strong>Contact us:</strong> Get expert web design, development, and digital marketing services.</p>
+      </div>
+    </noscript>
     <div id="root"></div>
     <!-- For admin portal, create admin.html with <div id='admin-root'></div> -->
   </body>

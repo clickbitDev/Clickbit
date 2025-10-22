@@ -8,8 +8,6 @@ import Error404Page from '../pages/Error404Page';
 import Error403Page from '../pages/Error403Page';
 import Error503Page from '../pages/Error503Page';
 import ProtectedRoute from './ProtectedRoute';
-// Admin Pages - All lazy loaded since they're admin-only
-import AdminRoute from './AdminRoute';
 
 // Loading component for better UX
 const PageLoadingSpinner = () => (
@@ -41,18 +39,6 @@ const ResetPasswordPage = React.lazy(() => import('../pages/ResetPasswordPage'))
 const VerifyEmailPage = React.lazy(() => import('../pages/VerifyEmailPage'));
 const ErrorTestPage = React.lazy(() => import('../pages/ErrorTestPage'));
 
-// Admin pages - all lazy loaded
-const AdminDashboardPage = React.lazy(() => import('../pages/AdminDashboardPage'));
-const AdminBlogPage = React.lazy(() => import('../pages/AdminBlogPage'));
-const AdminBlogPostForm = React.lazy(() => import('../pages/AdminBlogPostForm'));
-const AdminPortfolioPage = React.lazy(() => import('../pages/AdminPortfolioPage'));
-const AdminPortfolioItemForm = React.lazy(() => import('../pages/AdminPortfolioItemForm'));
-const AdminUsersPage = React.lazy(() => import('../pages/AdminUsersPage'));
-const AdminContactsPage = React.lazy(() => import('../pages/AdminContactsPage'));
-const AdminServicesPage = React.lazy(() => import('../pages/AdminServicesPage'));
-const AdminTeamPage = React.lazy(() => import('../pages/AdminTeamPage'));
-const AdminMarketingIntegrationsPage = React.lazy(() => import('../pages/AdminMarketingIntegrationsPage'));
-const AdminBillingSettingsPage = React.lazy(() => import('../pages/AdminBillingSettingsPage'));
 const CheckoutCancelledPage = React.lazy(() => import('../pages/CheckoutCancelledPage'));
 const CheckoutSuccessPage = React.lazy(() => import('../pages/CheckoutSuccessPage'));
 const TestSuccessPage = React.lazy(() => import('../pages/TestSuccessPage'));
@@ -99,22 +85,6 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/terms" element={<Suspense fallback={<PageLoadingSpinner />}><TermsOfServicePage /></Suspense>} />
         <Route path="/test-errors" element={<Suspense fallback={<PageLoadingSpinner />}><ErrorTestPage /></Suspense>} />
         
-        {/* Admin Routes - All lazy loaded */}
-        <Route path="/admin/*" element={<AdminRoute />}>
-          <Route path="dashboard" element={<Suspense fallback={<PageLoadingSpinner />}><AdminDashboardPage /></Suspense>} />
-          <Route path="blog" element={<Suspense fallback={<PageLoadingSpinner />}><AdminBlogPage /></Suspense>} />
-          <Route path="blog/new" element={<Suspense fallback={<PageLoadingSpinner />}><AdminBlogPostForm /></Suspense>} />
-          <Route path="blog/edit/:id" element={<Suspense fallback={<PageLoadingSpinner />}><AdminBlogPostForm /></Suspense>} />
-          <Route path="portfolio" element={<Suspense fallback={<PageLoadingSpinner />}><AdminPortfolioPage /></Suspense>} />
-          <Route path="portfolio/new" element={<Suspense fallback={<PageLoadingSpinner />}><AdminPortfolioItemForm /></Suspense>} />
-          <Route path="portfolio/edit/:id" element={<Suspense fallback={<PageLoadingSpinner />}><AdminPortfolioItemForm /></Suspense>} />
-          <Route path="users" element={<Suspense fallback={<PageLoadingSpinner />}><AdminUsersPage /></Suspense>} />
-          <Route path="contacts" element={<Suspense fallback={<PageLoadingSpinner />}><AdminContactsPage /></Suspense>} />
-          <Route path="services" element={<Suspense fallback={<PageLoadingSpinner />}><AdminServicesPage /></Suspense>} />
-          <Route path="team" element={<Suspense fallback={<PageLoadingSpinner />}><AdminTeamPage /></Suspense>} />
-          <Route path="marketing" element={<Suspense fallback={<PageLoadingSpinner />}><AdminMarketingIntegrationsPage /></Suspense>} />
-          <Route path="billing" element={<Suspense fallback={<PageLoadingSpinner />}><AdminBillingSettingsPage /></Suspense>} />
-        </Route>
         
         {/* Error Pages - Keep synchronous for instant error handling */}
         <Route path="/error/403" element={<Error403Page />} />

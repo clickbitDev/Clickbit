@@ -334,7 +334,7 @@ const AdminDashboardPage: React.FC = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Website Traffic</p>
                 <p className="text-2xl font-bold text-pink-600 dark:text-pink-400">{stats.totalAnalyticsEvents}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Total events</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Page views (30 days)</p>
               </div>
               <div className="p-3 bg-pink-100 dark:bg-pink-900/30 rounded-lg">
                 <Globe className="h-6 w-6 text-pink-600 dark:text-pink-400" />

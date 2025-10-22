@@ -11,6 +11,7 @@ import Layout from './components/Layout/Layout';
 import AdminLayout from './components/Layout/AdminLayout';
 import ScrollToTop from './components/ScrollToTop';
 import AnimatedRoutes from './components/AnimatedRoutes';
+import PageViewTracker from './components/PageViewTracker';
 
 import { ErrorHandler } from './utils/errorHandler';
 import './services/analytics'; // Initialize analytics service
@@ -37,59 +38,15 @@ const AdminMarketingIntegrationsPage = React.lazy(() => import('./pages/AdminMar
 const AdminBillingSettingsPage = React.lazy(() => import('./pages/AdminBillingSettingsPage'));
 const AdminAnalyticsPage = React.lazy(() => import('./pages/AdminAnalyticsPage'));
 
-// Component to handle layout switching
-const AppContent: React.FC = () => {
-  const location = useLocation();
+// Component to initialize error handler
+const ErrorHandlerInitializer: React.FC = () => {
   const navigate = useNavigate();
-  const isAdminRoute = location.pathname.startsWith('/admin');
-
-  // Initialize error handler with navigation
+  
   React.useEffect(() => {
     ErrorHandler.setNavigate(navigate);
   }, [navigate]);
-
-  if (isAdminRoute) {
-    return (
-      <AdminLayout>
-        <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
-          <Routes>
-            <Route path="/admin" element={<AdminRoute />}>
-              <Route index element={<Navigate to="/admin/dashboard" replace />} />
-              <Route path="dashboard" element={<AdminDashboardPage />} />
-              <Route path="orders" element={<AdminOrdersPage />} />
-              <Route path="blog" element={<AdminBlogPage />} />
-              <Route path="blog/new" element={<AdminBlogPostForm />} />
-              <Route path="blog/edit/:id" element={<AdminBlogPostForm />} />
-              <Route path="blog/scheduled" element={<AdminScheduledPostsPage />} />
-              <Route path="portfolio" element={<AdminPortfolioPage />} />
-              <Route path="portfolio/new" element={<AdminPortfolioItemForm />} />
-              <Route path="portfolio/edit/:id" element={<AdminPortfolioItemForm />} />
-              <Route element={<AdminOnlyRoute />}>
-                <Route path="users" element={<AdminUsersPage />} />
-                <Route path="users/new" element={<AdminUserForm />} />
-                <Route path="users/edit/:id" element={<AdminUserForm />} />
-              </Route>
-              <Route path="contacts" element={<AdminContactsPage />} />
-              <Route path="services" element={<AdminServicesPage />} />
-              <Route path="team" element={<AdminTeamPage />} />
-              <Route path="reviews" element={<AdminReviewsPage />} />
-              <Route path="content" element={<AdminContentManagementPage />} />
-              <Route path="services/:slug/detail" element={<AdminServicesDetailPage />} />
-                            <Route path="marketing" element={<AdminMarketingIntegrationsPage />} />
-              <Route path="billing" element={<AdminBillingSettingsPage />} />
-              <Route path="analytics" element={<AdminAnalyticsPage />} />
-            </Route>
-          </Routes>
-        </React.Suspense>
-      </AdminLayout>
-    );
-  }
-
-  return (
-    <Layout>
-      <AnimatedRoutes />
-    </Layout>
-  );
+  
+  return null;
 };
 
 const App: React.FC = () => {
@@ -103,7 +60,170 @@ const App: React.FC = () => {
               <CartProvider>
                 <ContentProvider>
                   <HelmetProvider>
-                    <AppContent />
+                    <ErrorHandlerInitializer />
+                    <PageViewTracker />
+                    <Routes>
+                      {/* Admin Routes */}
+                      <Route path="/admin" element={<AdminRoute />}>
+                        <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                        <Route path="dashboard" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminDashboardPage />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route path="orders" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminOrdersPage />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route path="blog" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminBlogPage />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route path="blog/new" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminBlogPostForm />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route path="blog/edit/:id" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminBlogPostForm />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route path="blog/scheduled" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminScheduledPostsPage />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route path="portfolio" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminPortfolioPage />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route path="portfolio/new" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminPortfolioItemForm />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route path="portfolio/edit/:id" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminPortfolioItemForm />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route element={<AdminOnlyRoute />}>
+                          <Route path="users" element={
+                            <AdminLayout>
+                              <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                                <AdminUsersPage />
+                              </React.Suspense>
+                            </AdminLayout>
+                          } />
+                          <Route path="users/new" element={
+                            <AdminLayout>
+                              <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                                <AdminUserForm />
+                              </React.Suspense>
+                            </AdminLayout>
+                          } />
+                          <Route path="users/edit/:id" element={
+                            <AdminLayout>
+                              <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                                <AdminUserForm />
+                              </React.Suspense>
+                            </AdminLayout>
+                          } />
+                        </Route>
+                        <Route path="contacts" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminContactsPage />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route path="services" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminServicesPage />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route path="team" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminTeamPage />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route path="reviews" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminReviewsPage />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route path="content" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminContentManagementPage />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route path="services/:slug/detail" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminServicesDetailPage />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route path="marketing" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminMarketingIntegrationsPage />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route path="billing" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminBillingSettingsPage />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route path="analytics" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminAnalyticsPage />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                      </Route>
+                      
+                      {/* Public Routes */}
+                      <Route path="/*" element={
+                        <Layout>
+                          <AnimatedRoutes />
+                        </Layout>
+                      } />
+                    </Routes>
                   </HelmetProvider>
                 </ContentProvider>
               </CartProvider>

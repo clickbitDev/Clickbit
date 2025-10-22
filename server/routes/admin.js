@@ -61,7 +61,7 @@ router.get(
         Service.count(),
         Team.count(),
         Order.count(),
-        Analytics.count().catch(() => 0)
+        Analytics.getPageViews(null, 30).then(views => views.length).catch(() => 0)
       ]);
 
       // Revenue calculations
@@ -153,6 +153,17 @@ router.get(
       const prevMonthContactsValue = contactsLastMonth.status === 'fulfilled' ? contactsLastMonth.value : 0;
       const contactGrowth = prevMonthContactsValue > 0 ? ((currentMonthContacts - prevMonthContactsValue) / prevMonthContactsValue * 100).toFixed(1) : 0;
 
+      // 🔥 FIX: Format recent orders to ensure total_amount is a number
+      const formattedRecentOrders = recentOrders.status === 'fulfilled' 
+        ? recentOrders.value.map(order => ({
+            id: order.id,
+            order_number: order.order_number,
+            total_amount: parseFloat(order.total_amount) || 0.00, // ✅ Convert to number
+            status: order.status,
+            created_at: order.created_at
+          }))
+        : [];
+
       const stats = {
         // Basic counts
         totalUsers: totalUsers.status === 'fulfilled' ? totalUsers.value : 0,
@@ -167,9 +178,9 @@ router.get(
         totalOrders: totalOrders.status === 'fulfilled' ? totalOrders.value : 0,
         totalAnalyticsEvents: totalAnalytics.status === 'fulfilled' ? totalAnalytics.value : 0,
 
-        // Revenue analytics
-        totalRevenue: totalRevenue.status === 'fulfilled' ? (totalRevenue.value || 0) : 0,
-        monthlyRevenue: monthlyRevenue.status === 'fulfilled' ? (monthlyRevenue.value || 0) : 0,
+        // 🔥 FIX: Revenue analytics - ensure numbers
+        totalRevenue: parseFloat(totalRevenue.status === 'fulfilled' ? (totalRevenue.value || 0) : 0),
+        monthlyRevenue: parseFloat(monthlyRevenue.status === 'fulfilled' ? (monthlyRevenue.value || 0) : 0),
 
         // Lead generation analytics
         newContactsThisWeek: newContactsThisWeek.status === 'fulfilled' ? newContactsThisWeek.value : 0,
@@ -185,7 +196,7 @@ router.get(
 
         // Recent activity
         recentContacts: recentContacts.status === 'fulfilled' ? recentContacts.value : [],
-        recentOrders: recentOrders.status === 'fulfilled' ? recentOrders.value : [],
+        recentOrders: formattedRecentOrders, // ✅ Use formatted orders
         newCommentsThisWeek: recentComments.status === 'fulfilled' ? recentComments.value : 0
       };
 
@@ -2461,7 +2472,7 @@ router.get(
         guest_email: order.guest_email,
         status: order.status,
         payment_status: order.payment_status,
-        total_amount: parseFloat(order.total_amount),
+        total_amount: parseFloat(order.total_amount)|| 0.00,
         currency: order.currency,
         items_count: order.items ? order.items.length : order.items_count,
         created_at: order.created_at,

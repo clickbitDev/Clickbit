@@ -42,18 +42,23 @@ const AdminBlogPage: React.FC = () => {
 
   const fetchPosts = async () => {
     if (!token) {
+      console.log('No authentication token found');
       setError('Authentication token not found.');
       setLoading(false);
       return;
     }
+    console.log('Token found, fetching posts...');
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/blog/admin/all');
-      setPosts(Array.isArray(response.data) ? response.data : []);
-    } catch (err) {
-      setError('Failed to fetch posts.');
-      console.error(err);
+      const response = await api.get(`/admin/posts?t=${Date.now()}`);
+      console.log('Admin posts response:', response.data);
+      const blogPosts: Post[] = response?.data || [];
+      console.log('Parsed blog posts:', blogPosts);
+      setPosts(blogPosts);
+    } catch (err: any) {
+      console.error('Error fetching posts:', err);
+      setError(err.response?.data?.message || err.message || 'Failed to fetch posts.');
     } finally {
       setLoading(false);
     }

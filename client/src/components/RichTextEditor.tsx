@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+
+// Type assertion to fix TypeScript compatibility
+
 import SecureHtmlRenderer from './SecureHtmlRenderer';
 import { Eye, Code, Save, X } from 'lucide-react';
+
+const QuillEditor = ReactQuill as any;
 
 interface RichTextEditorProps {
   value: string;
@@ -126,7 +131,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const renderEditor = () => (
     <div className="h-full">
-      <ReactQuill
+      <QuillEditor
         theme="snow"
         value={htmlSource}
         onChange={handleQuillChange}

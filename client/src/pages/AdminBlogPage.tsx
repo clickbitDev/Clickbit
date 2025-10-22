@@ -30,7 +30,7 @@ interface Category {
 
 const AdminBlogPage: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
-  // const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');

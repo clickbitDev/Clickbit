@@ -3,7 +3,7 @@ import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { PlusCircle, Edit, Trash2, Eye, Calendar, User, Tag, ChevronLeft, ChevronRight } from 'lucide-react';
-import { teamMembers } from '../services/TEAM_MEMBERS_DATA';
+// import { teamMembers } from '../services/TEAM_MEMBERS_DATA';
 
 interface Post {
   id: number;
@@ -30,7 +30,7 @@ interface Category {
 
 const AdminBlogPage: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  // const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -104,22 +104,22 @@ const AdminBlogPage: React.FC = () => {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      draft: { color: 'bg-gray-100 text-gray-800', label: 'Draft' },
-      published: { color: 'bg-green-100 text-green-800', label: 'Published' },
-      scheduled: { color: 'bg-blue-100 text-blue-800', label: 'Scheduled' },
-      archived: { color: 'bg-yellow-100 text-yellow-800', label: 'Archived' }
-    };
-    
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
-    
-    return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
-        {config.label}
-      </span>
-    );
-  };
+  // const getStatusBadge = (status: string) => {
+  //   const statusConfig = {
+  //     draft: { color: 'bg-gray-100 text-gray-800', label: 'Draft' },
+  //     published: { color: 'bg-green-100 text-green-800', label: 'Published' },
+  //     scheduled: { color: 'bg-blue-100 text-blue-800', label: 'Scheduled' },
+  //     archived: { color: 'bg-yellow-100 text-yellow-800', label: 'Archived' }
+  //   };
+  //   
+  //   const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
+  //   
+  //   return (
+  //     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
+  //       {config.label}
+  //     </span>
+  //   );
+  // };
 
   const filteredPosts = Array.isArray(posts) ? posts.filter(post => {
     const statusMatch = filterStatus === 'all' || post.status === filterStatus;

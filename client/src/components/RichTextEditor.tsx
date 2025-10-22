@@ -5,7 +5,7 @@ import 'react-quill/dist/quill.snow.css';
 // Type assertion to fix TypeScript compatibility
 
 import SecureHtmlRenderer from './SecureHtmlRenderer';
-import { Eye, Code, Save, X } from 'lucide-react';
+import { Eye, Code, Save } from 'lucide-react';
 
 const QuillEditor = ReactQuill as any;
 
@@ -143,17 +143,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     </div>
   );
 
-  const renderSourceEditor = () => (
-    <div className="h-full">
-      <textarea
-        value={htmlSource}
-        onChange={handleSourceChange}
-        placeholder={placeholder}
-        className="w-full h-full p-4 border-0 resize-none focus:outline-none font-mono text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
-        style={{ height: height - 50 }}
-      />
-    </div>
-  );
+  // const renderSourceEditor = () => (
+  //   <div className="h-full">
+  //     <textarea
+  //       value={htmlSource}
+  //       onChange={handleSourceChange}
+  //       placeholder={placeholder}
+  //       className="w-full h-full p-4 border-0 resize-none focus:outline-none font-mono text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+  //       style={{ height: height - 50 }}
+  //     />
+  //   </div>
+  // );
 
   const renderPreview = () => (
     <div 

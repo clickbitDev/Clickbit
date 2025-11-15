@@ -30,7 +30,7 @@ router.get('/', protect, authorize('admin', 'manager'), async (req, res) => {
 // @access  Private/Admin/Manager
 router.post('/', protect, authorize('admin', 'manager'), async (req, res) => {
   try {
-    const { first_name, last_name, email, password, role } = req.body;
+    const { first_name, last_name, email, password, role, email_verified } = req.body;
     if (!first_name || !last_name || !email || !password || !role) {
       return res.status(400).json({ message: 'Please provide all required fields.' });
     }
@@ -40,7 +40,20 @@ router.post('/', protect, authorize('admin', 'manager'), async (req, res) => {
       return res.status(403).json({ message: 'Managers can only create customer accounts.' });
     }
 
-    const newUser = await User.create({ first_name, last_name, email, password, role });
+    // Auto-verify users created by admins (unless explicitly set to false)
+    // Only admins can set email_verified, managers cannot
+    const shouldVerify = req.user.role === 'admin' 
+      ? (email_verified !== undefined ? email_verified : true)
+      : false;
+
+    const newUser = await User.create({ 
+      first_name, 
+      last_name, 
+      email, 
+      password, 
+      role,
+      email_verified: shouldVerify
+    });
     res.status(201).json(newUser);
   } catch (error) {
     res.status(500).json({ message: 'Error creating user', error: error.message });
@@ -69,7 +82,7 @@ router.get('/:id', protect, authorize('admin', 'manager'), async (req, res) => {
 // @access  Private/Admin/Manager
 router.put('/:id', protect, authorize('admin', 'manager'), async (req, res) => {
   try {
-    const { first_name, last_name, email, role, status, password } = req.body;
+    const { first_name, last_name, email, role, status, password, email_verified } = req.body;
     const user = await User.findByPk(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -85,11 +98,17 @@ router.put('/:id', protect, authorize('admin', 'manager'), async (req, res) => {
       return res.status(403).json({ message: 'Managers can only assign customer roles.' });
     }
 
-    user.first_name = first_name || user.first_name;
-    user.last_name = last_name || user.last_name;
-    user.email = email || user.email;
-    user.role = role || user.role;
-    user.status = status || user.status;
+    // Update fields only if they are provided (not undefined)
+    if (first_name !== undefined) user.first_name = first_name;
+    if (last_name !== undefined) user.last_name = last_name;
+    if (email !== undefined) user.email = email;
+    if (role !== undefined) user.role = role;
+    if (status !== undefined) user.status = status;
+
+    // Only admins can update email_verified status
+    if (req.user.role === 'admin' && email_verified !== undefined) {
+      user.email_verified = email_verified;
+    }
 
     // If a new password is provided, it will be hashed by the beforeUpdate hook
     if (password) {

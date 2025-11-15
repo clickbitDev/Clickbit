@@ -433,7 +433,7 @@ const socialMediaCrawlerMiddleware = async (req, res, next) => {
     // Set appropriate headers
     res.set({
       'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'public, max-age=300', // Cache for 5 minutes
+      'Cache-Control': 'no-cache, no-store, must-revalidate', // Disable caching temporarily
       'X-Meta-Injected': 'true'
     });
     

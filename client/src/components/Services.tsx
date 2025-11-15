@@ -106,13 +106,17 @@ const Services = () => {
   };
 
   if (loading) return <div className="text-center py-16">Loading services...</div>;
-  if (error) return <div className="text-center py-16 text-red-500">{error}</div>;
-
-
 
   return (
     <div className="bg-white dark:bg-gray-900 py-16 md:py-24">
       <div className="container mx-auto px-4">
+        {error && (
+          <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg text-center">
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              Showing cached services. Some features may be limited.
+            </p>
+          </div>
+        )}
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white">
             Our <span className="bg-gradient-to-r from-[#1FBBD2] to-[#F39C12] text-transparent bg-clip-text">Services</span>
@@ -125,7 +129,7 @@ const Services = () => {
             <button
               key={category}
               onClick={() => setActiveCategory(category)}
-              className={`px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 ${
+              className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 ease-in-out ${
                 activeCategory === category 
                 ? 'bg-[#1FBBD2] text-white' 
                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
@@ -144,10 +148,15 @@ const Services = () => {
                   key={service.id || service.name}
                   className={getServiceItemClasses(filteredServices.length, index)}
                   layout
-                  initial={{ opacity: 0, scale: 0.8 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ 
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 25,
+                    mass: 0.5
+                  }}
                 >
                   <Link to={service.href || `/services/${service.slug}`} className="block h-full">
                     <InteractiveCard>

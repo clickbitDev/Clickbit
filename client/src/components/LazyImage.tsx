@@ -94,7 +94,7 @@ const LazyImage: React.FC<LazyImageProps> = ({
         src={imageSrc}
         alt={alt}
         className={`
-          transition-opacity duration-300 w-full h-full object-cover
+          transition-opacity duration-500 ease-out w-full h-full object-cover
           ${isLoaded ? 'opacity-100' : 'opacity-70'}
           ${hasError ? 'filter grayscale' : ''}
         `}

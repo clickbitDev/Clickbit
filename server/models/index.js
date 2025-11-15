@@ -18,6 +18,7 @@ const Comment = require('./Comment');
 const Service = require('./Service');
 const Team = require('./Team');
 const Review = require('./Review');
+const Notification = require('./Notification');
 
 // Define associations
 const defineAssociations = () => {
@@ -94,5 +95,6 @@ module.exports = {
   Service,
   Team,
   Review,
+  Notification,
   initializeModels,
 }; 

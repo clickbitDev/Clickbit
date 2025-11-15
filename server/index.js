@@ -34,6 +34,7 @@ const teamRoutes = require('./routes/team');
 const reviewsRoutes = require('./routes/reviews');
 const publicContentRoutes = require('./routes/publicContent');
 const uploadRoutes = require('./routes/upload');
+const notificationsRoutes = require('./routes/notifications');
 const SocketService = require('./services/socketService');
 const { botHandler } = require('./middleware/botDetection');
 const { socialMediaCrawlerMiddleware } = require('./middleware/socialMediaCrawler');
@@ -263,6 +264,7 @@ app.use('/api/team', teamRoutes);
 app.use('/api/reviews', reviewsRoutes);
 app.use('/api/public', publicContentRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

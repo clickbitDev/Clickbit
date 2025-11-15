@@ -436,4 +436,12 @@ export const adminAPI = {
   updateBillingSettings: (data: any) => api.put('/admin/billing-settings', data),
 };
 
+// Notifications API
+export const notificationsAPI = {
+  getNotifications: (params?: { limit?: number; offset?: number; unread_only?: boolean }) => 
+    api.get('/notifications', { params }),
+  markAsRead: (id: number) => api.put(`/notifications/${id}/read`),
+  markAllAsRead: () => api.put('/notifications/read-all'),
+};
+
 export default api; 

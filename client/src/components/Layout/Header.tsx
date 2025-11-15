@@ -11,8 +11,6 @@ import { Menu, X, Search, LayoutGrid, Code, Server, BrainCircuit, Building2, Pal
 // TODO: Replace static data with API call to backend for services
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '../ThemeToggle';
-import { teamMembers } from '../../services/TEAM_MEMBERS_DATA';
-import { softwareLogos } from '../../services/TECHNOLOGY_LOGOS_DATA';
 import { getServiceIcon } from '../../services/SERVICE_ICONS_MAPPING';
 
 // Icon mapping for service categories
@@ -55,9 +53,9 @@ const mobileNavItemVariants = {
 
 const Header: React.FC = () => {
   const { theme } = useTheme();
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, isOpen: isSidebarOpen } = useSidebar();
   const { itemCount } = useCart();
-  const { isAuthenticated, logout, user, isLoading } = useAuth();
+  const { isAuthenticated, logout, user, isLoading, token } = useAuth();
   const { isConnected, isAuthenticated: socketAuthenticated, activeSessionUser } = useSocket();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isServicesMenuOpen, setServicesMenuOpen] = useState(false);
@@ -143,6 +141,7 @@ const Header: React.FC = () => {
   
   const handleSidebarToggle = (event: React.MouseEvent) => {
     event.stopPropagation();
+    // Toggle sidebar - if open, it will close; if closed, it will open
     toggleSidebar();
   };
 
@@ -153,49 +152,69 @@ const Header: React.FC = () => {
     setIsMobileUserTooltipOpen(false);
   };
   
-  const allServices = Object.values(serviceCategories).flatMap((category: any) => (category.items || []).map((item: any) => ({
-    type: 'service',
-    name: item.name,
-    desc: item.desc || item.description,
-    href: item.href || `/services/${item.slug}`,
-    icon: categoryIcons[category.name] || Award
-  })));
-  
-  const allTeamMembers = teamMembers.map(member => ({
-    type: 'team',
-    name: member.name,
-    desc: member.role,
-    href: '/about',
-    icon: null
-  }));
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
-  const allPages = [
-    { type: 'page', name: 'Services', desc: 'View all our services', href: '/services', icon: null },
-    { type: 'page', name: 'About Us', desc: 'Learn more about our company', href: '/about', icon: null },
-    { type: 'page', name: 'Contact Us', desc: 'Get in touch with us', href: '/contact', icon: null },
-    { type: 'page', name: 'Blog', desc: 'Read our latest articles', href: '/blog', icon: null },
-    { type: 'page', name: 'Portfolio', desc: 'See our featured work', href: '/portfolio', icon: null },
-  ];
-
-  const allTechnologies = Object.entries(softwareLogos).flatMap(([serviceSlug, techs]) => 
-    Object.keys(techs).map(techName => {
-      const service = Object.values(serviceCategories).flatMap(cat => cat.items).find(item => item.href === `/services/${serviceSlug}`);
-      return {
-        type: 'technology',
-        name: techName,
-        desc: service ? `Used in our ${service.name} service` : 'Technology we use',
-        href: service ? service.href : '/services',
-        icon: null
+  // Comprehensive search across all content
+  useEffect(() => {
+    const performSearch = async () => {
+      if (!searchQuery.trim()) {
+        setSearchResults([]);
+        return;
       }
-    })
-  );
 
-  const allItems = [...allServices, ...allTeamMembers, ...allPages, ...allTechnologies];
+      setIsSearching(true);
+      try {
+        const API_BASE = process.env.REACT_APP_API_URL || '/api';
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json'
+        };
+        
+        // Include auth token if user is authenticated
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch(`${API_BASE}/public/search?q=${encodeURIComponent(searchQuery)}&limit=20`, {
+          headers,
+          credentials: 'include'
+        });
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Search failed:', response.status, errorData);
+          throw new Error('Search failed');
+        }
+        const data = await response.json();
+        
+        // Debug logging
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Search results:', data);
+          console.log('Is admin:', data.isAdmin);
+          console.log('Total results:', data.total);
+        }
+        
+        // Format results for display
+        const formattedResults = (data.all || []).map((item: any) => ({
+          type: item.type,
+          name: item.name,
+          desc: item.description || '',
+          href: item.href,
+          category: item.category || item.client || ''
+        }));
+        
+        setSearchResults(formattedResults);
+      } catch (error) {
+        console.error('Search error:', error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
 
-  const filteredResults = searchQuery.trim().length === 0 ? [] : allItems.filter(item =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (item.desc && item.desc.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+    // Debounce search
+    const timeoutId = setTimeout(performSearch, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
 
   return (
     <>
@@ -232,13 +251,22 @@ const Header: React.FC = () => {
 
           {/* MAIN HEADER CAPSULE */}
           <header className={headerClasses}>
-            <div className="container mx-auto px-4">
-              <div className="relative flex items-center justify-between h-20">
+            <div className="container mx-auto px-2 xl:px-4">
+              <div className="relative flex items-center justify-between h-20 gap-2">
                 {/* Left Section */}
-                <div className="flex items-center justify-start xl:w-1/4">
-                  <button onClick={handleSidebarToggle} className="p-2 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Open sidebar menu">
+                <div className="flex items-center justify-start xl:w-1/4 flex-shrink-0">
+                  <motion.button 
+                    onClick={handleSidebarToggle} 
+                    data-sidebar-toggle
+                    className={`p-2 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${isSidebarOpen ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
+                    aria-label={isSidebarOpen ? "Close sidebar menu" : "Open sidebar menu"}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95, rotate: 90 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                    animate={{ rotate: isSidebarOpen ? 90 : 0 }}
+                  >
                     <LayoutGrid size={22} />
-                  </button>
+                  </motion.button>
                   <button
                     className="p-2 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                     onClick={() => setIsSearchOpen(true)}
@@ -249,20 +277,20 @@ const Header: React.FC = () => {
                 </div>
 
                 {/* Center Section */}
-                <div className="flex items-center justify-center absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                  <nav className="hidden xl:flex items-center space-x-2">
+                <div className="flex-1 flex items-center justify-center min-w-0">
+                  <nav className="hidden xl:flex items-center space-x-2 flex-wrap justify-center gap-2">
                     <NavLink 
                       to="/about" 
-                      className={({isActive}) => `px-5 py-2.5 rounded-full font-medium text-base transition-colors duration-300 ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                      className={({isActive}) => `px-4 py-2 rounded-full font-medium text-sm xl:text-base transition-colors duration-300 whitespace-nowrap ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
                     >
                       About
                     </NavLink>
                     <div onMouseEnter={handleServicesMenuEnter} onMouseLeave={handleServicesMenuLeave} className="relative">
                       <NavLink
                         to="/services"
-                        className={({isActive}) => `px-5 py-2.5 rounded-full flex items-center font-medium text-base transition-colors duration-300 ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                        className={({isActive}) => `px-4 py-2 rounded-full flex items-center font-medium text-sm xl:text-base transition-colors duration-300 whitespace-nowrap ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
                       >
-                        Services <ChevronDownIcon className="h-5 w-5 ml-1" />
+                        Services <ChevronDownIcon className="h-4 w-4 xl:h-5 xl:w-5 ml-1" />
                       </NavLink>
                       {isServicesMenuOpen && (
                         <div className="absolute -left-1/2 top-full mt-0 w-screen max-w-2xl pointer-events-none">
@@ -388,28 +416,28 @@ const Header: React.FC = () => {
                       )}
                     </div>
                   </nav>
-                  <div className="px-6 flex-shrink-0">
+                  <div className="px-3 xl:px-6 flex-shrink-0 mx-2">
                     <Link to="/">
-                      <img src={theme === 'light' ? "/logo.svg" : "/logo-dark.svg"} alt="ClickBit Logo" className="h-8" loading="eager" />
+                      <img src={theme === 'light' ? "/logo.svg" : "/logo-dark.svg"} alt="ClickBit Logo" className="h-6 xl:h-8" loading="eager" />
                     </Link>
                   </div>
-                  <nav className="hidden xl:flex items-center space-x-2">
+                  <nav className="hidden xl:flex items-center space-x-2 flex-wrap justify-center gap-2">
                     <NavLink 
                       to="/portfolio" 
-                      className={({isActive}) => `px-5 py-2.5 rounded-full font-medium text-base transition-colors duration-300 ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                      className={({isActive}) => `px-4 py-2 rounded-full font-medium text-sm xl:text-base transition-colors duration-300 whitespace-nowrap ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
                     >
                       Portfolio
                     </NavLink>
                     <NavLink 
                       to="/contact" 
-                      className={({isActive}) => `px-5 py-2.5 rounded-full font-medium text-base transition-colors duration-300 ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                      className={({isActive}) => `px-4 py-2 rounded-full font-medium text-sm xl:text-base transition-colors duration-300 whitespace-nowrap ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
                     >
                       Contact
                     </NavLink>
                     {isAuthenticated && (user?.role === 'admin' || user?.role === 'manager') && (
                       <NavLink 
                         to="/admin/dashboard" 
-                        className={({isActive}) => `px-5 py-2.5 rounded-full font-medium text-base transition-colors duration-300 ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                        className={({isActive}) => `px-4 py-2 rounded-full font-medium text-sm xl:text-base transition-colors duration-300 whitespace-nowrap ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
                       >
                         Dashboard
                       </NavLink>
@@ -640,7 +668,7 @@ const Header: React.FC = () => {
                     <Search className="h-6 w-6 text-gray-400 mr-4 flex-shrink-0" />
                     <input
                       type="text"
-                      placeholder="Search services, pages, team members..."
+                      placeholder="Search website..."
                       className="w-full bg-transparent focus:outline-none text-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
@@ -655,10 +683,19 @@ const Header: React.FC = () => {
                   </div>
                 </div>
                 <div className="p-4 max-h-[60vh] overflow-y-auto">
-                  {filteredResults.length > 0 ? (
+                  {isSearching ? (
+                    <div className="text-center py-12">
+                      <div className="mx-auto w-12 h-12 mb-4 text-gray-400 animate-spin">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      </div>
+                      <p className="text-gray-500 dark:text-gray-400">Searching...</p>
+                    </div>
+                  ) : searchResults.length > 0 ? (
                     <ul className="space-y-2">
-                      {filteredResults.map((item: any, index) => (
-                        <li key={`${item.name}-${index}`}>
+                      {searchResults.map((item: any, index) => (
+                        <li key={`${item.type}-${item.name}-${index}`}>
                           <Link 
                             to={item.href}
                             onClick={() => setIsSearchOpen(false)}
@@ -673,6 +710,7 @@ const Header: React.FC = () => {
                               <div className="flex-1">
                                 <p className="font-semibold text-gray-900 dark:text-white">{item.name}</p>
                                 {item.desc && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{item.desc}</p>}
+                                {item.category && <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{item.category}</p>}
                               </div>
                             </div>
                           </Link>
@@ -719,7 +757,7 @@ const Header: React.FC = () => {
                           </div>
                           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Start typing to search</h3>
                           <p className="text-gray-500 dark:text-gray-400 mb-4">
-                            Search for services, team members, or pages
+                            Search across services, blog posts, portfolio, and pages
                           </p>
                           <div className="space-y-2">
                             <p className="text-sm text-gray-500 dark:text-gray-400">Popular searches:</p>

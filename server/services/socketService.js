@@ -179,6 +179,16 @@ class SocketService {
     this.io.emit(event, data);
   }
 
+  emitToAdmins(event, data) {
+    // Emit to all authenticated admin users
+    this.activeUsers.forEach((session, userId) => {
+      if (session.user.role === 'admin' || session.user.role === 'super_admin') {
+        // Emit to the user's room (they join user_${userId} in addUserSession)
+        this.io.to(`user_${userId}`).emit(event, data);
+      }
+    });
+  }
+
   getConnectionCount() {
     return this.io.engine.clientsCount;
   }

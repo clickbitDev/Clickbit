@@ -1,7 +1,7 @@
 export const pageVariants = {
   initial: {
     opacity: 0,
-    y: 10,
+    y: 20,
   },
   in: {
     opacity: 1,
@@ -9,12 +9,13 @@ export const pageVariants = {
   },
   out: {
     opacity: 0,
-    y: -10,
+    y: -20,
   },
 };
 
 export const pageTransition = {
-  type: 'tween',
-  ease: 'easeInOut',
-  duration: 0.4,
+  type: 'spring',
+  stiffness: 100,
+  damping: 20,
+  mass: 0.5,
 }; 

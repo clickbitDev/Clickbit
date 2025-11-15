@@ -6,6 +6,7 @@ import SiteHead from '../components/SiteHead';
 import api from '../services/api';
 import PageHeader from '../components/PageHeader';
 import LazyImage from '../components/LazyImage';
+import PortfolioFlipCard from '../components/PortfolioFlipCard';
 import { ArrowLeft, ExternalLink, Github, Calendar, Tag } from 'lucide-react';
 
 interface PortfolioItem {
@@ -29,11 +30,28 @@ interface PortfolioItem {
   updated_at: string;
 }
 
+interface RelatedPortfolioItem {
+  id: number;
+  title: string;
+  category: string;
+  image_url?: string;
+  cover_image?: string;
+  featured_image?: string;
+  description: string;
+  short_description?: string;
+  tags: string[];
+  slug?: string;
+  live_url?: string;
+  externalUrl?: string;
+}
+
 const PortfolioItemPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [item, setItem] = useState<PortfolioItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [relatedProjects, setRelatedProjects] = useState<RelatedPortfolioItem[]>([]);
+  const [loadingRelated, setLoadingRelated] = useState(false);
 
   useEffect(() => {
     const fetchPortfolioItem = async () => {
@@ -62,6 +80,78 @@ const PortfolioItemPage: React.FC = () => {
 
     fetchPortfolioItem();
   }, [slug]);
+
+  useEffect(() => {
+    const fetchRelatedProjects = async () => {
+      if (!item) return;
+      
+      try {
+        setLoadingRelated(true);
+        // First, try to fetch projects from the same category
+        const categoryParams = item.category ? { category: item.category, limit: 4 } : { limit: 4 };
+        const response = await api.get('/portfolio', { params: categoryParams });
+        
+        const allProjects = response.data.items || [];
+        
+        // Filter out the current project and map to RelatedPortfolioItem format
+        const related = allProjects
+          .filter((project: any) => project.slug !== item.slug && project.id !== item.id)
+          .slice(0, 3)
+          .map((project: any) => ({
+            id: project.id,
+            title: project.title,
+            category: project.category,
+            image_url: project.featured_image || project.cover_image || project.image_url,
+            cover_image: project.featured_image || project.cover_image || project.image_url,
+            featured_image: project.featured_image || project.cover_image || project.image_url,
+            description: project.description || project.short_description || '',
+            short_description: project.short_description || project.description?.slice(0, 150),
+            tags: Array.isArray(project.technologies) ? project.technologies : (Array.isArray(project.tags) ? project.tags : []),
+            slug: project.slug,
+            live_url: project.live_url,
+            externalUrl: project.live_url || project.externalUrl,
+          }));
+        
+        // If we don't have enough from the same category, fetch more from all projects
+        if (related.length < 3) {
+          const allResponse = await api.get('/portfolio', { params: { limit: 10 } });
+          const allProjectsList = allResponse.data.items || [];
+          const additional = allProjectsList
+            .filter((project: any) => 
+              project.slug !== item.slug && 
+              project.id !== item.id &&
+              !related.some((r: RelatedPortfolioItem) => r.id === project.id)
+            )
+            .slice(0, 3 - related.length)
+            .map((project: any) => ({
+              id: project.id,
+              title: project.title,
+              category: project.category,
+              image_url: project.featured_image || project.cover_image || project.image_url,
+              cover_image: project.featured_image || project.cover_image || project.image_url,
+              featured_image: project.featured_image || project.cover_image || project.image_url,
+              description: project.description || project.short_description || '',
+              short_description: project.short_description || project.description?.slice(0, 150),
+              tags: Array.isArray(project.technologies) ? project.technologies : (Array.isArray(project.tags) ? project.tags : []),
+              slug: project.slug,
+              live_url: project.live_url,
+              externalUrl: project.live_url || project.externalUrl,
+            }));
+          
+          setRelatedProjects([...related, ...additional]);
+        } else {
+          setRelatedProjects(related);
+        }
+      } catch (err) {
+        console.error('Error fetching related projects:', err);
+        setRelatedProjects([]);
+      } finally {
+        setLoadingRelated(false);
+      }
+    };
+
+    fetchRelatedProjects();
+  }, [item]);
 
   if (loading) {
     return (
@@ -283,18 +373,32 @@ const PortfolioItemPage: React.FC = () => {
           </div>
 
           {/* Related Projects */}
-          <div className="mt-16">
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Related Projects</h3>
-            <div className="text-center text-gray-600 dark:text-gray-400">
-              <p>Explore more of our portfolio work</p>
-              <Link 
-                to="/portfolio" 
-                className="inline-block mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
-              >
-                View All Projects
-              </Link>
+          {relatedProjects.length > 0 && (
+            <div className="mt-16">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Related Projects</h3>
+              {loadingRelated ? (
+                <div className="text-center py-12 text-gray-600 dark:text-gray-400">
+                  Loading related projects...
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+                    {relatedProjects.map((project) => (
+                      <PortfolioFlipCard key={project.id} item={project} />
+                    ))}
+                  </div>
+                  <div className="text-center">
+                    <Link 
+                      to="/portfolio" 
+                      className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+                    >
+                      View All Projects
+                    </Link>
+                  </div>
+                </>
+              )}
             </div>
-          </div>
+          )}
         </div>
       </motion.div>
     </>

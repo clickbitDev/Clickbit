@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { SocketProvider } from './contexts/SocketContext';
@@ -37,6 +38,8 @@ const AdminServicesDetailPage = React.lazy(() => import('./pages/AdminServicesDe
 const AdminMarketingIntegrationsPage = React.lazy(() => import('./pages/AdminMarketingIntegrationsPage'));
 const AdminBillingSettingsPage = React.lazy(() => import('./pages/AdminBillingSettingsPage'));
 const AdminAnalyticsPage = React.lazy(() => import('./pages/AdminAnalyticsPage'));
+const UptimeKumaPage = React.lazy(() => import('./pages/UptimeKuma'));
+const AdminExternalServicesPage = React.lazy(() => import('./pages/AdminExternalServicesPage'));
 
 // Component to initialize error handler
 const ErrorHandlerInitializer: React.FC = () => {
@@ -53,6 +56,30 @@ const App: React.FC = () => {
   return (
     <Router>
       <ScrollToTop />
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+          success: {
+            duration: 4000,
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            duration: 5000,
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
       <ThemeProvider>
         <SidebarProvider>
           <AuthProvider>
@@ -212,6 +239,20 @@ const App: React.FC = () => {
                           <AdminLayout>
                             <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
                               <AdminAnalyticsPage />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route path="uptime-kuma" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <UptimeKumaPage />
+                            </React.Suspense>
+                          </AdminLayout>
+                        } />
+                        <Route path="external-services" element={
+                          <AdminLayout>
+                            <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+                              <AdminExternalServicesPage />
                             </React.Suspense>
                           </AdminLayout>
                         } />

@@ -8,15 +8,8 @@ import {
   Image, 
   MessageSquare,
   Eye,
-  Trash2,
   TrendingUp,
-  Clock,
-  CheckCircle,
-  Cloud,
-  Database,
-  Activity,
   Settings,
-  Zap,
   DollarSign,
   ShoppingCart,
   Mail,
@@ -25,24 +18,8 @@ import {
   Star,
   ArrowUp,
   ArrowDown,
-  Globe,
-  Phone
+  Globe
 } from 'lucide-react';
-
-interface Comment {
-  id: number;
-  content: string;
-  author_name: string;
-  author_email: string;
-  status: 'pending' | 'approved' | 'rejected';
-  created_at: string;
-  blogPost?: {
-    title: string;
-  };
-  portfolioItem?: {
-    title: string;
-  };
-}
 
 interface DashboardStats {
   totalUsers: number;
@@ -69,28 +46,16 @@ interface DashboardStats {
     view_count: number;
     created_at: string;
   }>;
-  servicePopularity: Array<{
-    contact_type: string;
-    count: number;
-  }>;
   recentContacts: Array<{
     name: string;
     email: string;
     contact_type: string;
     created_at: string;
   }>;
-  recentOrders: Array<{
-    id: number;
-    order_number: string;
-    total_amount: number;
-    status: string;
-    created_at: string;
-  }>;
   newCommentsThisWeek: number;
 }
 
 const AdminDashboardPage: React.FC = () => {
-  const [pendingComments, setPendingComments] = useState<Comment[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     totalBlogPosts: 0,
@@ -110,9 +75,7 @@ const AdminDashboardPage: React.FC = () => {
     userGrowth: 0,
     contactGrowth: 0,
     topBlogPosts: [],
-    servicePopularity: [],
     recentContacts: [],
-    recentOrders: [],
     newCommentsThisWeek: 0
   });
   const [loading, setLoading] = useState(true);
@@ -128,11 +91,6 @@ const AdminDashboardPage: React.FC = () => {
       }
       try {
         setLoading(true);
-        
-        const commentsResponse = await api.get('/admin/comments/pending', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setPendingComments(commentsResponse.data);
         
         const statsResponse = await api.get('/admin/dashboard/stats', {
           headers: { Authorization: `Bearer ${token}` }
@@ -150,23 +108,6 @@ const AdminDashboardPage: React.FC = () => {
 
     fetchDashboardData();
   }, [token]);
-
-  const handleUpdateCommentStatus = async (commentId: number, status: 'approved' | 'rejected') => {
-    if (!token) {
-      setError('Authentication token not found.');
-      return;
-    }
-    try {
-      await api.put(`/admin/comments/${commentId}/status`, { status }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setPendingComments(prevComments => prevComments.filter(comment => comment.id !== commentId));
-      setStats(prev => ({ ...prev, pendingComments: prev.pendingComments - 1 }));
-    } catch (err) {
-      setError(`Failed to ${status === 'approved' ? 'approve' : 'reject'} the comment.`);
-      console.error(err);
-    }
-  };
 
   if (loading) {
     return (
@@ -397,104 +338,8 @@ const AdminDashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Service Cards */}
+        {/* Top Performing Content */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">External Services</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <a 
-              href="https://crm.clickbit.com.au/app-admin" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 hover:scale-105"
-            >
-              <div className="flex items-center mb-3">
-                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                  <Database className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">CRM Admin</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Customer Management</p>
-                </div>
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Manage customer relationships and sales pipeline</p>
-            </a>
-
-            <a 
-              href="https://team.crm.clickbit.com.au" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 hover:scale-105"
-            >
-              <div className="flex items-center mb-3">
-                <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                  <Users className="h-6 w-6 text-green-600 dark:text-green-400" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">Team CRM</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Team Collaboration</p>
-                </div>
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Team access to CRM system and shared data</p>
-            </a>
-
-            <a 
-              href="https://status.clickbit.com.au" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 hover:scale-105"
-            >
-              <div className="flex items-center mb-3">
-                <div className="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-                  <Activity className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">Uptime Kuma</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">System Monitoring</p>
-                </div>
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Monitor system status and uptime</p>
-            </a>
-
-            <a 
-              href="https://cloud.clickbit.com.au" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 hover:scale-105"
-            >
-              <div className="flex items-center mb-3">
-                <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                  <Cloud className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">ClickCloud</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Cloud Services</p>
-                </div>
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Cloud infrastructure and hosting management</p>
-            </a>
-
-            <a 
-              href="https://automation.clickbit.com.au" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300 hover:scale-105"
-            >
-              <div className="flex items-center mb-3">
-                <div className="p-3 bg-teal-100 dark:bg-teal-900/30 rounded-lg">
-                  <Zap className="h-6 w-6 text-teal-600 dark:text-teal-400" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">N8N</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Workflow Automation</p>
-                </div>
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-300">Automate workflows and business processes</p>
-            </a>
-          </div>
-        </div>
-
-        {/* Top Performing Content & Popular Services */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
               <Star className="h-5 w-5 mr-2 text-yellow-500" />
@@ -529,46 +374,10 @@ const AdminDashboardPage: React.FC = () => {
               )}
             </div>
           </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-              <BarChart3 className="h-5 w-5 mr-2 text-green-500" />
-              Most Requested Services
-            </h2>
-            <div className="space-y-3">
-              {stats.servicePopularity && stats.servicePopularity.length > 0 ? (
-                stats.servicePopularity.map((service, index) => (
-                  <div key={service.contact_type} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mr-3">
-                        <span className="text-xs font-bold text-green-600 dark:text-green-400">{index + 1}</span>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {service.contact_type}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{service.count} inquiries</p>
-                      </div>
-                    </div>
-                    <div className="w-16 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                      <div 
-                        className="bg-green-500 h-2 rounded-full" 
-                        style={{
-                          width: `${Math.min((service.count / (stats.servicePopularity[0]?.count || 1)) * 100, 100)}%`
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500 dark:text-gray-400 text-sm">No service analytics yet</p>
-              )}
-            </div>
-          </div>
         </div>
 
         {/* Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
               <Mail className="h-5 w-5 mr-2 text-orange-500" />
@@ -601,47 +410,10 @@ const AdminDashboardPage: React.FC = () => {
               View all contacts →
             </Link>
           </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-              <ShoppingCart className="h-5 w-5 mr-2 text-purple-500" />
-              Recent Orders
-            </h2>
-            <div className="space-y-3">
-              {stats.recentOrders && stats.recentOrders.length > 0 ? (
-                stats.recentOrders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        Order #{order.order_number}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Status: {order.status}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-green-600 dark:text-green-400">
-                        ${order.total_amount.toFixed(2)}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {new Date(order.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500 dark:text-gray-400 text-sm">No recent orders</p>
-              )}
-            </div>
-            <Link 
-              to="/admin/orders"
-              className="mt-4 inline-flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-            >
-              View all orders →
-            </Link>
-          </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h2>
             <div className="space-y-3">
@@ -661,60 +433,6 @@ const AdminDashboardPage: React.FC = () => {
                 <TrendingUp className="h-5 w-5 text-teal-600 dark:text-teal-400 mr-3" />
                 <span className="text-teal-700 dark:text-teal-300 font-medium">Manage Contacts</span>
               </Link>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Pending Comments</h2>
-            <div className="space-y-6">
-              {pendingComments.length > 0 ? (
-                pendingComments.map(comment => (
-                  <div key={comment.id} className="border-b border-gray-200 dark:border-gray-700 pb-6 last:border-b-0">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <p className="font-semibold text-lg text-gray-900 dark:text-white">{comment.author_name}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{comment.author_email}</p>
-                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                          On post: 
-                          <span className="font-medium">
-                            {comment.blogPost?.title || comment.portfolioItem?.title || 'Unknown'}
-                          </span>
-                        </p>
-                      </div>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 ml-4">
-                        {new Date(comment.created_at).toLocaleString()}
-                      </p>
-                    </div>
-                    <p className="mt-4 text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-                      {comment.content}
-                    </p>
-                    <div className="mt-4 flex space-x-3">
-                      <button 
-                        onClick={() => handleUpdateCommentStatus(comment.id, 'approved')}
-                        className="flex items-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Approve
-                      </button>
-                      <button 
-                        onClick={() => handleUpdateCommentStatus(comment.id, 'rejected')}
-                        className="flex items-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Reject
-                      </button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8">
-                  <MessageSquare className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No pending comments</h3>
-                  <p className="text-gray-500 dark:text-gray-400">
-                    All comments have been reviewed. Check back later for new submissions.
-                  </p>
-                </div>
-              )}
             </div>
           </div>
         </div>

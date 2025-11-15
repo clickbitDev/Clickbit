@@ -94,10 +94,15 @@ const RegisterPage: React.FC = () => {
     }
 
     setIsLoading(true);
+    setErrors({});
+    clearError(); // Clear any existing errors
     
     try {
       const { confirmPassword, ...registerData } = formData;
       await register(registerData);
+      
+      // Only set success message if registration was successful
+      // Don't show verification failed messages after successful registration
       setSuccessMessage('Registration successful! Please check your email to verify your account.');
       
       // Track Meta Pixel CompleteRegistration event
@@ -113,8 +118,20 @@ const RegisterPage: React.FC = () => {
         last_name: '',
         phone: '',
       });
-    } catch (err) {
-      // Error is handled and displayed by AuthContext
+      
+      // Clear any error state after successful registration
+      clearError();
+    } catch (err: any) {
+      // Only show error if it's not related to verification after successful registration
+      // Check if the error message contains "verification failed" and ignore it if registration succeeded
+      const errorMessage = err?.response?.data?.message || err?.message || '';
+      if (errorMessage.toLowerCase().includes('verification failed')) {
+        // Don't show verification failed errors after registration submission
+        // The user will verify via email link
+        setSuccessMessage('Registration successful! Please check your email to verify your account.');
+        clearError();
+      }
+      // Other errors are handled and displayed by AuthContext
     } finally {
       setIsLoading(false);
     }

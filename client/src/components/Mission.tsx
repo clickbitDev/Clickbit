@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useContent } from '../contexts/ContentContext';
 import {
   Users,
@@ -97,10 +98,43 @@ const Mission = () => {
           {displayMissionPoints.map((point, index) => {
             const IconComponent = iconMap[point.icon] || Target;
             return (
-              <div key={index} className="group text-center bg-gray-50 dark:bg-gray-800/50 p-4 sm:p-8 rounded-2xl shadow-md hover:shadow-2xl hover:scale-105 transition-all duration-300">
-                <div className="bg-[#F39C12] h-10 w-10 sm:h-14 sm:w-14 rounded-lg flex items-center justify-center mb-4 sm:mb-6 mx-auto transition-colors duration-300">
-                  <IconComponent size={20} className="sm:w-7 sm:h-7 text-gray-900 group-hover:text-white transition-colors duration-300" />
-                </div>
+              <motion.div
+                key={index}
+                className="group text-center bg-gray-50 dark:bg-gray-800/50 p-4 sm:p-8 rounded-2xl shadow-md"
+                initial={{ scale: 1, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 300,
+                  damping: 25,
+                  mass: 0.5,
+                }}
+              >
+                <motion.div
+                  className="bg-[#F39C12] h-10 w-10 sm:h-14 sm:w-14 rounded-lg flex items-center justify-center mb-4 sm:mb-6 mx-auto"
+                  initial={{ backgroundColor: '#F39C12' }}
+                  whileHover={{ backgroundColor: '#F39C12' }}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 300,
+                    damping: 25,
+                  }}
+                >
+                  <motion.div
+                    initial={{ color: '#111827' }}
+                    whileHover={{ color: '#ffffff' }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 300,
+                      damping: 25,
+                    }}
+                  >
+                    <IconComponent size={20} className="sm:w-7 sm:h-7" />
+                  </motion.div>
+                </motion.div>
                 <h3 className="text-sm sm:text-xl font-bold mb-2 sm:mb-3 text-[#F39C12]">{point.title}</h3>
                 <p className="text-xs sm:text-base text-gray-600 dark:text-gray-400">
                   {point.description.includes('From web development to digital marketing and hardware support') ? (
@@ -115,7 +149,7 @@ const Mission = () => {
                     point.description
                   )}
                 </p>
-              </div>
+              </motion.div>
             );
           })}
         </div>

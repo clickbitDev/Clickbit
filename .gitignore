@@ -134,3 +134,6 @@ react-server.log
 # Backup files
 *.bak
 *.backup
+
+# YoYo AI version control directory
+.yoyo/

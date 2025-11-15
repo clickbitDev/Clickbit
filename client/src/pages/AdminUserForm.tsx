@@ -15,6 +15,7 @@ const AdminUserForm: React.FC = () => {
     password: '',
     role: 'customer',
     status: 'active',
+    email_verified: true,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +35,7 @@ const AdminUserForm: React.FC = () => {
             password: '',
             role: user.role,
             status: user.status,
+            email_verified: user.email_verified || false,
           });
         })
         .catch(() => setError('Failed to load user data.'))
@@ -42,7 +44,9 @@ const AdminUserForm: React.FC = () => {
   }, [id, isEditing, token]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const target = e.target;
+    const value = target.type === 'checkbox' ? (target as HTMLInputElement).checked : target.value;
+    setFormData({ ...formData, [target.name]: value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -129,6 +133,25 @@ const AdminUserForm: React.FC = () => {
             </select>
           </div>
         </div>
+        {user?.role === 'admin' && (
+          <div>
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                name="email_verified"
+                checked={formData.email_verified}
+                onChange={handleChange}
+                className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+              />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Email Verified
+              </span>
+            </label>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Check this box to mark the user's email as verified. Only admins can modify this setting.
+            </p>
+          </div>
+        )}
         <div className="flex justify-end space-x-4">
           <button type="button" onClick={() => navigate('/admin/users')} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500">
             Cancel

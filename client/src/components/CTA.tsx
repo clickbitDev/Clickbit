@@ -55,7 +55,7 @@ const CTA: React.FC = () => {
           </p>
           <Link
             to="/contact"
-            className="mt-8 group inline-flex items-center justify-center px-8 py-4 bg-cyan-500 hover:bg-cyan-600 text-white font-bold text-lg rounded-full transition-all duration-300 shadow-2xl hover:shadow-cyan-500/40 transform hover:scale-105"
+            className="mt-8 group inline-flex items-center justify-center px-8 py-4 bg-cyan-500 hover:bg-cyan-600 text-white font-bold text-lg rounded-full transition-all duration-300 ease-in-out shadow-2xl hover:shadow-cyan-500/40 transform hover:scale-105"
           >
             Get Started
             <ArrowRight className="w-6 h-6 ml-3 transform transition-transform duration-300 group-hover:translate-x-1.5" />

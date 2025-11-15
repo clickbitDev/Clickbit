@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import PortfolioFlipCard from './PortfolioFlipCard';
 
@@ -26,7 +27,7 @@ const staticPortfolioItems: PortfolioItem[] = [
     id: 1,
     title: "E-commerce Platform",
     category: "Web Development",
-    cover_image: "/images/work/project1.jpg",
+    cover_image: "/images/placeholders/pattern.jpg",
     description: "Modern e-commerce solution with advanced features and seamless user experience.",
     tags: ["React", "Node.js", "MongoDB"]
   },
@@ -34,7 +35,7 @@ const staticPortfolioItems: PortfolioItem[] = [
     id: 2,
     title: "Mobile Banking App",
     category: "Mobile Development",
-    cover_image: "/images/work/project2.jpg",
+    cover_image: "/images/placeholders/pattern.jpg",
     description: "Secure and intuitive mobile banking application for iOS and Android.",
     tags: ["React Native", "API Integration"]
   },
@@ -42,7 +43,7 @@ const staticPortfolioItems: PortfolioItem[] = [
     id: 3,
     title: "Cloud Infrastructure",
     category: "Cloud Solutions",
-    cover_image: "/images/work/project3.jpg",
+    cover_image: "/images/placeholders/pattern.jpg",
     description: "Scalable cloud infrastructure setup with automated deployment and monitoring.",
     tags: ["AWS", "Docker", "Kubernetes"]
   }
@@ -86,9 +87,9 @@ const FeaturedWork = () => {
         setError(null);
       } catch (err) {
         console.error('Error fetching portfolio items:', err);
-        setError('Failed to load portfolio items');
-        // Use fallback data if API fails
+        // Use fallback data if API fails - don't set error so fallback items are displayed
         setPortfolioItems(staticPortfolioItems);
+        setError(null); // Clear error so fallback items are shown
       } finally {
         setLoading(false);
       }
@@ -114,7 +115,7 @@ const FeaturedWork = () => {
     } else {
       // Show lightbox with portfolio details
       console.log('Showing lightbox for item:', item.title);
-      setLightboxImage(item.cover_image || item.image_url || '/images/work/project1.jpg');
+      setLightboxImage(item.cover_image || item.image_url || '/images/placeholders/pattern.jpg');
       setLightboxTitle(item.title);
       setLightboxDescription(item.description || item.short_description || '');
     }
@@ -143,7 +144,8 @@ const FeaturedWork = () => {
     );
   }
 
-  if (error || portfolioItems.length === 0) {
+  // Only show error if we have no items at all (not even fallback)
+  if (portfolioItems.length === 0) {
     return (
       <div id="work" className="bg-white dark:bg-[#17283B] py-16 md:py-24 transition-colors duration-300">
         <div className="container mx-auto px-4">
@@ -177,12 +179,25 @@ const FeaturedWork = () => {
 
           {/* Image Gallery Grid with Flip Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {portfolioItems.map((project) => (
-              <PortfolioFlipCard 
+            {portfolioItems.map((project, index) => (
+              <motion.div
                 key={project.id}
-                item={project} 
-                onClick={handleImageClick}
-              />
+                initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 100,
+                  damping: 20,
+                  mass: 0.5,
+                  delay: index * 0.1
+                }}
+              >
+                <PortfolioFlipCard 
+                  item={project} 
+                  onClick={handleImageClick}
+                />
+              </motion.div>
             ))}
           </div>
 
@@ -199,7 +214,7 @@ const FeaturedWork = () => {
           <div className="relative max-w-4xl max-h-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
             <button
               onClick={closeLightbox}
-              className="absolute top-4 right-4 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white transition-colors z-10 bg-white/80 dark:bg-gray-800/80 rounded-full p-2"
+              className="absolute top-4 right-4 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white transition-all duration-300 ease-in-out z-10 bg-white/80 dark:bg-gray-800/80 rounded-full p-2"
               aria-label="Close lightbox"
             >
               <X className="h-6 w-6" />
@@ -227,13 +242,13 @@ const FeaturedWork = () => {
                 <div className="flex gap-3">
                   <Link 
                     to="/portfolio" 
-                    className="bg-[#1FBBD2] hover:bg-[#1A9DAA] text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                    className="bg-[#1FBBD2] hover:bg-[#1A9DAA] text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 ease-in-out"
                   >
                     View All Projects
                   </Link>
                   <button
                     onClick={closeLightbox}
-                    className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 px-6 py-3 rounded-lg font-semibold transition-colors"
+                    className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 px-6 py-3 rounded-lg font-semibold transition-all duration-300 ease-in-out"
                   >
                     Close
                   </button>

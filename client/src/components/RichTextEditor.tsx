@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
-// Type assertion to fix TypeScript compatibility
-
 import SecureHtmlRenderer from './SecureHtmlRenderer';
 import { Eye, Code, Save } from 'lucide-react';
 
+// Type assertion to fix TypeScript compatibility with react-quill
 const QuillEditor = ReactQuill as any;
 
 interface RichTextEditorProps {

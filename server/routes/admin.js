@@ -444,7 +444,7 @@ router.post(
         }
       }
 
-      const postSlug = slug || title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+      const postSlug = slug || title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') + '-' + Date.now();
 
       const newPost = await BlogPost.create({
         title,
@@ -464,7 +464,30 @@ router.post(
       res.status(201).json(newPost);
     } catch (error) {
       console.error('Error creating blog post:', error);
-      res.status(500).json({ message: 'Error creating blog post', error: error.message });
+      
+      // Provide detailed error information for debugging
+      let errorDetails = {
+        message: 'Error creating blog post',
+        error: error.message,
+        name: error.name
+      };
+      
+      if (error.name === 'SequelizeValidationError') {
+        errorDetails.validationErrors = error.errors.map(err => ({
+          field: err.path,
+          message: err.message,
+          value: err.value
+        }));
+      }
+      
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        errorDetails.uniqueConstraintError = {
+          field: error.errors[0]?.path,
+          value: error.errors[0]?.value
+        };
+      }
+      
+      res.status(500).json(errorDetails);
     }
   }
 );
@@ -502,7 +525,7 @@ router.put(
         }
       }
       
-      const postSlug = slug || title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+      const postSlug = slug || title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') + '-' + Date.now();
 
       const updatedData = {
         title,
@@ -2600,6 +2623,92 @@ router.get(
       console.error('Error fetching order details:', error);
       res.status(500).json({ 
         message: 'Error fetching order details', 
+        error: error.message 
+      });
+    }
+  }
+);
+
+// @desc    Delete a single order
+// @route   DELETE /api/admin/orders/:id
+// @access  Private/Admin
+router.delete(
+  '/orders/:id',
+  protect,
+  authorize('orders:delete'),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const order = await Order.findByPk(id);
+      if (!order) {
+        return res.status(404).json({ message: 'Order not found' });
+      }
+
+      // Delete associated order items first
+      await OrderItem.destroy({
+        where: { order_id: id }
+      });
+
+      // Delete the order
+      await order.destroy();
+
+      res.status(200).json({
+        message: 'Order deleted successfully',
+        deletedOrder: {
+          id: order.id,
+          order_number: order.order_number
+        }
+      });
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      res.status(500).json({ 
+        message: 'Error deleting order', 
+        error: error.message 
+      });
+    }
+  }
+);
+
+// @desc    Delete all orders
+// @route   DELETE /api/admin/orders
+// @access  Private/Admin
+router.delete(
+  '/orders',
+  protect,
+  authorize('orders:delete'),
+  async (req, res) => {
+    try {
+      // Get count before deletion
+      const orderCount = await Order.count();
+      
+      if (orderCount === 0) {
+        return res.status(200).json({
+          message: 'No orders to delete',
+          deletedCount: 0
+        });
+      }
+
+      // Delete all order items first
+      await OrderItem.destroy({
+        where: {},
+        truncate: true
+      });
+
+      // Delete all orders
+      await Order.destroy({
+        where: {},
+        truncate: true
+      });
+
+      res.status(200).json({
+        message: `Successfully deleted ${orderCount} order(s)`,
+        deletedCount: orderCount
+      });
+    } catch (error) {
+      console.error('Error deleting all orders:', error);
+      res.status(500).json({ 
+        message: 'Error deleting orders', 
         error: error.message 
       });
     }

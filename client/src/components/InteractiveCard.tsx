@@ -1,16 +1,63 @@
-import React, { useRef, useState, ReactNode, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef, ReactNode, useCallback } from 'react';
+import { motion, useMotionValue, useSpring, useTransform, useMotionValueEvent } from 'framer-motion';
 
-interface InteractiveCardProps {
+export interface InteractiveCardProps {
   children: ReactNode;
   className?: string;
 }
 
 const InteractiveCard: React.FC<InteractiveCardProps> = ({ children, className = '' }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const [rotate, setRotate] = useState({ x: 0, y: 0 });
-  const [shine, setShine] = useState({ x: 50, y: 50, opacity: 0 });
   const cachedRectRef = useRef({ left: 0, top: 0, width: 0, height: 0 });
+
+  // Use motion values for smooth interpolation
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const shineX = useMotionValue(50);
+  const shineY = useMotionValue(50);
+  const shineOpacity = useMotionValue(0);
+
+  // Spring animations for smooth, natural movement
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [8, -8]), {
+    stiffness: 120,
+    damping: 18,
+    mass: 0.1,
+  });
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-8, 8]), {
+    stiffness: 120,
+    damping: 18,
+    mass: 0.1,
+  });
+
+  const springShineX = useSpring(shineX, {
+    stiffness: 150,
+    damping: 20,
+    mass: 0.1,
+  });
+  const springShineY = useSpring(shineY, {
+    stiffness: 150,
+    damping: 20,
+    mass: 0.1,
+  });
+  const springShineOpacity = useSpring(shineOpacity, {
+    stiffness: 200,
+    damping: 25,
+    mass: 0.1,
+  });
+
+  // Combine shine position into background gradient string
+  const shineBackground = useMotionValue('radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.15), transparent 40%)');
+  
+  // Update background when shine position changes
+  useMotionValueEvent(springShineX, 'change', (latestX) => {
+    const y = springShineY.get();
+    shineBackground.set(`radial-gradient(circle at ${latestX}% ${y}%, rgba(255, 255, 255, 0.15), transparent 40%)`);
+  });
+  
+  useMotionValueEvent(springShineY, 'change', (latestY) => {
+    const x = springShineX.get();
+    shineBackground.set(`radial-gradient(circle at ${x}% ${latestY}%, rgba(255, 255, 255, 0.15), transparent 40%)`);
+  });
 
   // Cache rect on mount and resize
   const updateCachedRect = useCallback(() => {
@@ -27,7 +74,8 @@ const InteractiveCard: React.FC<InteractiveCardProps> = ({ children, className =
   // Update cached rect on mouse enter instead of during mouse move
   const handleMouseEnter = useCallback(() => {
     updateCachedRect();
-  }, [updateCachedRect]);
+    shineOpacity.set(1);
+  }, [updateCachedRect, shineOpacity]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!ref.current) return;
@@ -35,28 +83,27 @@ const InteractiveCard: React.FC<InteractiveCardProps> = ({ children, className =
     const { left, top, width, height } = cachedRectRef.current;
     
     // Use cached rect values to avoid getBoundingClientRect on every mousemove
-    const mouseX = e.clientX - left;
-    const mouseY = e.clientY - top;
+    const mouseXValue = e.clientX - left;
+    const mouseYValue = e.clientY - top;
 
-    const xPct = mouseX / width - 0.5;
-    const yPct = mouseY / height - 0.5;
+    const xPct = mouseXValue / width - 0.5;
+    const yPct = mouseYValue / height - 0.5;
 
-    setRotate({
-      x: yPct * -12, // Invert for natural feel
-      y: xPct * 12,
-    });
+    // Update motion values (will be smoothly interpolated by springs)
+    mouseX.set(xPct);
+    mouseY.set(yPct);
     
-    setShine({
-      x: (mouseX / width) * 100,
-      y: (mouseY / height) * 100,
-      opacity: 1,
-    });
-  }, []);
+    shineX.set((mouseXValue / width) * 100);
+    shineY.set((mouseYValue / height) * 100);
+  }, [mouseX, mouseY, shineX, shineY]);
 
-  const handleMouseLeave = () => {
-    setRotate({ x: 0, y: 0 });
-    setShine({ x: 50, y: 50, opacity: 0 });
-  };
+  const handleMouseLeave = useCallback(() => {
+    mouseX.set(0);
+    mouseY.set(0);
+    shineX.set(50);
+    shineY.set(50);
+    shineOpacity.set(0);
+  }, [mouseX, mouseY, shineX, shineY, shineOpacity]);
 
   return (
     <motion.div
@@ -72,17 +119,20 @@ const InteractiveCard: React.FC<InteractiveCardProps> = ({ children, className =
     >
       <motion.div
         style={{
-          transform: `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg) translateZ(20px)`,
+          rotateX: rotateX,
+          rotateY: rotateY,
+          z: 15,
+          willChange: 'transform',
         }}
-        className="relative w-full h-full transition-transform duration-100 ease-out"
+        className="relative w-full h-full"
       >
-        <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none z-10">
           <motion.div
             className="absolute inset-0"
             style={{
-              background: `radial-gradient(circle at ${shine.x}% ${shine.y}%, rgba(255, 255, 255, 0.2), transparent 40%)`,
-              opacity: shine.opacity,
-              transition: 'opacity 0.2s ease-out',
+              background: shineBackground,
+              opacity: springShineOpacity,
+              willChange: 'opacity, background',
             }}
           />
         </div>

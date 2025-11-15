@@ -89,13 +89,26 @@ const ShowcaseGrid: React.FC = () => {
                 className={`rounded-2xl overflow-hidden relative group min-h-[240px] h-full ${card.styleClassName}`}
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
+                transition={{ 
+                  type: "spring",
+                  stiffness: 100,
+                  damping: 20,
+                  mass: 0.5,
+                  delay: index * 0.05
+                }}
                 viewport={{ once: true }}
               >
                 {card.type === 'pattern' && (
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                  <motion.div
+                    className="absolute inset-0 bg-cover bg-center"
                     style={{ backgroundImage: `url(${card.pattern})` }}
+                    whileHover={{ scale: 1.08 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 250,
+                      damping: 35,
+                      mass: 0.5,
+                    }}
                   />
                 )}
                 {(card.type === 'pattern' || card.type === 'gradient' || card.type === 'brand') && (

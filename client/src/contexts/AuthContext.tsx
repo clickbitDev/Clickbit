@@ -280,17 +280,35 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const register = async (userData: RegisterData) => {
     try {
       dispatch({ type: 'AUTH_START' });
-      await authAPI.register(userData);
+      const response = await authAPI.register(userData);
       
       // Do not log in automatically after registration
       // User needs to verify email first
       dispatch({ type: 'SET_LOADING', payload: false });
       
-      toast.success('Registration successful! Please check your email to verify your account.');
+      // Clear any existing errors
+      dispatch({ type: 'CLEAR_ERROR' });
+      
+      // Show success message from server or default
+      const successMessage = response?.data?.message || 'Registration successful! Please check your email to verify your account.';
+      toast.success(successMessage);
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Registration failed';
-      dispatch({ type: 'AUTH_FAILURE', payload: message });
-      toast.error(message);
+      // Handle email already exists error specifically
+      if (error.response?.status === 409 && error.response?.data?.error === 'EMAIL_EXISTS') {
+        const message = error.response?.data?.message || 'This email address is already registered.';
+        dispatch({ type: 'AUTH_FAILURE', payload: message });
+        toast.error(message, { duration: 5000 });
+      } else {
+        const message = error.response?.data?.message || 'Registration failed. Please try again.';
+        // Don't show "verification failed" errors after registration - user will verify via email
+        if (!message.toLowerCase().includes('verification failed')) {
+          dispatch({ type: 'AUTH_FAILURE', payload: message });
+          toast.error(message);
+        } else {
+          // If it's a verification error, just clear it - registration was successful
+          dispatch({ type: 'CLEAR_ERROR' });
+        }
+      }
       throw error;
     }
   };

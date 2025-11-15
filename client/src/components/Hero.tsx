@@ -119,7 +119,7 @@ const Hero = () => {
         >
           <Link
             to="/services"
-            className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-8 rounded-full transition duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+            className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             {heroCtaText}
           </Link>

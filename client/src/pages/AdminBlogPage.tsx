@@ -38,6 +38,7 @@ const AdminBlogPage: React.FC = () => {
   const [filterAuthor, setFilterAuthor] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [postsPerPage] = useState<number>(5);
+  const [monthOffset, setMonthOffset] = useState<number>(0); // 0 means current month is centered
   const { token } = useAuth();
 
   const fetchPosts = async () => {
@@ -143,6 +144,80 @@ const AdminBlogPage: React.FC = () => {
   const uniqueCategories = Array.isArray(posts) ? Array.from(new Set(posts.map(post => post.category))) : [];
   const uniqueAuthors = Array.isArray(posts) ? Array.from(new Set(posts.map(post => post.author))) : [];
 
+  // Calendar helper functions
+  const getMonthsToDisplay = () => {
+    const now = new Date();
+    const months = [];
+    for (let i = -2; i <= 2; i++) {
+      const date = new Date(now.getFullYear(), now.getMonth() + i + monthOffset, 1);
+      months.push(date);
+    }
+    return months;
+  };
+
+  // Check if navigation is allowed
+  const canNavigateLeft = () => {
+    // The first month shown should not be before January 2025
+    // Check if the first month after decrementing would still be >= January 2025
+    const now = new Date();
+    const firstMonthAfterDecrement = new Date(now.getFullYear(), now.getMonth() - 2 + monthOffset - 1, 1);
+    const jan2025 = new Date(2025, 0, 1); // January 2025
+    return firstMonthAfterDecrement.getTime() >= jan2025.getTime();
+  };
+
+  const canNavigateRight = () => {
+    // The rightmost month shown should not exceed current month + 2
+    // With offset 0, we show: current-2, current-1, current, current+1, current+2 (rightmost is current+2)
+    // With offset +1, we'd show: current-1, current, current+1, current+2, current+3 (rightmost is current+3, too far)
+    // So we can navigate right only if the rightmost month after incrementing would still be <= current+2
+    const now = new Date();
+    const rightmostMonthAfterIncrement = new Date(now.getFullYear(), now.getMonth() + 2 + monthOffset + 1, 1);
+    const maxAllowedMonth = new Date(now.getFullYear(), now.getMonth() + 2, 1);
+    return rightmostMonthAfterIncrement.getTime() <= maxAllowedMonth.getTime();
+  };
+
+  const handlePreviousMonth = () => {
+    if (canNavigateLeft()) {
+      setMonthOffset(prev => prev - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (canNavigateRight()) {
+      setMonthOffset(prev => prev + 1);
+    }
+  };
+
+  const getDaysInMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  };
+
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // Get dates that have blog posts
+  const getPostDates = () => {
+    const postDates = new Set<string>();
+    if (Array.isArray(posts)) {
+      posts.forEach(post => {
+        // Use published_at if available, otherwise use created_at
+        const postDate = post.published_at || post.created_at;
+        if (postDate) {
+          const date = new Date(postDate);
+          const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+          postDates.add(dateString);
+        }
+      });
+    }
+    return postDates;
+  };
+
+  const postDates = getPostDates();
+
   if (loading) return <div className="p-8">Loading posts...</div>;
   if (error) return (
     <div className="text-red-500 p-8">
@@ -202,6 +277,89 @@ const AdminBlogPage: React.FC = () => {
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 md:p-6">
             <h3 className="text-sm md:text-lg font-medium text-gray-900 dark:text-white">Categories</h3>
             <p className="text-xl md:text-3xl font-bold text-purple-600">{uniqueCategories.length}</p>
+          </div>
+        </div>
+
+        {/* 5-Month Calendar */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 md:p-6 mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Calendar</h3>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={handlePreviousMonth}
+                disabled={!canNavigateLeft()}
+                className="p-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                aria-label="Previous month"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                onClick={handleNextMonth}
+                disabled={!canNavigateRight()}
+                className="p-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                aria-label="Next month"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 overflow-x-auto">
+            {getMonthsToDisplay().map((monthDate, monthIndex) => {
+              const daysInMonth = getDaysInMonth(monthDate);
+              const firstDay = getFirstDayOfMonth(monthDate);
+              const isCurrentMonth = monthDate.getMonth() === new Date().getMonth() && monthDate.getFullYear() === new Date().getFullYear();
+              const today = new Date();
+              const todayDate = today.getDate();
+              const todayMonth = today.getMonth();
+              const todayYear = today.getFullYear();
+
+              return (
+                <div 
+                  key={monthIndex} 
+                  className="min-w-[200px]"
+                >
+                  <div className={`text-center font-semibold mb-2 p-2 rounded ${isCurrentMonth ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200' : 'text-gray-900 dark:text-white'}`}>
+                    {monthNames[monthDate.getMonth()]} {monthDate.getFullYear()}
+                  </div>
+                  <div className="grid grid-cols-7 gap-1 text-xs">
+                    {dayNames.map(day => (
+                      <div key={day} className="text-center font-medium text-gray-500 dark:text-gray-400 py-1">
+                        {day.charAt(0)}
+                      </div>
+                    ))}
+                    {Array.from({ length: firstDay }, (_, i) => (
+                      <div key={`empty-${i}`} className="aspect-square"></div>
+                    ))}
+                    {Array.from({ length: daysInMonth }, (_, i) => {
+                      const day = i + 1;
+                      const isToday = isCurrentMonth && 
+                                     day === todayDate && 
+                                     monthDate.getMonth() === todayMonth && 
+                                     monthDate.getFullYear() === todayYear;
+                      
+                      const dateString = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                      const hasPost = postDates.has(dateString);
+                      
+                      return (
+                        <div
+                          key={day}
+                          className={`aspect-square flex items-center justify-center text-xs rounded ${
+                            isToday
+                              ? 'bg-blue-500 text-white font-bold'
+                              : hasPost
+                              ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 font-semibold hover:bg-green-200 dark:hover:bg-green-800'
+                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                          }`}
+                          title={hasPost ? 'Has blog post(s)' : ''}
+                        >
+                          {day}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 

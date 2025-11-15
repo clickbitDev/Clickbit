@@ -8,6 +8,34 @@ import InteractiveCard from '../components/InteractiveCard';
 import { getServiceIcon } from '../services/SERVICE_ICONS_MAPPING';
 import api from '../services/api';
 
+// Fallback static data in case API fails
+const staticServices = [
+  {
+    id: 1,
+    name: "Web Development",
+    slug: "web-development",
+    description: "Custom web applications and websites built with modern technologies.",
+    category: "Development",
+    isPopular: true
+  },
+  {
+    id: 2,
+    name: "Mobile Development",
+    slug: "mobile-development", 
+    description: "Native and cross-platform mobile applications for iOS and Android.",
+    category: "Development",
+    isPopular: true
+  },
+  {
+    id: 3,
+    name: "Cloud Solutions",
+    slug: "cloud-solutions",
+    description: "Cloud migration, setup, and management services.",
+    category: "Infrastructure",
+    isPopular: false
+  }
+];
+
 const ServicesPage = () => {
   const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,6 +58,8 @@ const ServicesPage = () => {
       } catch (err: any) {
         setError(err.message || 'Error fetching services');
         console.error('Service fetch error:', err); // DEBUG LOG
+        // Use fallback data if API fails
+        setServices(staticServices);
       } finally {
         setLoading(false);
       }
@@ -101,28 +131,6 @@ const ServicesPage = () => {
     );
   }
 
-  if (error) {
-    return (
-      <motion.div
-        initial="initial"
-        animate="in"
-        exit="out"
-        variants={pageVariants}
-        transition={pageTransition}
-        className="min-h-screen bg-white dark:bg-gray-900"
-      >
-        <PageHeader 
-          title="Our Services" 
-          breadcrumbs={[
-            { name: 'Home', href: '/' },
-            { name: 'Services', href: '/services' }
-          ]} 
-        />
-        <div className="text-center py-20 text-red-500">{error}</div>
-      </motion.div>
-    );
-  }
-
   return (
     <>
       <SiteHead 
@@ -146,6 +154,13 @@ const ServicesPage = () => {
       />
       <div className="py-16">
         <div className="container mx-auto px-4">
+          {error && (
+            <div className="mb-6 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg text-center">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                Showing cached services. Some features may be limited.
+              </p>
+            </div>
+          )}
           <p className="text-center text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-12">
             Explore our comprehensive range of services designed to help your business grow and succeed in the digital landscape.
           </p>

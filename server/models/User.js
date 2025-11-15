@@ -179,7 +179,8 @@ User.prototype.resetLoginAttempts = async function() {
 
 // Class methods
 User.findByEmail = function(email) {
-  return this.findOne({ where: { email: email.toLowerCase() } });
+  // Store email exactly as provided (case-sensitive)
+  return this.findOne({ where: { email: email.trim() } });
 };
 
 User.createUser = async function(userData) {

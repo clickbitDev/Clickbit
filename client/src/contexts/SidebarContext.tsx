@@ -12,7 +12,7 @@ export const SidebarProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleSidebar = () => {
-    setIsOpen(!isOpen);
+    setIsOpen(prev => !prev);
   };
   
   const closeSidebar = () => {

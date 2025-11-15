@@ -1,6 +1,27 @@
 const express = require('express');
 const router = express.Router();
-const { Content, SiteSetting } = require('../models');
+const { Content, SiteSetting, BlogPost, PortfolioItem, Service, Contact, Order, User, Team } = require('../models');
+const { Op, QueryTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
+const jwt = require('jsonwebtoken');
+
+// Optional auth middleware - doesn't fail if no token
+const optionalAuth = async (req, res, next) => {
+  let token;
+  
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    try {
+      token = req.headers.authorization.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = await User.findByPk(decoded.id);
+    } catch (error) {
+      // Ignore auth errors - continue without user
+      req.user = null;
+    }
+  }
+  
+  next();
+};
 
 // @desc    Get site identity (public)
 // @route   GET /api/public/site-identity
@@ -377,6 +398,369 @@ router.get('/process-phases', async (req, res) => {
         ]
       }
     ]);
+  }
+});
+
+// @desc    Comprehensive search across all content types
+// @route   GET /api/public/search
+// @access  Public (with admin enhancements if authenticated)
+router.get('/search', optionalAuth, async (req, res) => {
+  try {
+    const { q, limit = 20 } = req.query;
+    
+    if (!q || q.trim().length === 0) {
+      return res.json({
+        services: [],
+        blogPosts: [],
+        portfolioItems: [],
+        pages: [],
+        teamMembers: [],
+        contacts: [],
+        orders: [],
+        users: [],
+        total: 0
+      });
+    }
+
+    const searchQuery = q.trim();
+    const searchPattern = `%${searchQuery}%`;
+    const limitNum = parseInt(limit);
+    
+    // Check if user is authenticated and has admin/manager role
+    const isAdmin = req.user && (req.user.role === 'admin' || req.user.role === 'manager');
+    
+    // Debug logging (can be removed later)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Search query:', searchQuery);
+      console.log('User authenticated:', !!req.user);
+      console.log('User role:', req.user?.role);
+      console.log('Is admin:', isAdmin);
+    }
+
+    // Search services (case-insensitive for MySQL)
+    const services = await Service.findAll({
+      where: {
+        status: 'active',
+        [Op.or]: [
+          { name: { [Op.like]: searchPattern } },
+          { description: { [Op.like]: searchPattern } },
+          { short_description: { [Op.like]: searchPattern } }
+        ]
+      },
+      limit: limitNum,
+      attributes: ['id', 'name', 'slug', 'description', 'short_description', 'category']
+    });
+
+    // Search blog posts (case-insensitive for MySQL)
+    // If admin, include unpublished posts
+    const blogPostWhere = {
+        [Op.or]: [
+          { title: { [Op.like]: searchPattern } },
+          { excerpt: { [Op.like]: searchPattern } },
+          { content: { [Op.like]: searchPattern } }
+        ]
+      };
+    
+    if (!isAdmin) {
+      blogPostWhere.status = 'published';
+      blogPostWhere.published_at = {
+        [Op.lte]: new Date()
+      };
+    }
+    
+    const blogPosts = await BlogPost.findAll({
+      where: blogPostWhere,
+      limit: limitNum,
+      attributes: ['id', 'title', 'slug', 'excerpt', 'published_at', 'status']
+    });
+
+    // Search portfolio items (case-insensitive for MySQL)
+    // If admin, include unpublished items
+    const portfolioWhere = {
+        [Op.or]: [
+          { title: { [Op.like]: searchPattern } },
+          { description: { [Op.like]: searchPattern } },
+          { client_name: { [Op.like]: searchPattern } }
+        ]
+      };
+    
+    if (!isAdmin) {
+      portfolioWhere.status = 'published';
+    }
+    
+    const portfolioItems = await PortfolioItem.findAll({
+      where: portfolioWhere,
+      limit: limitNum,
+      attributes: ['id', 'title', 'slug', 'description', 'client_name', 'project_date', 'status']
+    });
+
+    // Search all content types (pages, custom content, etc.)
+    // If admin, include unpublished content
+    const contentWhere = {
+        [Op.or]: [
+          { title: { [Op.like]: searchPattern } },
+          { excerpt: { [Op.like]: searchPattern } },
+          { content: { [Op.like]: searchPattern } },
+          { meta_description: { [Op.like]: searchPattern } },
+          { meta_keywords: { [Op.like]: searchPattern } }
+        ]
+      };
+    
+    if (!isAdmin) {
+      contentWhere.status = 'published';
+    }
+    
+    const pages = await Content.findAll({
+      where: contentWhere,
+      limit: limitNum,
+      attributes: ['id', 'title', 'slug', 'excerpt', 'content_type', 'status', 'content']
+    });
+
+    // Search team members
+    const teamMembers = await Team.findAll({
+      where: {
+        is_active: true,
+        [Op.or]: [
+          { name: { [Op.like]: searchPattern } },
+          { role: { [Op.like]: searchPattern } },
+          { role_label: { [Op.like]: searchPattern } },
+          { bio: { [Op.like]: searchPattern } },
+          { email: { [Op.like]: searchPattern } }
+        ]
+      },
+      limit: limitNum,
+      attributes: ['id', 'name', 'role', 'role_label', 'email', 'bio', 'image']
+    });
+
+    // Admin-only searches
+    let contacts = [];
+    let orders = [];
+    let users = [];
+
+    if (isAdmin) {
+      // Search contacts (admin panel)
+      contacts = await Contact.findAll({
+        where: {
+          [Op.or]: [
+            { name: { [Op.like]: searchPattern } },
+            { email: { [Op.like]: searchPattern } },
+            { subject: { [Op.like]: searchPattern } },
+            { message: { [Op.like]: searchPattern } }
+          ]
+        },
+        limit: limitNum,
+        attributes: ['id', 'name', 'email', 'subject', 'contact_type', 'status', 'created_at']
+      });
+
+      // Search orders (admin panel)
+      orders = await Order.findAll({
+        where: {
+          [Op.or]: [
+            { order_number: { [Op.like]: searchPattern } },
+            { guest_email: { [Op.like]: searchPattern } }
+          ]
+        },
+        limit: limitNum,
+        attributes: ['id', 'order_number', 'guest_email', 'status', 'total_amount', 'created_at']
+      });
+
+      // Search users (admin panel) - search full name combinations too
+      // Use raw query to search full name combinations efficiently
+      const [userResults] = await sequelize.query(`
+        SELECT id, first_name, last_name, email, role, created_at
+        FROM users
+        WHERE first_name LIKE :pattern
+           OR last_name LIKE :pattern
+           OR email LIKE :pattern
+           OR CONCAT(first_name, ' ', last_name) LIKE :pattern
+        LIMIT :limit
+      `, {
+        replacements: {
+          pattern: searchPattern,
+          limit: limitNum
+        },
+        type: QueryTypes.SELECT
+      });
+      
+      // Convert raw results to User instances
+      users = userResults.map((row) => ({
+        id: row.id,
+        first_name: row.first_name,
+        last_name: row.last_name,
+        email: row.email,
+        role: row.role,
+        created_at: row.created_at
+      }));
+    }
+
+    // Admin navigation items (static - always available for admin searches)
+    const adminNavItems = isAdmin ? [
+      { label: 'Dashboard', path: '/admin/dashboard', keywords: ['dashboard', 'admin', 'home'] },
+      { label: 'Orders', path: '/admin/orders', keywords: ['orders', 'order', 'sales', 'purchases'] },
+      { label: 'Blog', path: '/admin/blog', keywords: ['blog', 'posts', 'articles', 'content'] },
+      { label: 'Portfolio', path: '/admin/portfolio', keywords: ['portfolio', 'projects', 'work'] },
+      { label: 'Services', path: '/admin/services', keywords: ['services', 'service', 'products'] },
+      { label: 'Reviews', path: '/admin/reviews', keywords: ['reviews', 'review', 'testimonials'] },
+      { label: 'Team', path: '/admin/team', keywords: ['team', 'members', 'staff'] },
+      { label: 'Contacts', path: '/admin/contacts', keywords: ['contacts', 'contact', 'leads', 'inquiries'] },
+      { label: 'Users', path: '/admin/users', keywords: ['users', 'user', 'accounts', 'people'] },
+      { label: 'Analytics', path: '/admin/analytics', keywords: ['analytics', 'stats', 'statistics', 'data'] },
+      { label: 'Marketing', path: '/admin/marketing', keywords: ['marketing', 'seo', 'advertising'] },
+      { label: 'Billing', path: '/admin/billing', keywords: ['billing', 'payment', 'invoice', 'subscription'] },
+      { label: 'Uptime Kuma', path: '/admin/uptime-kuma', keywords: ['uptime', 'kuma', 'monitoring', 'status', 'system monitor'] },
+      { label: 'External Services', path: '/admin/external-services', keywords: ['external', 'services', 'crm', 'tools'] }
+    ] : [];
+
+    // Filter admin nav items based on search query
+    const matchingAdminNavItems = adminNavItems.filter(item => {
+      const searchLower = searchQuery.toLowerCase();
+      return item.label.toLowerCase().includes(searchLower) ||
+             item.keywords.some(keyword => keyword.toLowerCase().includes(searchLower));
+    });
+
+    // Format results
+    const formattedServices = services.map(service => ({
+      type: 'service',
+      id: service.id,
+      name: service.name,
+      description: service.short_description || service.description,
+      href: `/services/${service.slug}`,
+      category: service.category
+    }));
+
+    const formattedBlogPosts = blogPosts.map(post => ({
+      type: 'blog',
+      id: post.id,
+      name: post.title,
+      description: post.excerpt,
+      href: `/blog/${post.slug}`,
+      published_at: post.published_at
+    }));
+
+    const formattedPortfolioItems = portfolioItems.map(item => ({
+      type: 'portfolio',
+      id: item.id,
+      name: item.title,
+      description: item.description,
+      href: `/portfolio/${item.slug}`,
+      client: item.client_name
+    }));
+
+    const formattedPages = pages.map(page => {
+      // Determine the correct href based on content type and slug
+      let href = `/${page.slug}`;
+      if (page.content_type === 'custom') {
+        // For custom content, try to map to known pages
+        if (page.slug === 'about' || page.slug.includes('about')) {
+          href = '/about';
+        }
+      }
+      
+      return {
+        type: page.content_type === 'page' ? 'page' : 'content',
+        id: page.id,
+        name: page.title,
+        description: page.excerpt || (page.content ? page.content.substring(0, 150) + '...' : ''),
+        href: href,
+        status: page.status,
+        content_type: page.content_type
+      };
+    });
+
+    const formattedTeamMembers = teamMembers.map(member => ({
+      type: 'team',
+      id: member.id,
+      name: member.name,
+      description: member.role + (member.bio ? ` - ${member.bio.substring(0, 100)}` : ''),
+      href: '/about',
+      role: member.role,
+      email: member.email
+    }));
+
+    // Format admin results
+    const formattedContacts = contacts.map(contact => ({
+      type: 'contact',
+      id: contact.id,
+      name: contact.name || contact.email,
+      description: contact.subject,
+      href: `/admin/contacts`,
+      email: contact.email,
+      status: contact.status,
+      contact_type: contact.contact_type
+    }));
+
+    const formattedOrders = orders.map(order => ({
+      type: 'order',
+      id: order.id,
+      name: `Order ${order.order_number}`,
+      description: order.guest_email || `Total: $${order.total_amount}`,
+      href: `/admin/orders`,
+      order_number: order.order_number,
+      status: order.status
+    }));
+
+    const formattedUsers = users.map(user => ({
+      type: 'user',
+      id: user.id,
+      name: `${user.first_name} ${user.last_name}`,
+      description: user.email,
+      href: `/admin/users`,
+      email: user.email,
+      role: user.role
+    }));
+
+    const formattedAdminNavItems = matchingAdminNavItems.map(item => ({
+      type: 'admin',
+      id: `nav-${item.path}`,
+      name: item.label,
+      description: `Admin panel: ${item.label}`,
+      href: item.path
+    }));
+
+    // Combine all results
+    const allResults = [
+      ...formattedServices,
+      ...formattedBlogPosts,
+      ...formattedPortfolioItems,
+      ...formattedPages,
+      ...formattedTeamMembers,
+      ...formattedAdminNavItems,
+      ...formattedContacts,
+      ...formattedOrders,
+      ...formattedUsers
+    ];
+
+    res.json({
+      services: formattedServices,
+      blogPosts: formattedBlogPosts,
+      portfolioItems: formattedPortfolioItems,
+      pages: formattedPages,
+      teamMembers: formattedTeamMembers,
+      adminNav: formattedAdminNavItems,
+      contacts: formattedContacts,
+      orders: formattedOrders,
+      users: formattedUsers,
+      all: allResults,
+      total: allResults.length,
+      isAdmin: isAdmin || false
+    });
+  } catch (error) {
+    console.error('Error performing search:', error);
+    res.status(500).json({ 
+      message: 'Error performing search', 
+      error: error.message,
+      services: [],
+      blogPosts: [],
+      portfolioItems: [],
+      pages: [],
+      teamMembers: [],
+      contacts: [],
+      orders: [],
+      users: [],
+      all: [],
+      total: 0,
+      isAdmin: false
+    });
   }
 });
 

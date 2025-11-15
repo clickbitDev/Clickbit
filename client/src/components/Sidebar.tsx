@@ -15,7 +15,12 @@ const Sidebar: React.FC = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isOpen && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+      const target = event.target as HTMLElement;
+      // Don't close if clicking on the sidebar toggle button
+      if (target.closest('[data-sidebar-toggle]')) {
+        return;
+      }
+      if (isOpen && sidebarRef.current && !sidebarRef.current.contains(target)) {
         closeSidebar();
       }
     };
@@ -25,6 +30,21 @@ const Sidebar: React.FC = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen, closeSidebar]);
+
+  // Disable body scroll when sidebar is open
+  useEffect(() => {
+    if (isOpen) {
+      // Save the current overflow style
+      const originalOverflow = document.body.style.overflow;
+      // Disable scrolling
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        // Restore the original overflow style when sidebar closes
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
 
   const sidebarVariants = {
     hidden: { x: '-100%' },
@@ -39,12 +59,12 @@ const Sidebar: React.FC = () => {
   ]
 
   const socialLinks: any[] = [
-    { icon: Facebook, href: "https://facebook.clickbit.com.au", name: "Facebook" },
-    { icon: Instagram, href: "https://instagram.clickbit.com.au", name: "Instagram" },
-    { icon: Linkedin, href: "https://linkedin.clickbit.com.au", name: "LinkedIn" },
-    { icon: XIcon, href: "https://x.clickbit.com.au", name: "X" },
-    { icon: SiTiktok, href: "https://tiktok.clickbit.com.au", name: "TikTok" },
-    { icon: Youtube, href: "https://youtube.clickbit.com.au", name: "YouTube" },
+    { icon: Facebook, href: "https://www.facebook.com/clickbitau", name: "Facebook" },
+    { icon: Instagram, href: "https://www.instagram.com/clickbitau/", name: "Instagram" },
+    { icon: Linkedin, href: "https://www.linkedin.com/company/clickbitau/", name: "LinkedIn" },
+    { icon: XIcon, href: "https://x.com/ClickBITau", name: "X" },
+    { icon: SiTiktok, href: "http://tiktok.com/@clickbitau", name: "TikTok" },
+    { icon: Youtube, href: "https://www.youtube.com/@clickbitau", name: "YouTube" },
     { icon: Github, href: "https://github.clickbit.com.au", name: "GitHub" },
   ];
 
@@ -84,8 +104,8 @@ const Sidebar: React.FC = () => {
 
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
                   <div className="flex items-center justify-center h-32 border-b border-gray-200 dark:border-gray-800 mb-8">
-                    <Link to="/" className="flex items-center space-x-2 p-8 pb-12">
-                      <img src={theme === 'dark' ? '/images/logos/clickbit-logo-single-color-light.png' : '/images/logos/Click Bit Logo Vec Full.png'} alt="ClickBit Logo" className="w-32" loading="lazy" />
+                    <Link to="/" className="flex items-center justify-center w-full">
+                      <img src={theme === 'dark' ? '/images/logos/clickbit-logo-single-color-light.png' : '/images/logos/Click Bit Logo Vec Full.png'} alt="ClickBit Logo" className="w-48" loading="lazy" />
                     </Link>
                   </div>
                   <div className="flex flex-wrap justify-center gap-4 mb-6">

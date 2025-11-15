@@ -47,13 +47,21 @@ const createTransporter = async () => {
   }
   
   // Priority 4: Use Ethereal Email for testing (creates a fake SMTP server)
-  logger.warn('No production/Gmail email configuration found. Falling back to Ethereal Email for testing.');
+  logger.warn('⚠️ No production/Gmail email configuration found. Falling back to Ethereal Email for testing.');
+  console.warn('\n⚠️ WARNING: No SMTP configuration found!');
+  console.warn('📧 Emails will NOT be delivered. Using Ethereal test service.');
+  console.warn('💡 To send real emails, configure SMTP settings in your .env file:');
+  console.warn('   SMTP_HOST=smtp.hostinger.com');
+  console.warn('   SMTP_PORT=587');
+  console.warn('   SMTP_USER=your_email@clickbit.com.au');
+  console.warn('   SMTP_PASS=your_password\n');
   
   // Generate test account
   let testAccount;
   try {
     testAccount = await nodemailer.createTestAccount();
     logger.info(`Ethereal test account created: User: ${testAccount.user}, Pass: ${testAccount.pass}`);
+    console.log('📧 Ethereal test account created (emails will NOT be delivered)');
   } catch (err) {
     logger.error('Failed to create Ethereal test account:', err);
     throw new Error('Could not create Ethereal test account for email sending.');
@@ -304,21 +312,35 @@ const sendEmail = async (options) => {
 
   try {
     const info = await transporter.sendMail(mailOptions);
+    const previewURL = nodemailer.getTestMessageUrl(info);
+    
     logger.info('Email sent successfully:', {
       messageId: info.messageId,
-      previewURL: nodemailer.getTestMessageUrl(info),
+      previewURL: previewURL,
       to: options.to,
       subject: options.subject,
       response: info.response, // Log the full SMTP response
     });
-    return info;
+    
+    // Return info with previewURL for Ethereal emails
+    return {
+      ...info,
+      previewURL: previewURL
+    };
   } catch (error) {
     logger.error('Error sending email:', {
       error: error.message,
       stack: error.stack,
       to: options.to,
       subject: options.subject,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode
     });
+    console.error('\n❌ Email sending error:', error.message);
+    if (error.code) console.error('   Error code:', error.code);
+    if (error.response) console.error('   SMTP response:', error.response);
     throw error;
   }
 };

@@ -19,7 +19,7 @@ const router = express.Router();
 const validateRegistration = [
   body('email')
     .isEmail()
-    .normalizeEmail()
+    .trim()
     .withMessage('Please provide a valid email address'),
   body('password')
     .isLength({ min: 6 })
@@ -46,7 +46,7 @@ const validateRegistration = [
 const validateLogin = [
   body('email')
     .isEmail()
-    .normalizeEmail()
+    .trim()
     .withMessage('Please provide a valid email address'),
   body('password')
     .notEmpty()
@@ -56,7 +56,7 @@ const validateLogin = [
 const validatePasswordReset = [
   body('email')
     .isEmail()
-    .normalizeEmail()
+    .trim()
     .withMessage('Please provide a valid email address')
 ];
 
@@ -91,43 +91,84 @@ const handleValidationErrors = (req, res, next) => {
 // @route   POST /api/auth/register
 // @desc    Register a new user
 // @access  Public
+// Process flow:
+// 1. Check if email already exists in database (prompt if exists)
+// 2. Generate activation token
+// 3. Create user account with token
+// 4. Send email with activation link
+// 5. User clicks activation link (verify-email endpoint)
+// 6. Database update after verification (email_verified = true, status = active)
 router.post('/register', authLimiter, validateRegistration, handleValidationErrors, async (req, res) => {
   try {
+    // Get email from validated request (stored exactly as provided, no normalization)
     const { email, password, first_name, last_name, phone } = req.body;
 
-    // Check if user already exists
+    // Step 1: Check if email already exists in database (check first to avoid unnecessary token generation)
+    logger.info(`Checking if email already exists: ${email}`);
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
-      return res.status(400).json({
+      logger.warn(`Registration failed: Email already exists - ${email}`);
+      return res.status(409).json({
         success: false,
-        message: 'User with this email already exists'
+        message: 'This email address is already registered. Please use a different email address or try logging in instead.',
+        error: 'EMAIL_EXISTS'
       });
     }
+    logger.info(`Email ${email} is available. Proceeding with registration...`);
 
-    // Create verification token
+    // Step 2: Generate activation token
+    logger.info(`Generating activation token for email: ${email}`);
     const verificationToken = jwt.sign(
-      { email },
+      { email, type: 'email_verification' },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
+    logger.info('Activation token generated successfully');
 
-    // Create user
+    // Create user with activation token (status will be 'active' by default, but email_verified is false)
     const user = await User.create({
       email,
       password,
       first_name,
       last_name,
       phone,
-      email_verification_token: verificationToken
+      email_verification_token: verificationToken,
+      email_verified: false, // User starts unverified
+      status: 'active' // Account is active but requires email verification to login
     });
+
+    logger.info(`User created successfully with ID: ${user.id} for email: ${email}`);
 
     // Get dynamic frontend URL from request origin or fallback to env
     const origin = req.get('origin') || req.get('referer') || process.env.FRONTEND_URL || 'http://localhost:3000';
     const frontendUrl = origin.replace(/\/$/, ''); // Remove trailing slash if present
 
-    // Send verification email
+    // Step 3: Send email with activation link
+    let emailSent = false;
+    let emailErrorDetails = null;
+    
+    logger.info(`[REGISTRATION] Step 3: Preparing to send verification email to: ${email}`);
+    
     try {
-      await sendEmail({
+      logger.info(`[REGISTRATION] Attempting to send verification email to: ${email}`);
+      
+      // Log email configuration status
+      const hasSMTP = process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS;
+      const hasGmail = process.env.GMAIL_USER && process.env.GMAIL_PASS;
+      logger.info('[REGISTRATION] Email configuration check:', {
+        hasSMTP,
+        hasGmail,
+        smtpHost: process.env.SMTP_HOST || 'Not set',
+        usingEthereal: !hasSMTP && !hasGmail
+      });
+      
+      // Ensure sendEmail is imported and available
+      if (!sendEmail) {
+        throw new Error('sendEmail function is not available');
+      }
+      
+      logger.info(`[REGISTRATION] Calling sendEmail service for: ${email}`);
+      const emailResult = await sendEmail({
         to: email,
         subject: 'Welcome to Clickbit.com.au - Verify Your Email',
         template: 'emailVerification',
@@ -136,21 +177,81 @@ router.post('/register', authLimiter, validateRegistration, handleValidationErro
           verificationUrl: `${frontendUrl}/#/verify-email?token=${verificationToken}`
         }
       });
+      
+      emailSent = true;
+      logger.info(`[REGISTRATION] Verification email sent successfully to: ${email}`, {
+        messageId: emailResult.messageId,
+        previewURL: emailResult.previewURL || 'N/A (production email)'
+      });
+      
+      // If using Ethereal (test email), log the preview URL
+      if (emailResult.previewURL) {
+        logger.warn('[REGISTRATION] ⚠️ Using Ethereal test email service. Email will NOT be delivered!', {
+          previewURL: emailResult.previewURL,
+          message: 'Configure SMTP settings in .env file to send real emails'
+        });
+        console.log('\n⚠️ WARNING: Using Ethereal test email service!');
+        console.log(`📧 Preview URL: ${emailResult.previewURL}`);
+        console.log('⚠️ Configure SMTP settings in .env to send real emails\n');
+      }
     } catch (emailError) {
-      logger.error('Failed to send verification email:', emailError);
-      // Don't fail the registration if email fails
+      emailErrorDetails = emailError.message;
+      logger.error('[REGISTRATION] Failed to send verification email:', {
+        error: emailError.message,
+        stack: emailError.stack,
+        email: email,
+        userId: user.id,
+        errorCode: emailError.code,
+        command: emailError.command,
+        response: emailError.response
+      });
+      console.error('\n❌ [REGISTRATION] Email sending failed:', emailError.message);
+      if (emailError.stack) {
+        console.error('Stack trace:', emailError.stack);
+      }
+      // User is already created, but email failed
+      // We'll still return success but log the error
     }
 
-    res.status(201).json({
-      success: true,
-      message: 'User registered successfully. Please check your email to verify your account.'
-    });
+    // Return success response
+    if (emailSent) {
+      logger.info(`Registration completed successfully for ${email}. Activation email sent.`);
+      res.status(201).json({
+        success: true,
+        message: 'Registration successful! Please check your email inbox and click the activation link to verify your account.',
+        data: {
+          email: email,
+          requiresVerification: true
+        }
+      });
+    } else {
+      // Email failed but user was created
+      logger.warn(`User ${user.id} created but activation email failed to send`, {
+        error: emailErrorDetails,
+        email: email
+      });
+      res.status(201).json({
+        success: true,
+        message: 'Your account has been created, but we encountered an issue sending the activation email. Please contact support for assistance.',
+        warning: 'Email verification required',
+        error: process.env.NODE_ENV === 'development' ? emailErrorDetails : undefined,
+        data: {
+          email: email,
+          userId: user.id
+        }
+      });
+    }
 
   } catch (error) {
-    logger.error('Registration error:', error);
+    logger.error('Registration error:', {
+      error: error.message,
+      stack: error.stack,
+      email: req.body.email,
+      ip: req.ip
+    });
     res.status(500).json({
       success: false,
-      message: 'Server error during registration'
+      message: 'Server error during registration. Please try again later.'
     });
   }
 });
@@ -244,7 +345,7 @@ router.post('/login', validateLogin, handleValidationErrors, async (req, res) =>
 });
 
 // @route   POST /api/auth/verify-email
-// @desc    Verify user email
+// @desc    Verify user email (Step 4 & 5: User clicks activation link, Database update)
 // @access  Public
 router.post('/verify-email', async (req, res) => {
   try {
@@ -253,35 +354,60 @@ router.post('/verify-email', async (req, res) => {
     if (!token) {
       return res.status(400).json({
         success: false,
-        message: 'Verification token is required'
+        message: 'Activation token is required'
       });
     }
 
-    // Verify token
+    logger.info('Email verification attempt with token');
+
+    // Verify and decode token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Validate token type
+    if (decoded.type !== 'email_verification') {
+      logger.warn('Invalid token type for email verification');
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid activation token'
+      });
+    }
     
     // Find user by email
     const user = await User.findByEmail(decoded.email);
     if (!user) {
+      logger.warn(`User not found for email: ${decoded.email}`);
       return res.status(400).json({
         success: false,
-        message: 'Invalid verification token'
+        message: 'Invalid activation token'
       });
     }
 
-    // Check if token matches
+    // Check if token matches stored token
     if (user.email_verification_token !== token) {
+      logger.warn(`Token mismatch for user: ${user.email}`);
       return res.status(400).json({
         success: false,
-        message: 'Invalid verification token'
+        message: 'Invalid or already used activation token'
       });
     }
 
-    // Update user
+    // Check if already verified
+    if (user.email_verified) {
+      logger.info(`Email already verified for user: ${user.email}`);
+      const origin = req.get('origin') || req.get('referer') || process.env.FRONTEND_URL || 'http://localhost:3000';
+      const frontendUrl = origin.replace(/\/$/, '');
+      return res.redirect(`${frontendUrl}/#/login?verified=true&already=true`);
+    }
+
+    // Step 5: Database update - Update user status after verification
+    logger.info(`Updating database for email verification: ${user.email}`);
     await user.update({
       email_verified: true,
-      email_verification_token: null
+      email_verification_token: null,
+      status: 'active' // Activate the account
     });
+
+    logger.info(`Email verified successfully for user: ${user.email} (ID: ${user.id})`);
 
     // Get dynamic frontend URL from request origin or fallback to env
     const origin = req.get('origin') || req.get('referer') || process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -290,14 +416,26 @@ router.post('/verify-email', async (req, res) => {
     res.redirect(`${frontendUrl}/#/login?verified=true`);
 
   } catch (error) {
-    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+    if (error.name === 'JsonWebTokenError') {
+      logger.warn('Invalid JWT token format');
       return res.status(400).json({
         success: false,
-        message: 'Invalid or expired verification token'
+        message: 'Invalid activation token format'
+      });
+    }
+    
+    if (error.name === 'TokenExpiredError') {
+      logger.warn('Expired activation token');
+      return res.status(400).json({
+        success: false,
+        message: 'Activation token has expired. Please request a new verification email.'
       });
     }
 
-    logger.error('Email verification error:', error);
+    logger.error('Email verification error:', {
+      error: error.message,
+      stack: error.stack
+    });
     res.status(500).json({
       success: false,
       message: 'Server error during email verification'
@@ -306,7 +444,7 @@ router.post('/verify-email', async (req, res) => {
 });
 
 // @route   GET /api/auth/verify-email
-// @desc    Verify user email via GET (for email links)
+// @desc    Verify user email via GET (for email links - Step 4 & 5)
 // @access  Public
 router.get('/verify-email', async (req, res) => {
   try {
@@ -317,38 +455,69 @@ router.get('/verify-email', async (req, res) => {
     const frontendUrl = origin.replace(/\/$/, ''); // Remove trailing slash if present
 
     if (!token) {
+      logger.warn('Email verification attempted without token');
       return res.redirect(`${frontendUrl}/#/login?error=no-token`);
     }
+
+    logger.info('Email verification attempt via GET with token');
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
+    // Validate token type
+    if (decoded.type !== 'email_verification') {
+      logger.warn('Invalid token type for email verification');
+      return res.redirect(`${frontendUrl}/#/login?error=invalid-token`);
+    }
+    
     // Find user by email
     const user = await User.findByEmail(decoded.email);
     if (!user) {
+      logger.warn(`User not found for email: ${decoded.email}`);
       return res.redirect(`${frontendUrl}/#/login?error=invalid-token`);
     }
 
-    // Check if token matches (if we stored it) or just verify the JWT is valid
+    // Check if token matches stored token
     if (user.email_verification_token && user.email_verification_token !== token) {
+      logger.warn(`Token mismatch for user: ${user.email}`);
       return res.redirect(`${frontendUrl}/#/login?error=token-mismatch`);
     }
 
-    // Update user
+    // Check if already verified
+    if (user.email_verified) {
+      logger.info(`Email already verified for user: ${user.email}`);
+      return res.redirect(`${frontendUrl}/#/login?verified=true&already=true`);
+    }
+
+    // Step 5: Database update - Update user status after verification
+    logger.info(`Updating database for email verification: ${user.email}`);
     await user.update({
       email_verified: true,
-      email_verification_token: null
+      email_verification_token: null,
+      status: 'active' // Activate the account
     });
 
-    logger.info(`Email verified successfully for user: ${user.email}`);
+    logger.info(`Email verified successfully for user: ${user.email} (ID: ${user.id})`);
     res.redirect(`${frontendUrl}/#/login?verified=true`);
 
   } catch (error) {
-    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+    const origin = req.get('origin') || req.get('referer') || process.env.FRONTEND_URL || 'http://localhost:3000';
+    const frontendUrl = origin.replace(/\/$/, '');
+    
+    if (error.name === 'JsonWebTokenError') {
+      logger.warn('Invalid JWT token format');
+      return res.redirect(`${frontendUrl}/#/login?error=invalid-token`);
+    }
+    
+    if (error.name === 'TokenExpiredError') {
+      logger.warn('Expired activation token');
       return res.redirect(`${frontendUrl}/#/login?error=expired-token`);
     }
 
-    logger.error('Email verification error:', error);
+    logger.error('Email verification error:', {
+      error: error.message,
+      stack: error.stack
+    });
     res.redirect(`${frontendUrl}/#/login?error=server-error`);
   }
 });

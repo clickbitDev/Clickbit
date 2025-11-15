@@ -3,27 +3,27 @@
   "name": "ClickBit - Web Solutions",
   "icons": [
     {
-      "src": "favicon-48x48.png",
+      "src": "https://clickbit.com.au/favicon-48x48.png",
       "type": "image/png",
       "sizes": "48x48"
     },
     {
-      "src": "favicon-96x96.png",
+      "src": "https://clickbit.com.au/favicon-96x96.png",
       "type": "image/png",
       "sizes": "96x96"
     },
     {
-      "src": "favicon-192x192.png",
+      "src": "https://clickbit.com.au/favicon-192x192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "apple-touch-icon.png",
+      "src": "https://clickbit.com.au/apple-touch-icon.png",
       "type": "image/png",
       "sizes": "180x180"
     },
     {
-      "src": "logo.svg",
+      "src": "https://clickbit.com.au/logo.svg",
       "type": "image/svg+xml",
       "sizes": "any"
     }

@@ -160,6 +160,7 @@ const Header: React.FC = () => {
     const performSearch = async () => {
       if (!searchQuery.trim()) {
         setSearchResults([]);
+        setIsSearching(false);
         return;
       }
 
@@ -175,23 +176,49 @@ const Header: React.FC = () => {
           headers['Authorization'] = `Bearer ${token}`;
         }
         
-        const response = await fetch(`${API_BASE}/public/search?q=${encodeURIComponent(searchQuery)}&limit=20`, {
+        const searchUrl = `${API_BASE}/public/search?q=${encodeURIComponent(searchQuery)}&limit=20`;
+        console.log('Searching:', searchUrl);
+        
+        const response = await fetch(searchUrl, {
           headers,
           credentials: 'include'
         });
+        
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           console.error('Search failed:', response.status, errorData);
-          throw new Error('Search failed');
+          // Even if there's an error, try to continue - don't block search
+          // This handles cases where token might be expired but search should still work
+          if (response.status === 401 || response.status === 403) {
+            // If auth error, try again without token
+            console.log('Auth error, retrying search without token...');
+            const retryResponse = await fetch(searchUrl, {
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include'
+            });
+            if (retryResponse.ok) {
+              const retryData = await retryResponse.json();
+              const formattedResults = (retryData.all || []).map((item: any) => ({
+                type: item.type,
+                name: item.name,
+                desc: item.description || '',
+                href: item.href,
+                category: item.category || item.client || ''
+              }));
+              setSearchResults(formattedResults);
+              return;
+            }
+          }
+          setSearchResults([]);
+          return;
         }
+        
         const data = await response.json();
         
         // Debug logging
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Search results:', data);
-          console.log('Is admin:', data.isAdmin);
-          console.log('Total results:', data.total);
-        }
+        console.log('Search response:', data);
+        console.log('Total results:', data.total);
+        console.log('All results:', data.all);
         
         // Format results for display
         const formattedResults = (data.all || []).map((item: any) => ({
@@ -202,6 +229,7 @@ const Header: React.FC = () => {
           category: item.category || item.client || ''
         }));
         
+        console.log('Formatted results:', formattedResults);
         setSearchResults(formattedResults);
       } catch (error) {
         console.error('Search error:', error);
@@ -214,7 +242,7 @@ const Header: React.FC = () => {
     // Debounce search
     const timeoutId = setTimeout(performSearch, 300);
     return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
+  }, [searchQuery, token]);
 
   return (
     <>
@@ -252,7 +280,7 @@ const Header: React.FC = () => {
           {/* MAIN HEADER CAPSULE */}
           <header className={headerClasses}>
             <div className="container mx-auto px-2 xl:px-4">
-              <div className="relative flex items-center justify-between h-20 gap-2">
+              <div className="relative flex items-center justify-between h-20">
                 {/* Left Section */}
                 <div className="flex items-center justify-start xl:w-1/4 flex-shrink-0">
                   <motion.button 
@@ -278,17 +306,17 @@ const Header: React.FC = () => {
 
                 {/* Center Section */}
                 <div className="flex-1 flex items-center justify-center min-w-0">
-                  <nav className="hidden xl:flex items-center space-x-2 flex-wrap justify-center gap-2">
+                  <nav className="hidden xl:flex items-center space-x-2">
                     <NavLink 
                       to="/about" 
-                      className={({isActive}) => `px-4 py-2 rounded-full font-medium text-sm xl:text-base transition-colors duration-300 whitespace-nowrap ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                      className={({isActive}) => `px-4 py-2 rounded-full font-medium transition-colors duration-300 ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
                     >
                       About
                     </NavLink>
                     <div onMouseEnter={handleServicesMenuEnter} onMouseLeave={handleServicesMenuLeave} className="relative">
                       <NavLink
                         to="/services"
-                        className={({isActive}) => `px-4 py-2 rounded-full flex items-center font-medium text-sm xl:text-base transition-colors duration-300 whitespace-nowrap ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                        className={({isActive}) => `px-4 py-2 rounded-full flex items-center font-medium transition-colors duration-300 ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
                       >
                         Services <ChevronDownIcon className="h-4 w-4 xl:h-5 xl:w-5 ml-1" />
                       </NavLink>
@@ -416,28 +444,28 @@ const Header: React.FC = () => {
                       )}
                     </div>
                   </nav>
-                  <div className="px-3 xl:px-6 flex-shrink-0 mx-2">
+                  <div className="px-3 xl:px-6 flex-shrink-0">
                     <Link to="/">
-                      <img src={theme === 'light' ? "/logo.svg" : "/logo-dark.svg"} alt="ClickBit Logo" className="h-6 xl:h-8" loading="eager" />
+                      <img src={theme === 'light' ? "/logo.svg" : "/logo-dark.svg"} alt="ClickBit Logo" className="h-8" loading="eager" />
                     </Link>
                   </div>
-                  <nav className="hidden xl:flex items-center space-x-2 flex-wrap justify-center gap-2">
+                  <nav className="hidden xl:flex items-center space-x-2">
                     <NavLink 
                       to="/portfolio" 
-                      className={({isActive}) => `px-4 py-2 rounded-full font-medium text-sm xl:text-base transition-colors duration-300 whitespace-nowrap ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                      className={({isActive}) => `px-4 py-2 rounded-full font-medium transition-colors duration-300 ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
                     >
                       Portfolio
                     </NavLink>
                     <NavLink 
                       to="/contact" 
-                      className={({isActive}) => `px-4 py-2 rounded-full font-medium text-sm xl:text-base transition-colors duration-300 whitespace-nowrap ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                      className={({isActive}) => `px-4 py-2 rounded-full font-medium transition-colors duration-300 ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
                     >
                       Contact
                     </NavLink>
                     {isAuthenticated && (user?.role === 'admin' || user?.role === 'manager') && (
                       <NavLink 
                         to="/admin/dashboard" 
-                        className={({isActive}) => `px-4 py-2 rounded-full font-medium text-sm xl:text-base transition-colors duration-300 whitespace-nowrap ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                        className={({isActive}) => `px-4 py-2 rounded-full font-medium transition-colors duration-300 ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
                       >
                         Dashboard
                       </NavLink>

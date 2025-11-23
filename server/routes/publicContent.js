@@ -14,10 +14,18 @@ const optionalAuth = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = await User.findByPk(decoded.id);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('OptionalAuth: User authenticated:', req.user?.email, 'Role:', req.user?.role);
+      }
     } catch (error) {
       // Ignore auth errors - continue without user
+      if (process.env.NODE_ENV === 'development') {
+        console.log('OptionalAuth: Token verification failed (continuing without auth):', error.message);
+      }
       req.user = null;
     }
+  } else {
+    req.user = null;
   }
   
   next();
@@ -438,17 +446,22 @@ router.get('/search', optionalAuth, async (req, res) => {
     }
 
     // Search services (case-insensitive for MySQL)
+    // Search in name, description, and JSON fields (features, sections)
+    // For JSON fields, we'll search by casting to text and using LIKE
     const services = await Service.findAll({
       where: {
-        status: 'active',
+        isActive: true,
         [Op.or]: [
           { name: { [Op.like]: searchPattern } },
           { description: { [Op.like]: searchPattern } },
-          { short_description: { [Op.like]: searchPattern } }
+          // Search in JSON fields by casting to text
+          sequelize.literal(`CAST(features AS CHAR) LIKE ${sequelize.escape(searchPattern)}`),
+          sequelize.literal(`CAST(sections AS CHAR) LIKE ${sequelize.escape(searchPattern)}`),
+          sequelize.literal(`CAST(pricing AS CHAR) LIKE ${sequelize.escape(searchPattern)}`)
         ]
       },
       limit: limitNum,
-      attributes: ['id', 'name', 'slug', 'description', 'short_description', 'category']
+      attributes: ['id', 'name', 'slug', 'description', 'category']
     });
 
     // Search blog posts (case-insensitive for MySQL)
@@ -623,7 +636,7 @@ router.get('/search', optionalAuth, async (req, res) => {
       type: 'service',
       id: service.id,
       name: service.name,
-      description: service.short_description || service.description,
+      description: service.description,
       href: `/services/${service.slug}`,
       category: service.category
     }));

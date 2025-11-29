@@ -137,3 +137,6 @@ react-server.log
 
 # YoYo AI version control directory
 .yoyo/
+.env*
+*.sql
+*.backup*

@@ -91,12 +91,6 @@ const Footer: React.FC = () => {
               {footerContent.companyDescription || 'Empowering businesses with innovative digital solutions to connect, engage, and grow.'}
             </p>
             <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-              {/* Debug: Show count of social links */}
-              {process.env.NODE_ENV === 'development' && (
-                <div className="text-xs text-gray-400 mb-2 w-full text-center">
-                  Social Links: {contactInfo.socialLinks.length} platforms
-                </div>
-              )}
               {contactInfo.socialLinks.map((social, index) => {
                 const IconComponent = getSocialIcon(social.platform);
                 return (

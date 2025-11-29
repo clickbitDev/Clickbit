@@ -3,6 +3,13 @@
 echo "🚀 Starting ClickBit Frontend Server for Network Access..."
 echo "=================================================="
 
+# Get the script directory and navigate to project root
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Change to project root
+cd "$PROJECT_ROOT" || exit 1
+
 # Check if we're in the right directory
 if [ ! -f "client/package.json" ]; then
     echo "❌ Error: client/package.json not found. Please run this script from the project root."

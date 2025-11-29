@@ -138,6 +138,17 @@ const Header: React.FC = () => {
       setServicesMenuOpen(false);
     }, 200);
   };
+
+  const handleServiceClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Clear any pending timeout
+    if (servicesMenuTimeout.current) {
+      clearTimeout(servicesMenuTimeout.current);
+      servicesMenuTimeout.current = null;
+    }
+    // Immediately close the menu
+    setServicesMenuOpen(false);
+  };
   
   const handleSidebarToggle = (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -327,6 +338,8 @@ const Header: React.FC = () => {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             className="bg-white-97 backdrop-blur-2xl backdrop-saturate-150 dark:bg-gray-900-97 dark:backdrop-blur-2xl dark:backdrop-saturate-50 text-black dark:text-white rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 p-6 pointer-events-auto"
+                            onMouseEnter={handleServicesMenuEnter}
+                            onMouseLeave={handleServicesMenuLeave}
                           >
                             <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                               {Object.values(serviceCategories)
@@ -342,6 +355,7 @@ const Header: React.FC = () => {
                                     <div key={category.name} className="col-span-2 relative group mt-2">
                                       <Link 
                                         to={`/services?category=${category.slug}`}
+                                        onClick={handleServiceClick}
                                         className="block p-4 rounded-xl hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 dark:hover:from-gray-800 dark:hover:to-gray-700 transition-all duration-300 border-2 border-cyan-400 dark:border-cyan-600 shadow-lg bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-800/80"
                                       >
                                         <h3 className="font-bold text-base text-cyan-600 dark:text-cyan-400 mb-2 transition-colors flex items-center justify-center">
@@ -361,6 +375,7 @@ const Header: React.FC = () => {
                                               <Link
                                                 key={item.name}
                                                 to={item.href}
+                                                onClick={handleServiceClick}
                                                 className="block p-3 rounded-xl hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 dark:hover:from-gray-800 dark:hover:to-gray-700 transition-all duration-300 border border-transparent hover:border-cyan-200 dark:hover:border-cyan-800 group/item"
                                               >
                                                 <div className="flex items-start space-x-3">
@@ -389,6 +404,7 @@ const Header: React.FC = () => {
                                   <div key={category.name} className="relative group">
                                     <Link 
                                       to={`/services?category=${category.slug}`}
+                                      onClick={handleServiceClick}
                                       className="block p-4 rounded-xl hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 dark:hover:from-gray-800 dark:hover:to-gray-700 transition-all duration-300 border border-transparent hover:border-cyan-200 dark:hover:border-cyan-800"
                                     >
                                       <h3 className={`font-bold text-base text-gray-900 dark:text-white mb-2 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors flex items-center ${isLeftColumn ? 'justify-end' : ''}`}>
@@ -414,7 +430,8 @@ const Header: React.FC = () => {
                                           {category.items.map((item: any) => (
                                             <Link 
                                               key={item.name} 
-                                              to={item.href} 
+                                              to={item.href}
+                                              onClick={handleServiceClick}
                                               className="block p-3 rounded-xl hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 dark:hover:from-gray-800 dark:hover:to-gray-700 transition-all duration-300 border border-transparent hover:border-cyan-200 dark:hover:border-cyan-800 group/item"
                                             >
                                               <div className="flex items-start space-x-3">
@@ -465,7 +482,7 @@ const Header: React.FC = () => {
                     {isAuthenticated && (user?.role === 'admin' || user?.role === 'manager') && (
                       <NavLink 
                         to="/admin/dashboard" 
-                        className={({isActive}) => `px-4 py-2 rounded-full font-medium transition-colors duration-300 ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                        className={({isActive}) => `relative z-20 px-4 py-2 rounded-full font-medium transition-colors duration-300 ${isActive ? 'bg-[#1FBBD2] text-white' : 'text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
                       >
                         Dashboard
                       </NavLink>

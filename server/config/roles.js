@@ -106,6 +106,9 @@ const roles = {
       // Excluded: users:*, billing:* (admin only)
     ],
   },
+  customer: {
+    permissions: [],
+  },
   user: {
     permissions: [],
   },

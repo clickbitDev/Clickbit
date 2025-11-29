@@ -17,7 +17,7 @@ const { initializeModels } = require('./models');
 const connectionMonitor = require('./utils/connectionMonitor');
 
 // Import routes
-const authRoutes = require('./routes/auth');
+const authRoutes = require('./routes/auth-secure');
 const userRoutes = require('./routes/users');
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
@@ -372,13 +372,17 @@ const checkPort = async (port) => {
 // Start server
 const startServer = async () => {
   try {
-    // Check if port is available
-    const portAvailable = await checkPort(PORT);
-    if (!portAvailable) {
-      logger.error(`Port ${PORT} is already in use!`);
-      logger.info('Please kill the existing process or use a different port.');
-      logger.info(`Run: lsof -ti:${PORT} | xargs kill -9`);
-      process.exit(1);
+    // Skip port check in PM2 cluster mode (PM2 handles port sharing)
+    const isPM2Cluster = process.env.pm_id !== undefined;
+    if (!isPM2Cluster) {
+      // Check if port is available
+      const portAvailable = await checkPort(PORT);
+      if (!portAvailable) {
+        logger.error(`Port ${PORT} is already in use!`);
+        logger.info('Please kill the existing process or use a different port.');
+        logger.info(`Run: lsof -ti:${PORT} | xargs kill -9`);
+        process.exit(1);
+      }
     }
 
     // Connect to database

@@ -163,7 +163,7 @@ class SecurityMiddleware {
     // Remove or escape dangerous SQL characters
     return input
       .replace(/['"\\]/g, '') // Remove quotes and backslashes
-      .replace(/[;--]/g, '') // Remove semicolons and comments
+      .replace(/[;-]/g, '') // Remove semicolons and hyphens (prevents -- comments)
       .replace(/union/gi, '') // Remove UNION keywords
       .replace(/select/gi, '') // Remove SELECT keywords
       .replace(/insert/gi, '') // Remove INSERT keywords
@@ -304,6 +304,14 @@ class SecurityMiddleware {
 
 // Create singleton instance
 const securityMiddleware = new SecurityMiddleware();
+
+// Bind methods to ensure 'this' context is preserved when used as Express middleware
+securityMiddleware.rateLimitByIP = securityMiddleware.rateLimitByIP.bind(securityMiddleware);
+securityMiddleware.incrementFailedAttempts = securityMiddleware.incrementFailedAttempts.bind(securityMiddleware);
+securityMiddleware.resetFailedAttempts = securityMiddleware.resetFailedAttempts.bind(securityMiddleware);
+securityMiddleware.verifyTokenWithBlacklist = securityMiddleware.verifyTokenWithBlacklist.bind(securityMiddleware);
+securityMiddleware.securityHeaders = securityMiddleware.securityHeaders.bind(securityMiddleware);
+securityMiddleware.securityLogging = securityMiddleware.securityLogging.bind(securityMiddleware);
 
 // Start cleanup process
 securityMiddleware.startCleanup();

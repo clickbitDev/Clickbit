@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { pageVariants, pageTransition } from '../animations';
 import PageHeader from '../components/PageHeader';
@@ -22,6 +22,7 @@ const PRINTING_MIN_QUANTITIES: { [key: string]: number } = {
 const CartPage = () => {
   const navigate = useNavigate();
   const { items, total, itemCount, removeItem, updateQuantity, clearCart } = useCart();
+  const [quantityInputs, setQuantityInputs] = useState<{ [key: string]: string }>({});
 
   const handleCheckout = () => {
     if (items.length === 0) {
@@ -42,10 +43,83 @@ const CartPage = () => {
   const handleQuantityChange = (itemId: string, newQuantity: number) => {
     const minQuantity = getMinQuantity(itemId);
     if (newQuantity < minQuantity) {
-      alert(`Minimum quantity for this service is ${minQuantity}`);
+      toast.error(`Minimum quantity for this service is ${minQuantity} units. Please enter at least ${minQuantity}.`, {
+        duration: 4000,
+        icon: '⚠️',
+      });
+      // Reset input to current quantity
+      setQuantityInputs(prev => {
+        const updated = { ...prev };
+        delete updated[itemId];
+        return updated;
+      });
       return;
     }
     updateQuantity(itemId, newQuantity);
+    // Clear the input value after successful update
+    setQuantityInputs(prev => {
+      const updated = { ...prev };
+      delete updated[itemId];
+      return updated;
+    });
+  };
+
+  const handleQuantityInputChange = (itemId: string, value: string) => {
+    // Allow empty string for typing, and numbers only
+    if (value === '' || /^\d+$/.test(value)) {
+      setQuantityInputs(prev => ({
+        ...prev,
+        [itemId]: value
+      }));
+    }
+  };
+
+  const handleQuantityInputBlur = (itemId: string) => {
+    const inputValue = quantityInputs[itemId];
+    const minQuantity = getMinQuantity(itemId);
+    const currentQuantity = items.find(i => i.id === itemId)?.quantity || minQuantity;
+    
+    if (inputValue !== undefined) {
+      const numValue = parseInt(inputValue, 10);
+      
+      // If input is empty or invalid, reset to current quantity
+      if (isNaN(numValue) || numValue <= 0) {
+        setQuantityInputs(prev => {
+          const updated = { ...prev };
+          delete updated[itemId];
+          return updated;
+        });
+        return;
+      }
+      
+      // Check minimum quantity restriction
+      if (numValue < minQuantity) {
+        toast.error(
+          `Minimum quantity for "${items.find(i => i.id === itemId)?.name || 'this service'}" is ${minQuantity} units. Quantity has been set to ${minQuantity}.`,
+          {
+            duration: 5000,
+            icon: '⚠️',
+          }
+        );
+        // Auto-correct to minimum quantity
+        updateQuantity(itemId, minQuantity);
+        setQuantityInputs(prev => {
+          const updated = { ...prev };
+          delete updated[itemId];
+          return updated;
+        });
+        return;
+      }
+      
+      // Valid quantity, update it
+      handleQuantityChange(itemId, numValue);
+    }
+  };
+
+  const handleQuantityInputKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, itemId: string) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur();
+    }
   };
 
   const formatPrice = (price: number, itemId: string): string => {
@@ -158,9 +232,23 @@ const CartPage = () => {
                                 >
                                   <Minus size={16} />
                                 </button>
-                                <span className="px-4 py-2 font-semibold text-gray-900 dark:text-white">
-                                  {item.quantity}
-                                </span>
+                                <input
+                                  type="text"
+                                  inputMode="numeric"
+                                  value={quantityInputs[item.id] !== undefined ? quantityInputs[item.id] : item.quantity}
+                                  onChange={(e) => handleQuantityInputChange(item.id, e.target.value)}
+                                  onBlur={() => handleQuantityInputBlur(item.id)}
+                                  onKeyPress={(e) => handleQuantityInputKeyPress(e, item.id)}
+                                  className={`w-16 px-2 py-2 text-center font-semibold bg-transparent border-0 focus:outline-none focus:ring-2 rounded ${
+                                    quantityInputs[item.id] !== undefined && 
+                                    parseInt(quantityInputs[item.id], 10) < minQuantity && 
+                                    !isNaN(parseInt(quantityInputs[item.id], 10))
+                                      ? 'text-red-500 dark:text-red-400 focus:ring-red-500'
+                                      : 'text-gray-900 dark:text-white focus:ring-[#1FBBD2]'
+                                  }`}
+                                  min={minQuantity}
+                                  placeholder={minQuantity.toString()}
+                                />
                                 <button
                                   onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -171,6 +259,14 @@ const CartPage = () => {
                               {isPrinting && (
                                 <span className="text-xs text-gray-500 dark:text-gray-400">
                                   Min: {minQuantity}
+                                </span>
+                              )}
+                              {quantityInputs[item.id] !== undefined && 
+                               parseInt(quantityInputs[item.id], 10) < minQuantity && 
+                               !isNaN(parseInt(quantityInputs[item.id], 10)) && (
+                                <span className="text-xs text-red-500 dark:text-red-400 flex items-center gap-1">
+                                  <AlertCircle size={12} />
+                                  Minimum: {minQuantity}
                                 </span>
                               )}
                             </div>

@@ -21,7 +21,9 @@
     "seed": "npx sequelize-cli db:seed:all",
     "seed:undo": "npx sequelize-cli db:seed:undo:all",
     "test:meta-tags": "node scripts/test-meta-tags.js",
-    "test:meta-tags:url": "node scripts/test-meta-tags.js"
+    "test:meta-tags:url": "node scripts/test-meta-tags.js",
+    "health": "node scripts/health-check.js",
+    "health:check": "node scripts/health-check.js"
   },
   "keywords": [
     "clickbit",

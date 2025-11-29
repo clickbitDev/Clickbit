@@ -128,7 +128,7 @@ const RegisterPage: React.FC = () => {
       if (errorMessage.toLowerCase().includes('verification failed')) {
         // Don't show verification failed errors after registration submission
         // The user will verify via email link
-        setSuccessMessage('Registration successful! Please check your email to verify your account.');
+        setSuccessMessage('Registration failed! Please try again.',);
         clearError();
       }
       // Other errors are handled and displayed by AuthContext

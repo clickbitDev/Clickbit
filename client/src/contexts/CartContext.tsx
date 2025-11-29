@@ -61,7 +61,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
           ...state,
           items: updatedItems,
           total: updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-          itemCount: updatedItems.reduce((sum, item) => sum + item.quantity, 0),
+          itemCount: updatedItems.length,
         };
       } else {
         const newItem = { ...action.payload };
@@ -71,7 +71,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
           ...state,
           items: updatedItems,
           total: updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-          itemCount: updatedItems.reduce((sum, item) => sum + item.quantity, 0),
+          itemCount: updatedItems.length,
         };
       }
     }
@@ -83,7 +83,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         ...state,
         items: updatedItems,
         total: updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-        itemCount: updatedItems.reduce((sum, item) => sum + item.quantity, 0),
+        itemCount: updatedItems.length,
       };
     }
     
@@ -102,7 +102,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         ...state,
         items: updatedItems,
         total: updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-        itemCount: updatedItems.reduce((sum, item) => sum + item.quantity, 0),
+        itemCount: updatedItems.length,
       };
     }
     
@@ -119,7 +119,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         ...state,
         items: action.payload,
         total: action.payload.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-        itemCount: action.payload.reduce((sum, item) => sum + item.quantity, 0),
+        itemCount: action.payload.length,
       };
       
     default:

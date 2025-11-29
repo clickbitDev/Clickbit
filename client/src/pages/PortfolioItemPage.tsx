@@ -279,7 +279,7 @@ const PortfolioItemPage: React.FC = () => {
 
             {/* Sidebar */}
             <div className="lg:col-span-1">
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 sticky top-6">
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 sticky top-28">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Project Details</h3>
                 
                 {/* Project Date */}

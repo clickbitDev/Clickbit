@@ -4,7 +4,13 @@ const fs = require('fs');
 class SitemapGenerator {
   constructor() {
     // Use production URL for live domain
-    this.baseUrl = process.env.FRONTEND_URL || 'https://clickbit.com.au';
+    let baseUrl = process.env.FRONTEND_URL || 'https://clickbit.com.au';
+    // Ensure baseUrl is properly formatted (remove trailing slash, ensure protocol)
+    baseUrl = baseUrl.trim().replace(/\/+$/, ''); // Remove trailing slashes
+    if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+      baseUrl = `https://${baseUrl}`; // Add https if no protocol
+    }
+    this.baseUrl = baseUrl;
     this.staticRoutes = [
       { path: '/', priority: 1.0, changefreq: 'weekly' },
       { path: '/about', priority: 0.8, changefreq: 'monthly' },
@@ -86,6 +92,44 @@ class SitemapGenerator {
         console.warn('Could not fetch portfolio items for sitemap:', dbError.message);
       }
 
+      // Try to add blog posts if database is available
+      try {
+        const { BlogPost } = require('../models');
+        const { Op } = require('sequelize');
+        const blogPosts = await BlogPost.findAll({
+          where: {
+            status: 'published',
+            published_at: {
+              [Op.lte]: new Date()
+            }
+          },
+          attributes: ['id', 'title', 'slug', 'updated_at', 'published_at'],
+          order: [['published_at', 'DESC']]
+        });
+
+        blogPosts.forEach(post => {
+          // Use published_at if available, otherwise updated_at, otherwise today
+          const lastmod = post.published_at ? 
+            new Date(post.published_at).toISOString().split('T')[0] : 
+            (post.updated_at ? 
+              new Date(post.updated_at).toISOString().split('T')[0] : 
+              new Date().toISOString().split('T')[0]);
+          
+          // Ensure full absolute URL for blog post
+          const blogUrl = `${this.baseUrl}/blog/${post.slug}`;
+          
+          sitemap += `
+  <url>
+    <loc>${blogUrl}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+        });
+      } catch (dbError) {
+        console.warn('Could not fetch blog posts for sitemap:', dbError.message);
+      }
+
       // Close XML sitemap
       sitemap += `
 </urlset>`;
@@ -93,6 +137,70 @@ class SitemapGenerator {
       return sitemap;
     } catch (error) {
       console.error('Error generating sitemap:', error);
+      throw error;
+    }
+  }
+
+  async generateBlogSitemap() {
+    try {
+      // Start XML sitemap
+      let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+
+      // Add blog listing page
+      sitemap += `
+  <url>
+    <loc>${this.baseUrl}/blog</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+
+      // Try to add blog posts if database is available
+      try {
+        const { BlogPost } = require('../models');
+        const { Op } = require('sequelize');
+        const blogPosts = await BlogPost.findAll({
+          where: {
+            status: 'published',
+            published_at: {
+              [Op.lte]: new Date()
+            }
+          },
+          attributes: ['id', 'title', 'slug', 'updated_at', 'published_at'],
+          order: [['published_at', 'DESC']]
+        });
+
+        blogPosts.forEach(post => {
+          // Use published_at if available, otherwise updated_at, otherwise today
+          const lastmod = post.published_at ? 
+            new Date(post.published_at).toISOString().split('T')[0] : 
+            (post.updated_at ? 
+              new Date(post.updated_at).toISOString().split('T')[0] : 
+              new Date().toISOString().split('T')[0]);
+          
+          // Ensure full absolute URL for blog post
+          const blogUrl = `${this.baseUrl}/blog/${post.slug}`;
+          
+          sitemap += `
+  <url>
+    <loc>${blogUrl}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+        });
+      } catch (dbError) {
+        console.warn('Could not fetch blog posts for sitemap:', dbError.message);
+      }
+
+      // Close XML sitemap
+      sitemap += `
+</urlset>`;
+
+      return sitemap;
+    } catch (error) {
+      console.error('Error generating blog sitemap:', error);
       throw error;
     }
   }
@@ -113,6 +221,26 @@ class SitemapGenerator {
       return sitemapPath;
     } catch (error) {
       console.error('Error saving sitemap:', error);
+      throw error;
+    }
+  }
+
+  async saveBlogSitemap() {
+    try {
+      const sitemap = await this.generateBlogSitemap();
+      const sitemapPath = path.join(__dirname, '../../client/public/sitemap-blogs.xml');
+      
+      // Ensure directory exists
+      const dir = path.dirname(sitemapPath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      
+      fs.writeFileSync(sitemapPath, sitemap, 'utf8');
+      console.log('Blog sitemap generated successfully at:', sitemapPath);
+      return sitemapPath;
+    } catch (error) {
+      console.error('Error saving blog sitemap:', error);
       throw error;
     }
   }

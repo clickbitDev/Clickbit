@@ -293,19 +293,50 @@ app.get('/api/health', (req, res) => {
   }
 });
 
-// Sitemap endpoint
-app.get('/sitemap.xml', async (req, res) => {
-  try {
-    const SitemapGenerator = require('./utils/sitemapGenerator');
-    const generator = new SitemapGenerator();
-    const sitemap = await generator.generateSitemap();
-    
-    res.set('Content-Type', 'application/xml');
-    res.send(sitemap);
-  } catch (error) {
-    logger.error('Error generating sitemap:', error);
-    res.status(500).send('Error generating sitemap');
-  }
+// Sitemap endpoints - serve static files for better performance
+app.get('/sitemap.xml', (req, res) => {
+  const sitemapPath = path.join(__dirname, '../client/public/sitemap.xml');
+  res.set('Content-Type', 'application/xml');
+  res.sendFile(sitemapPath, (err) => {
+    if (err) {
+      logger.error('Error serving sitemap:', err);
+      // Fallback to dynamic generation if file doesn't exist
+      const SitemapGenerator = require('./utils/sitemapGenerator');
+      const generator = new SitemapGenerator();
+      generator.generateSitemap()
+        .then(sitemap => {
+          res.set('Content-Type', 'application/xml');
+          res.send(sitemap);
+        })
+        .catch(error => {
+          logger.error('Error generating sitemap:', error);
+          res.status(500).send('Error generating sitemap');
+        });
+    }
+  });
+});
+
+// Blog sitemap endpoint
+app.get('/sitemap-blogs.xml', (req, res) => {
+  const sitemapPath = path.join(__dirname, '../client/public/sitemap-blogs.xml');
+  res.set('Content-Type', 'application/xml');
+  res.sendFile(sitemapPath, (err) => {
+    if (err) {
+      logger.error('Error serving blog sitemap:', err);
+      // Fallback to dynamic generation if file doesn't exist
+      const SitemapGenerator = require('./utils/sitemapGenerator');
+      const generator = new SitemapGenerator();
+      generator.generateBlogSitemap()
+        .then(sitemap => {
+          res.set('Content-Type', 'application/xml');
+          res.send(sitemap);
+        })
+        .catch(error => {
+          logger.error('Error generating blog sitemap:', error);
+          res.status(500).send('Error generating blog sitemap');
+        });
+    }
+  });
 });
 
 // Social media crawler middleware (must be before static file serving)

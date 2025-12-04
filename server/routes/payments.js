@@ -177,9 +177,103 @@ router.post('/create-paypal-order', async (req, res) => {
   }
 });
 
+// Define minimum quantities for printing services (must match client-side)
+const PRINTING_MIN_QUANTITIES = {
+  // Product slugs (from product mapping)
+  'printing-business-cards': 500,
+  'printing-flyers': 500,
+  'printing-brochures': 500,
+  'printing-banners': 1, // per sqm
+  'printing-pull-up-banners': 1,
+  'printing-letterheads': 500,
+  'printing-posters': 100,
+  'printing-vehicle-wraps': 1, // per sqm
+  // Tier names (for matching by name)
+  'Business Cards': 500,
+  'Flyers': 500,
+  'Brochures': 500,
+  'Banners': 1,
+  'Pull-up Banners': 1,
+  'Letterheads': 500,
+  'Posters': 100,
+  'Vehicle Wraps': 1,
+  // Simplified keys (fallback)
+  'business-cards': 500,
+  'flyers': 500,
+  'brochures': 500,
+  'banners': 1,
+  'pull-up-banners': 1,
+  'letterheads': 500,
+  'posters': 100,
+  'vehicle-wraps': 1,
+};
+
+// Get minimum quantity for a printing service item
+function getMinQuantity(item) {
+  // Only check minimum quantities for printing services
+  if (item.serviceSlug !== 'printing') {
+    return 1;
+  }
+  
+  // Extract tier name from item name (format: "Printing Services - Business Cards")
+  if (item.name) {
+    const tierName = item.name.split(' - ')[1] || item.name;
+    
+    // Direct match with tier name (e.g., "Business Cards")
+    if (PRINTING_MIN_QUANTITIES[tierName]) {
+      return PRINTING_MIN_QUANTITIES[tierName];
+    }
+    
+    // Try matching with simplified key (convert "Business Cards" to "business-cards")
+    const simplifiedKey = tierName.toLowerCase().replace(/\s+/g, '-');
+    if (PRINTING_MIN_QUANTITIES[simplifiedKey]) {
+      return PRINTING_MIN_QUANTITIES[simplifiedKey];
+    }
+    
+    // Try matching with product slug format (e.g., "printing-business-cards")
+    const productSlug = `printing-${simplifiedKey}`;
+    if (PRINTING_MIN_QUANTITIES[productSlug]) {
+      return PRINTING_MIN_QUANTITIES[productSlug];
+    }
+  }
+  
+  // Fallback: check by id (product ID as string)
+  return PRINTING_MIN_QUANTITIES[item.id] || 1;
+}
+
+// Validate minimum quantities for printing services
+function validateMinimumQuantities(items) {
+  const errors = [];
+  
+  for (const item of items) {
+    const minQuantity = getMinQuantity(item);
+    
+    if (minQuantity > 1 && item.quantity < minQuantity) {
+      errors.push({
+        item: item.name || item.id,
+        quantity: item.quantity,
+        minQuantity: minQuantity,
+        message: `Minimum quantity for "${item.name || item.id}" is ${minQuantity} units, but ${item.quantity} was provided.`
+      });
+    }
+  }
+  
+  return errors;
+}
+
 router.post('/confirm-payment', async (req, res) => {
   try {
     const { paymentIntentId, paypalOrderId, items, customerInfo, paymentMethod, paypalDetails } = req.body;
+
+    // Validate minimum quantities for printing services
+    const quantityErrors = validateMinimumQuantities(items);
+    if (quantityErrors.length > 0) {
+      return res.status(400).json({
+        message: 'Invalid quantities for printing services',
+        errors: quantityErrors,
+        details: quantityErrors.map(e => e.message).join(' ')
+      });
+    }
 
     let paymentData = {};
     let transactionId = '';
@@ -437,6 +531,15 @@ router.post('/webhook/stripe', express.raw({ type: 'application/json' }), async 
         // Create order from checkout session
         try {
           const items = JSON.parse(session.metadata.items || '[]');
+          
+          // Validate minimum quantities for printing services
+          const quantityErrors = validateMinimumQuantities(items);
+          if (quantityErrors.length > 0) {
+            console.error('Webhook: Invalid quantities detected:', quantityErrors);
+            // Log error but don't fail the webhook - order was already paid
+            // The client-side validation should have prevented this
+          }
+          
           const customerInfo = {
             email: session.customer_email,
             name: session.metadata.customerName

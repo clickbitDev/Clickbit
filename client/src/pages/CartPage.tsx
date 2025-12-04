@@ -8,15 +8,35 @@ import { useCart } from '../contexts/CartContext';
 import toast from 'react-hot-toast';
 
 // Define minimum quantities for printing services
+// Keys can match: product slug (e.g., "printing-business-cards"), tier name (e.g., "Business Cards"), or simplified key (e.g., "business-cards")
 const PRINTING_MIN_QUANTITIES: { [key: string]: number } = {
+  // Product slugs (from product mapping)
+  'printing-business-cards': 500,
+  'printing-flyers': 500,
+  'printing-brochures': 500,
+  'printing-banners': 1, // per sqm
+  'printing-pull-up-banners': 1,
+  'printing-letterheads': 500,
+  'printing-posters': 100,
+  'printing-vehicle-wraps': 1, // per sqm
+  // Tier names (for matching by name)
+  'Business Cards': 500,
+  'Flyers': 500,
+  'Brochures': 500,
+  'Banners': 1,
+  'Pull-up Banners': 1,
+  'Letterheads': 500,
+  'Posters': 100,
+  'Vehicle Wraps': 1,
+  // Simplified keys (fallback)
   'business-cards': 500,
   'flyers': 500,
   'brochures': 500,
-  'banners': 1, // per sqm
+  'banners': 1,
   'pull-up-banners': 1,
   'letterheads': 500,
   'posters': 100,
-  'vehicle-wraps': 1, // per sqm
+  'vehicle-wraps': 1,
 };
 
 const CartPage = () => {
@@ -32,16 +52,51 @@ const CartPage = () => {
     navigate('/checkout');
   };
 
-  const getMinQuantity = (itemId: string): number => {
-    return PRINTING_MIN_QUANTITIES[itemId] || 1;
+  const getMinQuantity = (item: { id: string; serviceSlug: string; name?: string }): number => {
+    // Only check minimum quantities for printing services
+    if (item.serviceSlug !== 'printing') {
+      return 1;
+    }
+    
+    // Extract tier name from item name (format: "Printing Services - Business Cards")
+    if (item.name) {
+      const tierName = item.name.split(' - ')[1] || item.name;
+      
+      // Direct match with tier name (e.g., "Business Cards")
+      if (PRINTING_MIN_QUANTITIES[tierName]) {
+        return PRINTING_MIN_QUANTITIES[tierName];
+      }
+      
+      // Try matching with simplified key (convert "Business Cards" to "business-cards")
+      const simplifiedKey = tierName.toLowerCase().replace(/\s+/g, '-');
+      if (PRINTING_MIN_QUANTITIES[simplifiedKey]) {
+        return PRINTING_MIN_QUANTITIES[simplifiedKey];
+      }
+      
+      // Try matching with product slug format (e.g., "printing-business-cards")
+      const productSlug = `printing-${simplifiedKey}`;
+      if (PRINTING_MIN_QUANTITIES[productSlug]) {
+        return PRINTING_MIN_QUANTITIES[productSlug];
+      }
+    }
+    
+    // Fallback: check by id (product ID as string) - unlikely to match but safe fallback
+    return PRINTING_MIN_QUANTITIES[item.id] || 1;
   };
 
-  const isPrintingService = (itemId: string): boolean => {
-    return Object.keys(PRINTING_MIN_QUANTITIES).includes(itemId);
+  const isPrintingService = (item: { id: string; serviceSlug: string; name?: string }): boolean => {
+    // Check if it's a printing service
+    if (item.serviceSlug === 'printing') {
+      return getMinQuantity(item) > 1;
+    }
+    return false;
   };
 
   const handleQuantityChange = (itemId: string, newQuantity: number) => {
-    const minQuantity = getMinQuantity(itemId);
+    const item = items.find(i => i.id === itemId);
+    if (!item) return;
+    
+    const minQuantity = getMinQuantity(item);
     if (newQuantity < minQuantity) {
       toast.error(`Minimum quantity for this service is ${minQuantity} units. Please enter at least ${minQuantity}.`, {
         duration: 4000,
@@ -65,19 +120,38 @@ const CartPage = () => {
   };
 
   const handleQuantityInputChange = (itemId: string, value: string) => {
+    const item = items.find(i => i.id === itemId);
+    if (!item) return;
+    
+    const minQuantity = getMinQuantity(item);
+    
     // Allow empty string for typing, and numbers only
     if (value === '' || /^\d+$/.test(value)) {
-      setQuantityInputs(prev => ({
-        ...prev,
-        [itemId]: value
-      }));
+      // If a valid number is entered and it's below minimum, still allow typing
+      // but we'll validate on blur
+      const numValue = parseInt(value, 10);
+      if (value !== '' && !isNaN(numValue) && numValue < minQuantity) {
+        // Allow typing but mark as invalid (visual feedback already handled in className)
+        setQuantityInputs(prev => ({
+          ...prev,
+          [itemId]: value
+        }));
+      } else {
+        setQuantityInputs(prev => ({
+          ...prev,
+          [itemId]: value
+        }));
+      }
     }
   };
 
   const handleQuantityInputBlur = (itemId: string) => {
+    const item = items.find(i => i.id === itemId);
+    if (!item) return;
+    
     const inputValue = quantityInputs[itemId];
-    const minQuantity = getMinQuantity(itemId);
-    const currentQuantity = items.find(i => i.id === itemId)?.quantity || minQuantity;
+    const minQuantity = getMinQuantity(item);
+    const currentQuantity = item.quantity || minQuantity;
     
     if (inputValue !== undefined) {
       const numValue = parseInt(inputValue, 10);
@@ -92,10 +166,10 @@ const CartPage = () => {
         return;
       }
       
-      // Check minimum quantity restriction
+      // Check minimum quantity restriction - enforce minimum
       if (numValue < minQuantity) {
         toast.error(
-          `Minimum quantity for "${items.find(i => i.id === itemId)?.name || 'this service'}" is ${minQuantity} units. Quantity has been set to ${minQuantity}.`,
+          `Minimum quantity for "${item.name || 'this service'}" is ${minQuantity} units. Quantity has been set to ${minQuantity}.`,
           {
             duration: 5000,
             icon: '⚠️',
@@ -122,9 +196,9 @@ const CartPage = () => {
     }
   };
 
-  const formatPrice = (price: number, itemId: string): string => {
-    if (isPrintingService(itemId)) {
-      const minQuantity = getMinQuantity(itemId);
+  const formatPrice = (price: number, item: { id: string; serviceSlug: string }): string => {
+    if (isPrintingService(item)) {
+      const minQuantity = getMinQuantity(item);
       return `From A$${price.toLocaleString()} (min ${minQuantity})`;
     }
     return `A$${price.toLocaleString()}`;
@@ -188,8 +262,8 @@ const CartPage = () => {
                 {/* Cart Items */}
                 <div className="space-y-4">
                   {items.map((item) => {
-                    const minQuantity = getMinQuantity(item.id);
-                    const isPrinting = isPrintingService(item.id);
+                    const minQuantity = getMinQuantity(item);
+                    const isPrinting = isPrintingService(item);
                     
                     return (
                       <motion.div
@@ -210,7 +284,7 @@ const CartPage = () => {
                             {/* Price display with bulk information */}
                             <div className="mb-4">
                               <div className="text-2xl font-bold text-[#1FBBD2]">
-                                {formatPrice(item.price, item.id)}
+                                {formatPrice(item.price, item)}
                               </div>
                               {isPrinting && (
                                 <div className="flex items-center gap-2 mt-2 text-sm text-amber-600 dark:text-amber-400">
@@ -226,17 +300,38 @@ const CartPage = () => {
                             <div className="flex flex-col items-center gap-2">
                               <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg">
                                 <button
-                                  onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                                  onClick={() => {
+                                    const newQuantity = item.quantity - 1;
+                                    if (newQuantity >= minQuantity) {
+                                      handleQuantityChange(item.id, newQuantity);
+                                    }
+                                  }}
                                   className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                   disabled={item.quantity <= minQuantity}
+                                  title={item.quantity <= minQuantity ? `Minimum quantity is ${minQuantity}` : 'Decrease quantity'}
                                 >
                                   <Minus size={16} />
                                 </button>
                                 <input
-                                  type="text"
+                                  type="number"
                                   inputMode="numeric"
+                                  min={minQuantity}
+                                  step="1"
                                   value={quantityInputs[item.id] !== undefined ? quantityInputs[item.id] : item.quantity}
-                                  onChange={(e) => handleQuantityInputChange(item.id, e.target.value)}
+                                  onChange={(e) => {
+                                    const value = e.target.value;
+                                    // Prevent entering values below minimum in real-time
+                                    if (value === '' || /^\d+$/.test(value)) {
+                                      const numValue = parseInt(value, 10);
+                                      // If value is valid and below minimum, don't allow it
+                                      if (value !== '' && !isNaN(numValue) && numValue < minQuantity && isPrinting) {
+                                        // Show error but allow typing (will be corrected on blur)
+                                        handleQuantityInputChange(item.id, value);
+                                      } else {
+                                        handleQuantityInputChange(item.id, value);
+                                      }
+                                    }
+                                  }}
                                   onBlur={() => handleQuantityInputBlur(item.id)}
                                   onKeyPress={(e) => handleQuantityInputKeyPress(e, item.id)}
                                   className={`w-16 px-2 py-2 text-center font-semibold bg-transparent border-0 focus:outline-none focus:ring-2 rounded ${
@@ -246,8 +341,8 @@ const CartPage = () => {
                                       ? 'text-red-500 dark:text-red-400 focus:ring-red-500'
                                       : 'text-gray-900 dark:text-white focus:ring-[#1FBBD2]'
                                   }`}
-                                  min={minQuantity}
                                   placeholder={minQuantity.toString()}
+                                  aria-label={`Quantity for ${item.name}, minimum ${minQuantity}`}
                                 />
                                 <button
                                   onClick={() => handleQuantityChange(item.id, item.quantity + 1)}

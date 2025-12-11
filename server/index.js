@@ -235,7 +235,14 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
   etag: true,
   lastModified: true
 }));
-app.use('/images', express.static(path.join(__dirname, '../client/public/images'), {
+
+// Serve images from public directory (development) or build directory (production)
+// In production, images are copied to build directory during Docker build
+const imagesPath = process.env.NODE_ENV === 'production' 
+  ? path.join(__dirname, '../client/build/images')
+  : path.join(__dirname, '../client/public/images');
+
+app.use('/images', express.static(imagesPath, {
   maxAge: '30d', // Increased from 7d to 30d for better caching
   etag: true,
   lastModified: true

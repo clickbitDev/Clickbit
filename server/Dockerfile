@@ -15,14 +15,14 @@ RUN apk add --no-cache python3 make g++ libc6-compat
 # Copy root package files
 COPY package*.json ./
 
-# Install root dependencies
-RUN npm ci --only=production=false
+# Install root dependencies (including dev dependencies for build)
+RUN npm install
 
 # Copy client package files
 COPY client/package*.json ./client/
 
-# Install client dependencies
-RUN cd client && npm ci --only=production=false
+# Install client dependencies (including dev dependencies for build)
+RUN cd client && npm install
 
 # Copy client source
 COPY client/ ./client/
@@ -50,7 +50,7 @@ RUN addgroup -g 1001 -S nodejs && \
 COPY package*.json ./
 
 # Install production dependencies only
-RUN npm ci --only=production && \
+RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --production; fi && \
     npm cache clean --force
 
 # Copy server source code

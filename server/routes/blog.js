@@ -4,6 +4,7 @@ const { protect, authorize } = require('../middleware/auth');
 const { BlogPost, User } = require('../models');
 const Comment = require('../models/Comment');
 const { Op } = require('sequelize');
+const { normalizeBlogPost } = require('../utils/imagePathHelper');
 
 // @desc    Get all blog posts (public)
 // @route   GET /api/blog
@@ -110,7 +111,10 @@ router.get('/featured', async (req, res) => {
       }
     });
 
-    res.json(posts);
+    // Normalize image paths before sending response
+    const normalizedPosts = posts.map(post => normalizeBlogPost(post.toJSON()));
+
+    res.json(normalizedPosts);
   } catch (error) {
     console.error('Error fetching featured blog posts:', error);
     res.status(500).json({ message: 'Error fetching featured blog posts', error: error.message });
@@ -146,7 +150,10 @@ router.get('/:slug', async (req, res) => {
     // Increment view count
     await post.increment('view_count');
 
-    res.json(post);
+    // Normalize image paths before sending response
+    const normalizedPost = normalizeBlogPost(post.toJSON());
+
+    res.json(normalizedPost);
   } catch (error) {
     console.error('Error fetching blog post:', error);
     res.status(500).json({ message: 'Error fetching blog post', error: error.message });

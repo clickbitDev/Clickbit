@@ -3,6 +3,7 @@ const router = express.Router();
 const { protect, authorize } = require('../middleware/auth');
 const { PortfolioItem, User } = require('../models');
 const { Op } = require('sequelize');
+const { normalizePortfolioItem } = require('../utils/imagePathHelper');
 
 // @desc    Get all portfolio items (public)
 // @route   GET /api/portfolio
@@ -90,7 +91,10 @@ router.get('/featured', async (req, res) => {
       }
     });
 
-    res.json({ items });
+    // Normalize image paths before sending response
+    const normalizedItems = items.map(item => normalizePortfolioItem(item.toJSON()));
+
+    res.json({ items: normalizedItems });
   } catch (error) {
     console.error('Error fetching featured portfolio items:', error);
     res.status(500).json({ message: 'Error fetching featured portfolio items', error: error.message });
@@ -139,7 +143,10 @@ router.get('/:slug', async (req, res) => {
       return res.status(404).json({ message: 'Portfolio item not found' });
     }
 
-    res.json(item);
+    // Normalize image paths before sending response
+    const normalizedItem = normalizePortfolioItem(item.toJSON());
+
+    res.json(normalizedItem);
   } catch (error) {
     console.error('Error fetching portfolio item:', error);
     res.status(500).json({ message: 'Error fetching portfolio item', error: error.message });

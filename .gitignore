@@ -1,119 +1,256 @@
+# ============================================
+# ClickBit Production-Grade .gitignore
+# ============================================
+
+# ============================================
 # Dependencies
+# ============================================
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+# Note: package-lock.json should be committed for consistent installs
+# yarn.lock
+# pnpm-lock.yaml
+.pnp
+.pnp.js
 
-# Production builds
-build/
-dist/
-
-# Environment variables
+# ============================================
+# Environment Variables & Configuration
+# ============================================
 .env
+.env.*
+!.env.example
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+.env.backup
+*.env
 
-# Database files
-database.sqlite
-database.sqlite-journal
-*.db
+# ============================================
+# Build Outputs & Production Artifacts
+# ============================================
+# React build output
+client/build/
+client/dist/
+build/
+dist/
+
+# Source maps (exclude in production for security)
+*.map
+client/public/static/js/*.map
+client/public/static/css/*.map
+
+# Build logs
+build.log
+*.build.log
+
+# ============================================
+# Database Files
+# ============================================
+# SQLite databases
 *.sqlite
 *.sqlite3
+*.db
+*.db-shm
+*.db-wal
+database.sqlite
+database.sqlite-journal
+server/database.sqlite
+server/database.sqlite-journal
 
-# Log files
+# SQL dumps and exports
+*.sql
+!migrations/*.sql
+backup.sql
+clickbit_complete_mysql_export.sql
+client/clickbit_complete_mysql_export.sql
+
+# Database backups
+*.sql.backup
+*.sql.bak
+db-backup/
+database-backup/
+
+# ============================================
+# Logs & Runtime Data
+# ============================================
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+pm2.log
+pm2-error.log
+pm2-out.log
+server.log
+client.log
+react-app.log
+unified-react-app.log
+fixed-react-app.log
+react-server.log
+combined.log
+error.log
+out.log
+combined-*.log
+error-*.log
+out-*.log
+err-*.log
 
-# Runtime data
-pids
+# Process IDs
 *.pid
 *.seed
 *.pid.lock
+pids/
 
-# Coverage directory used by tools like istanbul
-coverage/
-*.lcov
+# ============================================
+# Uploads & User-Generated Content
+# ============================================
+# Upload directories (keep structure, ignore content)
+client/public/images/uploads/
+!client/public/images/uploads/.gitkeep
+client/build/images/uploads/
+uploads/
+public/uploads/
+server/uploads/
 
-# nyc test coverage
-.nyc_output
+# ============================================
+# Backups & Archives
+# ============================================
+# Server backups
+server/backups/
+backups/
+*.backup
+*.bak
+*.backup.*
+content-backup-*.json
 
-# Dependency directories
-node_modules/
-jspm_packages/
+# Archive files
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
 
-# Optional npm cache directory
+# ============================================
+# Cache & Temporary Files
+# ============================================
+# Node cache
 .npm
-
-# Optional REPL history
+.eslintcache
 .node_repl_history
 
-# Output of 'npm pack'
-*.tgz
+# React/Webpack cache
+.cache/
+.parcel-cache/
+client/.cache/
+client/node_modules/.cache/
+.next/
+.nuxt/
+.vuepress/dist/
 
-# Yarn Integrity file
-.yarn-integrity
+# TypeScript cache
+*.tsbuildinfo
+.tsbuildinfo
 
-# dotenv environment variables file
-.env
-.env.test
+# ============================================
+# Testing & Coverage
+# ============================================
+coverage/
+*.lcov
+.nyc_output
+.jest/
+test-results/
+playwright-report/
+playwright/.cache/
 
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
-
-# next.js build output
-.next
-
-# nuxt.js build output
-.nuxt
-
-# vuepress build output
-.vuepress/dist
-
-# Serverless directories
-.serverless/
-
-# FuseBox cache
-.fusebox/
-
-# DynamoDB Local files
-.dynamodb/
-
-# TernJS port file
-.tern-port
-
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
-
-# IDE files
+# ============================================
+# IDE & Editor Files
+# ============================================
+# VSCode
 .vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# IntelliJ IDEA / WebStorm
 .idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
 *.swp
 *.swo
-*~
+.vim/
 
-# OS generated files
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ============================================
+# OS Generated Files
+# ============================================
+# macOS
 .DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
-ehthumbs.db
+.AppleDouble
+.LSOverride
+Icon
+.DocumentRevisions-V100
+.fseventsd
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
 
-# Temporary files
-*.tmp
-*.temp
-temp/
-tmp/
+# Linux
+.directory
+.Trash-*
+.nfs*
 
-# Token files (sensitive)
+# ============================================
+# Security & Secrets
+# ============================================
+# API Keys & Tokens
 *token*.txt
 admin_token.txt
 fresh_admin_token.txt
@@ -122,21 +259,142 @@ final_test_token.txt
 new_token.txt
 test_final_token.txt
 token.txt
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
 
-# Local development files
-react-app.log
-client.log
-server.log
-unified-react-app.log
-fixed-react-app.log
-react-server.log
+# Google Cloud Service Account Keys
+*service-account*.json
+*serviceAccount*.json
+*-key.json
+google-cloud-key.json
+gcp-key.json
+GOOGLE_CLOUD_KEY_FILE
 
-# Backup files
-*.bak
-*.backup
+# Stripe keys (if accidentally committed)
+stripe-keys.txt
+stripe-secret.txt
 
-# YoYo AI version control directory
+# SSH keys
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+*.ppk
+
+# ============================================
+# Process Management
+# ============================================
+# PM2
+.pm2/
+ecosystem.config.js.backup
+pm2.config.js.backup
+
+# ============================================
+# Docker
+# ============================================
+# Docker volumes and data
+docker-data/
+.docker/
+*.dockerignore.backup
+
+# ============================================
+# SSL Certificates
+# ============================================
+# Note: *.pem, *.key, *.cert, *.crt already covered in Security section
+ssl/
+certs/
+certificates/
+
+# ============================================
+# Temporary Files
+# ============================================
+tmp/
+temp/
+*.tmp
+*.temp
+*.swn
+# Note: *.swp, *.swo already covered in Vim section
+# Note: *.bak already covered in Backups section
+# Note: *.cache already covered in Cache section
+
+# ============================================
+# Documentation Builds
+# ============================================
+docs/_build/
+docs/.doctrees/
+site/
+
+# ============================================
+# Miscellaneous
+# ============================================
+# YoYo AI version control
 .yoyo/
-.env*
-*.sql
-*.backup*
+
+# Lock files (keep package-lock.json but ignore duplicates)
+package-lock(hide).json
+client/package-lock(hide).json
+
+# Deployment logs
+DEPLOYMENT_LOG_*.txt
+deployment.log
+
+# Google verification files (if sensitive)
+# Uncomment if you want to ignore Google verification HTML
+# google*.html
+
+# ============================================
+# Project-Specific
+# ============================================
+# Nginx config backups
+nginx-*.conf.backup
+*.conf.backup
+
+# Script output files
+*.sh.log
+setup-*.log
+
+# Migration files (keep structure, ignore generated)
+# migrations/*.js.backup
+
+# ============================================
+# Optional: Large Media Files
+# ============================================
+# Uncomment if you have large media files that shouldn't be in git
+# *.mp4
+# *.mov
+# *.avi
+# *.mkv
+# *.webm
+
+# ============================================
+# Keep Important Files
+# ============================================
+# Keep example files
+!env.example
+!.env.example
+!*.example
+
+# Keep migration structure
+!migrations/
+migrations/*.backup
+
+# Keep documentation
+!documentations/
+!docs/
+
+# Keep public assets structure (but ignore uploads)
+!client/public/images/
+client/public/images/uploads/*
+!client/public/images/uploads/.gitkeep
+
+# Keep scripts
+!scripts/
+scripts/*.log
+
+# ============================================
+# End of .gitignore
+# ============================================

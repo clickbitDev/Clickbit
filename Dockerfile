@@ -13,14 +13,14 @@ RUN apk add --no-cache python3 make g++ libc6-compat
 # Copy package files
 COPY package*.json ./
 
-# Install root dependencies
-RUN npm ci --only=production=false
+# Install root dependencies (including dev dependencies for build)
+RUN npm install
 
 # Copy client package files
 COPY client/package*.json ./client/
 
-# Install client dependencies
-RUN cd client && npm ci --only=production=false
+# Install client dependencies (including dev dependencies for build)
+RUN cd client && npm install
 
 # Copy application code
 COPY . .
@@ -32,7 +32,7 @@ ENV INLINE_RUNTIME_CHUNK=false
 RUN cd client && npm run build
 
 # Install production dependencies only
-RUN npm ci --only=production && npm cache clean --force
+RUN (npm ci --omit=dev || npm install --production) && npm cache clean --force
 
 # Expose port
 EXPOSE 5001

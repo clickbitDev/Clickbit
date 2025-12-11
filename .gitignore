@@ -28,7 +28,9 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.backup
+.env.backup*
 *.env
+*.env.backup*
 
 # ============================================
 # Build Outputs & Production Artifacts
@@ -66,8 +68,12 @@ server/database.sqlite-journal
 *.sql
 !migrations/*.sql
 backup.sql
+*_export.sql
+*_hostinger.sql
 clickbit_complete_mysql_export.sql
+clickbitdb_hostinger.sql
 client/clickbit_complete_mysql_export.sql
+client/clickbitdb_hostinger.sql
 
 # Database backups
 *.sql.backup

@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  # MySQL Database Service
+  db:
+    image: mysql:8.0
+    container_name: clickbit-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-clickbitdb}
+      MYSQL_USER: ${DB_USER:-clickbit_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-clickbit_password}
+      TZ: UTC
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    networks:
+      - clickbit-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  # Backend API Server
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: clickbit-server
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 5001
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-clickbitdb}
+      DB_USER: ${DB_USER:-clickbit_user}
+      DB_PASSWORD: ${DB_PASSWORD:-clickbit_password}
+      JWT_SECRET: ${JWT_SECRET:-your_jwt_secret_key_here}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      # Email Configuration
+      SMTP_HOST: ${SMTP_HOST:-smtp.hostinger.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-contact@clickbit.com.au}
+      SMTP_PASS: ${SMTP_PASS:-}
+      FROM_EMAIL: ${FROM_EMAIL:-contact@clickbit.com.au}
+      # Stripe Configuration
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+      # Google Cloud (Optional)
+      GOOGLE_CLOUD_PROJECT_ID: ${GOOGLE_CLOUD_PROJECT_ID:-}
+      GOOGLE_CLOUD_KEY_FILE: ${GOOGLE_CLOUD_KEY_FILE:-}
+      BIGQUERY_DATASET_ID: ${BIGQUERY_DATASET_ID:-}
+      BIGQUERY_TABLE_ID: ${BIGQUERY_TABLE_ID:-}
+      GOOGLE_ADS_CONVERSION_ID: ${GOOGLE_ADS_CONVERSION_ID:-}
+    ports:
+      - "${SERVER_PORT:-5001}:5001"
+    volumes:
+      - ./logs:/app/logs
+      - ./uploads:/app/uploads
+      - ./client/public/images/uploads:/app/client/public/images/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - clickbit-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5001/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend Client (Optional - if you want to serve frontend separately)
+  # Uncomment if you want to run frontend as a separate service
+  # client:
+  #   build:
+  #     context: ./client
+  #     dockerfile: Dockerfile
+  #   container_name: clickbit-client
+  #   restart: unless-stopped
+  #   ports:
+  #     - "${CLIENT_PORT:-3000}:80"
+  #   depends_on:
+  #     - server
+  #   networks:
+  #     - clickbit-network
+  #   environment:
+  #     REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:5001/api}
+
+networks:
+  clickbit-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
+

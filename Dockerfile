@@ -25,11 +25,27 @@ RUN cd client && npm install
 # Copy application code
 COPY . .
 
+# Create upload directories with proper permissions BEFORE build
+RUN mkdir -p client/public/images/uploads/portfolio \
+    client/public/images/uploads/blog \
+    client/public/images/uploads/team \
+    uploads && \
+    chmod -R 755 client/public/images/uploads uploads
+
 # Build client
 ENV NODE_ENV=production
 ENV GENERATE_SOURCEMAP=false
 ENV INLINE_RUNTIME_CHUNK=false
 RUN cd client && npm run build
+
+# Ensure upload directories exist in build output (for production serving)
+RUN mkdir -p client/build/images/uploads/portfolio \
+    client/build/images/uploads/blog \
+    client/build/images/uploads/team && \
+    chmod -R 755 client/build/images/uploads
+
+# Copy public images to build directory (so they're available in production)
+RUN cp -r client/public/images/* client/build/images/ 2>/dev/null || true
 
 # Install production dependencies only
 RUN (npm ci --omit=dev || npm install --production) && npm cache clean --force
